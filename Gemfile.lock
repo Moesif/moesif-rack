@@ -1,8 +1,9 @@
 PATH
   remote: .
   specs:
-    moesif_api (1.0.4)
+    moesif_rack (1.0.0)
       json_mapper (~> 0.2.1)
+      moesif_api (~> 1.0.4)
       test-unit (~> 3.1.5)
       unirest (~> 1.1.2)
 
@@ -14,6 +15,10 @@ GEM
     json_mapper (0.2.1)
       json (>= 1.4.3)
     mime-types (1.25.1)
+    moesif_api (1.0.4)
+      json_mapper (~> 0.2.1)
+      test-unit (~> 3.1.5)
+      unirest (~> 1.1.2)
     power_assert (0.3.1)
     rake (11.2.2)
     rest-client (1.6.9)
@@ -29,7 +34,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  moesif_api!
+  moesif_rack!
   rake
 
 BUNDLED WITH
