@@ -11,23 +11,10 @@ class MoesifMiddleware
     @api_client = MoesifApi::MoesifAPIClient.new(options['application_id'])
     @api_controller = @api_client.api
     @identify_user = options['identify_user']
-    @identify_session = options['identify_session'
+    @identify_session = options['identify_session']
     @mask_data = options['mask_data']
     @debug = options['debug']
   end
-
-  # def initialize app, application_id,  debug=false, api_version = nil, identify_user = nil, identify_session = nil, mask_data = nil
-  #   @app = app
-  #   if not application_id
-  #     raise 'application_id required for Moesif Middleware'
-  #   end
-  #   @api_client = MoesifApi::MoesifAPIClient.new(application_id)
-  #   @api_controller = @api_client.api
-  #   @identify_user = identify_user
-  #   @identify_session = identify_session
-  #   @mask_data = mask_data
-  #   @debug = debug
-  # end
 
   def call env
     start_time = Time.now.utc.iso8601
