@@ -1,0 +1,36 @@
+PATH
+  remote: .
+  specs:
+    moesif_api (1.0.4)
+      json_mapper (~> 0.2.1)
+      test-unit (~> 3.1.5)
+      unirest (~> 1.1.2)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.3.8)
+    json (1.8.3)
+    json_mapper (0.2.1)
+      json (>= 1.4.3)
+    mime-types (1.25.1)
+    power_assert (0.3.1)
+    rake (11.2.2)
+    rest-client (1.6.9)
+      mime-types (~> 1.16)
+    test-unit (3.1.9)
+      power_assert
+    unirest (1.1.2)
+      addressable (~> 2.3.5)
+      json (~> 1.8.1)
+      rest-client (~> 1.6.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  moesif_api!
+  rake
+
+BUNDLED WITH
+   1.13.0
