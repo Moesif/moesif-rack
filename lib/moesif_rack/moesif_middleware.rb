@@ -13,10 +13,6 @@ module MoesifRack
       @api_client = MoesifApi::MoesifAPIClient.new(options['application_id'])
       @api_controller = @api_client.api
 
-      if options['moesif_base_url']
-        MoesifApi::Configuration.base_uri = options['moesif_base_url']
-      end
-
       @api_version = options['api_version']
       @identify_user = options['identify_user']
       @identify_session = options['identify_session']
