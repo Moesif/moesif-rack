@@ -36,7 +36,7 @@ module Blog
   class Application < Rails::Application
     # snip
 
-    config.middleware.use "MoesifMiddleware", moesif_options
+    config.middleware.use "MoesifRack::MoesifMiddleware", moesif_options
 
     # snip
   end
@@ -63,10 +63,58 @@ Optional. String. Tags the api with version.
 
 #### identify_user
 
-Optional. Proc. To help make data analysis easier, identify a user_id from the data.  
+Optional. A Proc that takes env, headers, body and returns a string. To help make data analysis easier, identify a user_id from the data.
+
+```ruby
+
+moesif_options['identify_user'] = Proc.new { |env, headers, body|
+
+  #snip
+
+  'the_user_id'
+}
 
 ```
 
-identify_user = Proc.new {
+@api_version = options['api_version']
+@identify_user = options['identify_user']
+@identify_session = options['identify_session']
+@mask_data = options['mask_data']
+@debug = options['debug']
 
+#### identify_session
+
+Optional. A Proc that takes env, headers, body and returns a string.
+
+```ruby
+
+moesif_options['identify_session'] = Proc.new { |env, headers, body|
+
+  #snip
+
+  'the_ession_token'
 }
+
+```
+
+#### mask_data
+
+Optional. A Proc that makes an event_model and masks any info that needs to be hidden before sending to Moesif.
+
+```ruby
+
+moesif_options['mask_data'] = Proc.new { |event_model|
+
+  #snip
+
+  event_model
+}
+
+```
+
+For details for the spec of event model, please see the [moesifapi-ruby git](https://github.com/Moesif/moesifapi-ruby)
+
+
+#### debug
+
+Optional. Boolean. If true, it will print out debug messages, also in debug mode, the processing is not done in backend thread.
