@@ -32,7 +32,7 @@ within `config/application.rb`
 
 ```ruby
 
-module Blog
+
   class Application < Rails::Application
     # snip
 
@@ -40,7 +40,6 @@ module Blog
 
     # snip
   end
-end
 
 ```
 
@@ -92,14 +91,14 @@ moesif_options['identify_session'] = Proc.new { |env, headers, body|
 
   #snip
 
-  'the_ession_token'
+  'the_session_token'
 }
 
 ```
 
 #### mask_data
 
-Optional. A Proc that makes an event_model and masks any info that needs to be hidden before sending to Moesif.
+Optional. A Proc that makes an event_model and masks any fields before sending to Moesif. Expect return event_model.
 
 ```ruby
 
@@ -117,4 +116,4 @@ For details for the spec of event model, please see the [moesifapi-ruby git](htt
 
 #### debug
 
-Optional. Boolean. If true, it will print out debug messages, also in debug mode, the processing is not done in backend thread.
+Optional. Boolean. Default false. If true, it will print out debug messages. In debug mode, the processing is not done in backend thread.
