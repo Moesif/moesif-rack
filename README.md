@@ -1,5 +1,7 @@
-MoesifApi Lib for Ruby
+Moesif Middleware for Ruby on Rails and Rack
 ======================
+
+This is a middleware that ingests data for APIs built on Ruby on Rails and Rack. 
 
 [Source Code on GitHub](https://github.com/moesif/moesif-rack)
 
