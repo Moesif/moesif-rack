@@ -1,7 +1,7 @@
 Moesif Middleware for Ruby on Rails and Rack
 ======================
 
-This is a middleware that ingests data for APIs built on Ruby on Rails and Rack. 
+Middleware that logs APIs built on Ruby on Rails and Rack.
 
 [Source Code on GitHub](https://github.com/moesif/moesif-rack)
 
@@ -53,18 +53,19 @@ options is a hash with these possible key value pairs.
 
 #### application_id
 
-Required. String. this is the id that identifies your app. You can obtain this id from settings
-from your [moesif account.](http://www.moesif.com)
+Required. String. This is the Moesif application_id under settings
+from your [Moesif account.](https://www.moesif.com)
 
 
 #### api_version
 
-Optional. String. Tags the api with version.
+Optional. String. Tag requests with the version of your API.
 
 
 #### identify_user
 
-Optional. A Proc that takes env, headers, body and returns a string. To help make data analysis easier, identify a user_id from the data.
+Optional.
+identify_user is a function that takes env, headers, and body as arguments and returns a user_id string. This helps us attribute requests to unique users. Even though Moesif can automatically retrieve the user_id without this, this is highly recommended to ensure accurate attribution.
 
 ```ruby
 
@@ -100,7 +101,8 @@ moesif_options['identify_session'] = Proc.new { |env, headers, body|
 
 #### mask_data
 
-Optional. A Proc that makes an event_model and masks any fields before sending to Moesif. Expect return event_model.
+Optional. A Proc that takes event_model as an argument and returns event_model.
+With mask_data, you can make modifications to headers or body of the event before it is sent to Moesif.
 
 ```ruby
 
