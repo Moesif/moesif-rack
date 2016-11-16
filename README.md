@@ -117,6 +117,25 @@ moesif_options['mask_data'] = Proc.new { |event_model|
 
 For details for the spec of event model, please see the [moesifapi-ruby git](https://github.com/Moesif/moesifapi-ruby)
 
+#### skip
+
+Optional. A Proc that takes env, headers, body and returns a boolean.
+
+```ruby
+
+moesif_options['skip'] = Proc.new { |env, headers, body|
+
+  #snip
+
+  false
+}
+
+```
+
+For details for the spec of event model, please see the [moesifapi-ruby git](https://github.com/Moesif/moesifapi-ruby)
+
+
+
 
 #### debug
 

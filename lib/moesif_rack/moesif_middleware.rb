@@ -17,6 +17,7 @@ module MoesifRack
       @identify_user = options['identify_user']
       @identify_session = options['identify_session']
       @mask_data = options['mask_data']
+      @skip = options['skip']
       @debug = options['debug']
     end
 
@@ -119,10 +120,20 @@ module MoesifRack
 
       end
 
-      if @debug
-        process_send.call
-      else
-        Thread.start(&process_send)
+      should_skip = false
+
+      if @skip
+        if @skip.call(env, headers, body)
+          should_skip = true;
+        end
+      end
+
+      if !should_skip
+        if @debug
+          process_send.call
+        else
+          Thread.start(&process_send)
+        end
       end
 
       [status, headers, body]
