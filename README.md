@@ -65,7 +65,7 @@ Optional. String. Tag requests with the version of your API.
 #### identify_user
 
 Optional.
-identify_user is a function that takes env, headers, and body as arguments and returns a user_id string. This helps us attribute requests to unique users. Even though Moesif can automatically retrieve the user_id without this, this is highly recommended to ensure accurate attribution.
+identify_user is a Proc that takes env, headers, and body as arguments and returns a user_id string. This helps us attribute requests to unique users. Even though Moesif can automatically retrieve the user_id without this, this is highly recommended to ensure accurate attribution.
 
 ```ruby
 
@@ -77,12 +77,6 @@ moesif_options['identify_user'] = Proc.new { |env, headers, body|
 }
 
 ```
-
-@api_version = options['api_version']
-@identify_user = options['identify_user']
-@identify_session = options['identify_session']
-@mask_data = options['mask_data']
-@debug = options['debug']
 
 #### identify_session
 
