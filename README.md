@@ -1,14 +1,12 @@
 Moesif Middleware for Ruby on Rails and Rack
-======================
+=============================================
 
 Middleware that logs APIs built on Ruby on Rails and Rack.
 
 [Source Code on GitHub](https://github.com/moesif/moesif-rack)
 
 __Check out Moesif's
-[Ruby developer documentation](https://www.moesif.com/developer-documentation) to learn more__
-
-
+[Ruby developer documentation](https://www.moesif.com/developer-documentation/?ruby) to learn more__
 
 Install from RubyGems
 =====================
