@@ -48,8 +48,12 @@ module MoesifRack
             req_body = JSON.parse(req_body_string)
           rescue
             req_body = {
-              'msg' => 'error parsing body',
-              'body' => req_body_string
+              'moesif_error' => {
+                'code': 'json_parse_error',
+                'src': 'moesif-rack',
+                'msg' => ['Body is not a JSON Object or JSON Array'],
+                'args' => [req_body_string]
+              }
             }
           end
         end
@@ -64,8 +68,12 @@ module MoesifRack
           rescue
             if content_type && (content_type.include? "json")
               rsp_body = {
-                'msg' => 'error parsing json',
-                'body' => body.body
+                'moesif_error' => {
+                  'code': 'json_parse_error',
+                  'src': 'moesif-rack',
+                  'msg' => ['Body is not a JSON Object or JSON Array'],
+                  'args' => [body.body]
+                }
               }
             end
           end
