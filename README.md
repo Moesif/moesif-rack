@@ -1,5 +1,4 @@
-Moesif Middleware for Ruby on Rails and Rack
-=============================================
+# Moesif Middleware for Ruby on Rails and Rack
 
 Middleware that logs APIs built on Ruby on Rails and Rack.
 
@@ -8,14 +7,12 @@ Middleware that logs APIs built on Ruby on Rails and Rack.
 __Check out Moesif's
 [Ruby developer documentation](https://www.moesif.com/developer-documentation/?ruby) to learn more__
 
-Install from RubyGems
-=====================
+## How to install
 
 ```bash
 gem install moesif_rack
 ```
-How to use:
-===========
+## How to use
 
 Create the options
 
@@ -44,8 +41,7 @@ within `config/application.rb`
 ```
 
 
-How to configure:
-=================
+## Configraution Options
 
 options is a hash with these possible key value pairs.
 
