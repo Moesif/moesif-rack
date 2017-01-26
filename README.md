@@ -1,11 +1,8 @@
 # Moesif Middleware for Ruby on Rails and Rack
 
-Rack Middleware that logs API calls built on Ruby on Rails and Rack.
+Rack Middleware that logs API calls to Moesif for Error Analysis is built on Ruby on Rails and Rack.
 
 [Source Code on GitHub](https://github.com/moesif/moesif-rack)
-
-__Check out Moesif's
-[Ruby developer documentation](https://www.moesif.com/developer-documentation/?ruby) to learn more__
 
 ## How to install
 
@@ -126,3 +123,12 @@ For details for the spec of event model, please see the [moesifapi-ruby git](htt
 #### debug
 
 Optional. Boolean. Default false. If true, it will print out debug messages. In debug mode, the processing is not done in backend thread.
+
+
+## Moesif Ruby Library
+
+If you are using Ruby, but not Rails or Rack, you can use the Moesif Ruby Library. 
+
+__Check out Moesif's
+[Ruby developer documentation](https://www.moesif.com/developer-documentation/?ruby) to learn more__
+
