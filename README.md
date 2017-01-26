@@ -1,6 +1,6 @@
 # Moesif Middleware for Ruby on Rails and Rack
 
-Middleware that logs APIs built on Ruby on Rails and Rack.
+Rack Middleware that logs API calls built on Ruby on Rails and Rack.
 
 [Source Code on GitHub](https://github.com/moesif/moesif-rack)
 
@@ -12,9 +12,10 @@ __Check out Moesif's
 ```bash
 gem install moesif_rack
 ```
+
 ## How to use
 
-Create the options
+### Create the options
 
 ```ruby
 moesif_options = {
@@ -22,8 +23,7 @@ moesif_options = {
 }
 ```
 
-Add to Middleware
-
+### Add to Middleware
 
 within `config/application.rb`
 
@@ -43,7 +43,7 @@ within `config/application.rb`
 
 ## Configraution Options
 
-options is a hash with these possible key value pairs.
+The options is a hash with these possible key value pairs.
 
 #### application_id
 
@@ -121,8 +121,6 @@ moesif_options['skip'] = Proc.new { |env, headers, body|
 ```
 
 For details for the spec of event model, please see the [moesifapi-ruby git](https://github.com/Moesif/moesifapi-ruby)
-
-
 
 
 #### debug
