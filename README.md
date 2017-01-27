@@ -125,10 +125,6 @@ For details for the spec of event model, please see the [moesifapi-ruby git](htt
 Optional. Boolean. Default false. If true, it will print out debug messages. In debug mode, the processing is not done in backend thread.
 
 
-## Moesif Ruby Library
+## Other Integrations
 
-If you are using Ruby, but not Rails or Rack, you can use the Moesif Ruby Library. 
-
-__Check out Moesif's
-[Ruby developer documentation](https://www.moesif.com/developer-documentation/?ruby) to learn more__
-
+To view more more documenation on integration options, please visit __[the Integration Options Documentation](https://www.moesif.com/docs/getting-started/integration-options/).__ 
