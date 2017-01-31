@@ -1,8 +1,10 @@
 # Moesif Middleware for Ruby on Rails and Rack
 
-Rack Middleware that logs API calls to Moesif for Error Analysis is built on Ruby on Rails and Rack.
+Rack Middleware that logs API calls to Moesif for Error Analysis for apps built on Ruby on Rails / Rack.
 
 [Source Code on GitHub](https://github.com/moesif/moesif-rack)
+
+[Ruby Gem](https://rubygems.org/gems/moesif_rack)
 
 ## How to install
 
@@ -20,7 +22,9 @@ moesif_options = {
 }
 ```
 
-### Add to Middleware
+Your can find your Application Id from [_Moesif Dashboard_](https://www.moesif.com/) -> _Top Right Menu_ -> _App Setup_
+
+### Add to middleware
 
 within `config/application.rb`
 
@@ -38,7 +42,7 @@ within `config/application.rb`
 ```
 
 
-## Configraution Options
+## Configuration options
 
 The options is a hash with these possible key value pairs.
 
@@ -117,7 +121,7 @@ moesif_options['skip'] = Proc.new { |env, headers, body|
 
 ```
 
-For details for the spec of event model, please see the [moesifapi-ruby git](https://github.com/Moesif/moesifapi-ruby)
+For details for the spec of event model, please see the [Moesif Ruby API Documentation](https://www.moesif.com/docs/api?ruby)
 
 
 #### debug
@@ -127,4 +131,4 @@ Optional. Boolean. Default false. If true, it will print out debug messages. In 
 
 ## Other Integrations
 
-To view more more documenation on integration options, please visit __[the Integration Options Documentation](https://www.moesif.com/docs/getting-started/integration-options/).__ 
+To view more more documentation on integration options, please visit __[the Integration Options Documentation](https://www.moesif.com/docs/getting-started/integration-options/).__
