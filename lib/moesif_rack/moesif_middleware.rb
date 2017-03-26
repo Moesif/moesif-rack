@@ -1,6 +1,7 @@
 require 'moesif_api'
 require 'json'
 require 'time'
+require 'base64'
 
 module MoesifRack
 
@@ -42,40 +43,28 @@ module MoesifRack
 
         req_body_string = req.body.read
         req.body.rewind
+        req_body_transfer_encoding = nil
 
         if req_body_string && req_body_string.length != 0
           begin
             req_body = JSON.parse(req_body_string)
           rescue
-            req_body = {
-              'moesif_error' => {
-                'code': 'json_parse_error',
-                'src': 'moesif-rack',
-                'msg' => ['Body is not a JSON Object or JSON Array'],
-                'args' => [req_body_string]
-              }
-            }
+            req_body = Base64.encode64(req_body_string)
+            req_body_transfer_encoding = 'base64'
           end
         end
 
         rsp_headers = headers.dup
 
-        content_type = rsp_headers['Content-Type'];
+        rsp_body_string = get_response_body(body);
+        rsp_body_transfer_encoding = nil
 
-        if body && body.body
+        if rsp_body_string && rsp_body_string.length != 0
           begin
-            rsp_body = JSON.parse(body.body)
+            rsp_body = JSON.parse(rsp_body_string)
           rescue
-            if content_type && (content_type.include? "json")
-              rsp_body = {
-                'moesif_error' => {
-                  'code': 'json_parse_error',
-                  'src': 'moesif-rack',
-                  'msg' => ['Body is not a JSON Object or JSON Array'],
-                  'args' => [body.body]
-                }
-              }
-            end
+            rsp_body = Base64.encode64(rsp_body_string)
+            rsp_body_transfer_encoding = 'base64'
           end
         end
 
@@ -90,12 +79,14 @@ module MoesifRack
         event_req.ip_address = req.ip
         event_req.headers = req_headers
         event_req.body = req_body
+        event_req.transfer_encoding = req_body_transfer_encoding
 
         event_rsp = MoesifApi::EventResponseModel.new()
         event_rsp.time = end_time
         event_rsp.status = status
         event_rsp.headers = rsp_headers
         event_rsp.body = rsp_body
+        event_rsp.transfer_encoding = rsp_body_transfer_encoding
 
         event_model = MoesifApi::EventModel.new()
         event_model.request = event_req
@@ -146,5 +137,12 @@ module MoesifRack
 
       [status, headers, body]
     end
+
+    def get_response_body(response)
+      body = response.respond_to?(:body) ? response.body : response
+      body = body.inject("") { |i, a| i << a } if body.respond_to?(:each)
+      body.to_s
+    end
+
   end
 end
