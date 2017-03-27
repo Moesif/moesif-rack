@@ -12,6 +12,13 @@ Rack Middleware that logs _incoming_ API calls to Moesif for advanced error anal
 gem install moesif_rack
 ```
 
+and if you have a `Gemfile` in your project, please add this line to
+
+```
+gem 'moesif_rack', '~> 1.1.0'
+
+```
+
 ## How to use
 
 ### Create the options
@@ -41,6 +48,27 @@ within `config/application.rb`
 
 ```
 
+#### Order of Middleware Matters
+
+Since Moesif Rack is basically a logging middleware, the ordering of middleware matters for accuracy and completeness.
+Many middleware are installed by default by rails.
+
+To see the list of the middleware that your system already have, type this into the bash.
+
+```bash
+  bin/rails middleware
+```
+
+The best place for MoesifMidleware is on top as possible (so it captures the data closest to the wire).
+Typically, right above the default logger of Rails apps, "Rails::Rack::Logger" is a good spot.
+
+You should use the following line of code to insert the middleware into the right spot.
+
+```ruby
+
+config.middleware.insert_before "Rails::Rack::Logger", "MoesifRack::MoesifMiddleware", moesif_options
+
+```
 
 ## Configuration options
 
