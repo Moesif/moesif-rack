@@ -51,15 +51,15 @@ within `config/application.rb`
 #### Order of Middleware Matters
 
 Since Moesif Rack is basically a logging middleware, the ordering of middleware matters for accuracy and completeness.
-Many middleware are installed by default by rails.
+Many middlewares are installed by default by Rails.
 
-To see the list of the middleware that your system already have, type this into the bash.
+To see the list of middlewares that your system already have, type this into the bash.
 
 ```bash
   bin/rails middleware
 ```
 
-The best place for MoesifMidleware is on top as possible (so it captures the data closest to the wire).
+The best place for "MoesifRack::MoesifMidleware" is on top as possible (so it captures the data closest to the wire).
 Typically, right above the default logger of Rails apps, "Rails::Rack::Logger" is a good spot.
 Or if you want to be as close as wire as possible, put it before "ActionDispatch::Static"
 
@@ -71,8 +71,8 @@ config.middleware.insert_before "Rails::Rack::Logger", "MoesifRack::MoesifMiddle
 
 ```
 
-Please note, if you are using "Rack::Deflater" please make sure that "MoesifMiddlware"
-is below it, so it can capture uncompressed data. 
+Please note, if you are using "Rack::Deflater" please make sure that "MoesifRack::MoesifMiddlware"
+is below it, so it can capture uncompressed data.
 
 
 ## Configuration options
