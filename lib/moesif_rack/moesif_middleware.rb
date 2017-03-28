@@ -117,7 +117,13 @@ module MoesifRack
           puts event_model.to_json
         end
         # Perform the API call through the SDK function
-        @api_controller.create_event(event_model)
+        begin
+          @api_controller.create_event(event_model)
+        rescue MoesifApi::APIException => e
+          if e.response_code.between?(401, 403)
+            puts "Unathorized accesss sending event to Moesif. Please verify your Application Id."
+          end
+        end
 
       end
 
