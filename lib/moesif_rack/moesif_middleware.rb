@@ -38,7 +38,9 @@ module MoesifRack
 
         req_headers = {}
         complex_copy.select {|k,v| k.start_with? 'HTTP_'}.each do |key, val|
-          req_headers[key.sub(/^HTTP_/, '')] = val
+          new_key = key.sub(/^HTTP_/, '')
+          new_key = new_key.sub('_', '-')
+          req_headers[new_key] = val
         end
 
         req_body_string = req.body.read
