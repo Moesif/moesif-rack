@@ -1,16 +1,17 @@
 To modify and build your own gem.
 
 ```
-   gem build moesif_rack.gemspec
+gem build moesif_rack.gemspec
 ```
 
 ```
-  gem install /full/path/to/your.gem
+gem install /full/path/to/your.gem
 ```
 
-to uninstall and reinstall
+to uninstall
+
 ```
-  gem uninstall moesif_rack
+gem uninstall moesif_rack
 ```
 
-after you installed it in a rails up to run the servers `bin/rails server`
+after you installed it in a rails app, to run the rails app `bin/rails server`
