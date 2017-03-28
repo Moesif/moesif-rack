@@ -123,6 +123,10 @@ module MoesifRack
           if e.response_code.between?(401, 403)
             puts "Unathorized accesss sending event to Moesif. Please verify your Application Id."
           end
+          if @debug
+            puts "Error sending event to Moesif, with status code: "
+            puts e.response_code
+          end
         end
 
       end
