@@ -161,6 +161,11 @@ For details for the spec of event model, please see the [Moesif Ruby API Documen
 
 Optional. Boolean. Default false. If true, it will print out debug messages. In debug mode, the processing is not done in backend thread.
 
+## Example Code
+
+[Moesif Rack Example](https://github.com/Moesif/moesif-rack-example) is an
+example of Moesif Rack applied to an Rail application. Please check it out
+for reference.
 
 ## Other integrations
 
