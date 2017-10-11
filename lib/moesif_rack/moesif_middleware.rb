@@ -16,6 +16,7 @@ module MoesifRack
 
       @api_version = options['api_version']
       @identify_user = options['identify_user']
+      @get_metadata = options['get_metadata']
       @identify_session = options['identify_session']
       @mask_data = options['mask_data']
       @skip = options['skip']
@@ -93,12 +94,21 @@ module MoesifRack
         event_model = MoesifApi::EventModel.new()
         event_model.request = event_req
         event_model.response = event_rsp
+        
         if @identify_user
           if @debug
             puts "calling identify user proc"
           end
           event_model.user_id = @identify_user.call(env, headers, body)
         end
+
+        if @get_metadata
+          if @debug
+            puts "calling get_metadata proc"
+          end
+          event_model.metadata = @get_metadata.call(env, headers, body)
+        end
+
         if @identify_session
           if @debug
             puts "calling identify session proc"

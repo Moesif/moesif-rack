@@ -106,6 +106,27 @@ moesif_options['identify_user'] = Proc.new { |env, headers, body|
 
 ```
 
+#### __`get_metadata`__
+
+Optional.
+get_metadata is a Proc that takes env, headers, and body as arguments and returns a Hash that is
+representation of a JSON object. This allows you to attach any
+metadata to this event.
+
+```ruby
+
+moesif_options['get_metadata'] = Proc.new { |env, headers, body|
+
+  #snip
+  value = {
+      'foo'  => 'abc',
+      'bar'  => '123'
+  }
+
+  value
+}
+```
+
 #### __`identify_session`__
 
 Optional. A Proc that takes env, headers, body and returns a string.

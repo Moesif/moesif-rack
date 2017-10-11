@@ -1,4 +1,16 @@
+
+
 To modify and build your own gem.
+
+```
+bundle install
+```
+or
+```
+bundle update
+```
+
+Then build the gem file. 
 
 ```
 gem build moesif_rack.gemspec
