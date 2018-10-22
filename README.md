@@ -1,10 +1,15 @@
 # Moesif Middleware for Ruby on Rails and Rack
 
-Rack Middleware that logs _incoming_ API calls to Moesif for advanced error analysis for apps built on Ruby on Rails / Rack.
+[![Built For rack][ico-built-for]][link-built-for]
+[![Latest Version on Packagist][ico-version]][link-package]
+[![Total Downloads][ico-downloads]][link-downloads]
+[![Software License][ico-license]][link-license]
+[![Source Code][ico-source]][link-source]
+
+Rack Middleware that logs _incoming_ API calls to Moesif's AI-powered API analytics service.
+Supports Ruby on Rails apps and other Ruby frameworks built on Rack.
 
 [Source Code on GitHub](https://github.com/moesif/moesif-rack)
-
-[Ruby Gem](https://rubygems.org/gems/moesif_rack)
 
 ## How to install
 
@@ -190,4 +195,16 @@ for reference.
 
 ## Other integrations
 
-To view more more documentation on integration options, please visit __[the Integration Options Documentation](https://www.moesif.com/docs/getting-started/integration-options/).__
+To view more more documentation on integration options, please visit __[the Integration Options Documentation](https://www.moesif.com/docs/getting-started/integration-options/).
+
+[ico-built-for]: https://img.shields.io/badge/built%20for-rack-blue.svg
+[ico-version]: https://img.shields.io/gem/v/moesif_rack.svg
+[ico-downloads]: https://img.shields.io/gem/dt/moesif_rack.svg
+[ico-license]: https://img.shields.io/badge/License-Apache%202.0-green.svg
+[ico-source]: https://img.shields.io/github/last-commit/moesif/moesif-rack.svg?style=social
+
+[link-built-for]: https://github.com/rack/rack
+[link-package]: https://rubygems.org/gems/moesif_rack
+[link-downloads]: https://rubygems.org/gems/moesif_rack
+[link-license]: https://raw.githubusercontent.com/Moesif/moesif-rack/master/LICENSE
+[link-source]: https://github.com/moesif/moesif-rack
