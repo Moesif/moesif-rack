@@ -1,7 +1,7 @@
 # Moesif Middleware for Ruby on Rails and Rack
 
 [![Built For rack][ico-built-for]][link-built-for]
-[![Latest Version on Packagist][ico-version]][link-package]
+[![Latest Version][ico-version]][link-package]
 [![Total Downloads][ico-downloads]][link-downloads]
 [![Software License][ico-license]][link-license]
 [![Source Code][ico-source]][link-source]
