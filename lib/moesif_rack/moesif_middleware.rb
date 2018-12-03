@@ -21,6 +21,10 @@ module MoesifRack
       @mask_data = options['mask_data']
       @skip = options['skip']
       @debug = options['debug']
+      @sampling_percentage = options['sampling_percentage'] || 100
+      if not @sampling_percentage.is_a? Numeric
+        raise "Sampling Percentage should be a number"
+      end
     end
 
     def call env
@@ -128,7 +132,17 @@ module MoesifRack
         end
         # Perform the API call through the SDK function
         begin
-          @api_controller.create_event(event_model)
+          @random_percentage = Random.rand(0.00..100.00)
+          if @sampling_percentage > @random_percentage
+            @api_controller.create_event(event_model)
+            if @debug
+              puts("Event successfully sent to Moesif")
+            end
+          else
+            if @debug
+              puts("Skipped Event due to sampling percentage: " + @sampling_percentage.to_s + " and random percentage: " + @random_percentage.to_s);
+            end
+          end
         rescue MoesifApi::APIException => e
           if e.response_code.between?(401, 403)
             puts "Unathorized accesss sending event to Moesif. Please verify your Application Id."
