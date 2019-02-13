@@ -21,10 +21,40 @@ module MoesifRack
       @mask_data = options['mask_data']
       @skip = options['skip']
       @debug = options['debug']
-      @sampling_percentage = options['sampling_percentage'] || 100
+      @config_dict = Hash.new
+      @sampling_percentage = get_config(nil)
       if not @sampling_percentage.is_a? Numeric
         raise "Sampling Percentage should be a number"
       end
+    end
+
+    def get_config(cached_config_etag)
+      sample_rate = 100
+      begin
+        # Calling the api
+        config_api_response = @api_controller.get_app_config()
+        # Fetch the response ETag
+        response_config_etag = JSON.parse( config_api_response.to_json )["headers"]["x_moesif_config_etag"]
+        # Remove ETag from the global dict if exist
+        if !cached_config_etag.nil? && @config_dict.key?(cached_config_etag)
+            @config_dict.delete(cached_config_etag)
+        end
+        # Fetch the response body
+        @config_dict[response_config_etag] = JSON.parse(JSON.parse( config_api_response.to_json )["raw_body"])
+        # 
+        app_config = @config_dict[response_config_etag]
+        # Fetch the sample rate
+        if !app_config.nil?
+          sample_rate = app_config.fetch("sample_rate", 100)
+        end
+        # Set the last updated time
+        @last_updated_time = Time.now.utc
+        rescue
+          # Set the last updated time
+          @last_updated_time = Time.now.utc
+      end
+      # Return the sample rate
+      return sample_rate
     end
 
     def call env
@@ -134,7 +164,13 @@ module MoesifRack
         begin
           @random_percentage = Random.rand(0.00..100.00)
           if @sampling_percentage > @random_percentage
-            @api_controller.create_event(event_model)
+            event_api_response = @api_controller.create_event(event_model)
+            cached_config_etag = @config_dict.keys[0]
+            event_response_config_etag = event_api_response[:x_moesif_config_etag]
+
+            if !event_response_config_etag.nil? && cached_config_etag != event_response_config_etag && Time.now.utc > @last_updated_time + 30
+              @sampling_percentage = get_config(cached_config_etag)
+            end
             if @debug
               puts("Event successfully sent to Moesif")
             end
