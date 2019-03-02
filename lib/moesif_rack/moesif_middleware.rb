@@ -22,6 +22,7 @@ module MoesifRack
       @skip = options['skip']
       @debug = options['debug']
       @config_dict = Hash.new
+      @disable_transaction_id = options['disable_transaction_id'] || false
       @sampling_percentage = get_config(nil)
       if not @sampling_percentage.is_a? Numeric
         raise "Sampling Percentage should be a number"
@@ -113,6 +114,34 @@ module MoesifRack
         if @api_version
           event_req.api_version = @api_version
         end
+
+        # Add Transaction Id to the Request Header
+        if !@disable_transaction_id
+          req_trans_id = req_headers["X-MOESIF_TRANSACTION_ID"]
+          if !req_trans_id.nil?
+            transaction_id = req_trans_id
+            if transaction_id.strip.empty?
+              transaction_id = SecureRandom.uuid
+            end
+          else
+            transaction_id = SecureRandom.uuid
+          end
+          # Add Transaction Id to Request Header
+          req_headers["X-Moesif-Transaction-Id"] = transaction_id
+          # Filter out the old key as HTTP Headers case are not preserved
+          req_headers = req_headers.except("X-MOESIF_TRANSACTION_ID")
+        end
+
+        # Add Transaction Id to the Response Header
+        if !transaction_id.nil?  
+          rsp_headers["X-Moesif-Transaction-Id"] = transaction_id
+        end
+
+        # Add Transaction Id to the Repsonse Header sent to the client
+        if !transaction_id.nil?  
+          headers["X-Moesif-Transaction-Id"] = transaction_id
+        end
+
         event_req.ip_address = req.ip
         event_req.headers = req_headers
         event_req.body = req_body
