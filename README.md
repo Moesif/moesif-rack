@@ -20,7 +20,7 @@ gem install moesif_rack
 and if you have a `Gemfile` in your project, please add this line to
 
 ```
-gem 'moesif_rack', '~> 1.2.5'
+gem 'moesif_rack', '~> 1.2.6'
 
 ```
 
@@ -187,6 +187,59 @@ For details for the spec of event model, please see the [Moesif Ruby API Documen
 
 Optional. Boolean. Default false. If true, it will print out debug messages. In debug mode, the processing is not done in backend thread.
 
+## Update User
+
+### update_user method
+A method is attached to the moesif middleware object to update the users profile or metadata.
+The metadata field can be any custom data you want to set on the user. The `user_id` field is required.
+
+```ruby
+metadata = JSON.parse('{'\
+      '"email": "testrubyapi@user.com",'\
+      '"name": "ruby api user",'\
+      '"custom": "testdata"'\
+    '}')
+
+user_model = { "user_id" => "testrubyapiuser", 
+                "modified_time" => Time.now.utc.iso8601, 
+                "metadata" => metadata }
+
+update_user = MoesifRack::MoesifMiddleware.new(@app, @options).update_user(user_model)
+```
+
+### update_users_batch method
+A method is attached to the moesif middleware object to update the users profile or metadata in batch.
+The metadata field can be any custom data you want to set on the user. The `user_id` field is required.
+
+```ruby
+metadata = JSON.parse('{'\
+      '"email": "testrubyapi@user.com",'\
+      '"name": "ruby api user",'\
+      '"custom": "testdata"'\
+    '}')
+
+user_models = []
+
+user_model_A = { "user_id" => "testrubyapiuser", 
+                "modified_time" => Time.now.utc.iso8601, 
+                "metadata" => metadata }
+
+user_model_B = { "user_id" => "testrubyapiuser1", 
+                "modified_time" => Time.now.utc.iso8601, 
+                "metadata" => metadata }
+
+user_models << user_model_A << user_model_B
+response = MoesifRack::MoesifMiddleware.new(@app, @options).update_users_batch(user_models)
+```
+
+## How to test
+
+1. Manually clone the git repo
+2. From terminal/cmd navigate to the root directory of the middleware.
+3. Invoke 'gem install moesif_rack'
+4. Add your own application id to 'test/moesif_rack_test.rb'. You can find your Application Id from [_Moesif Dashboard_](https://www.moesif.com/) -> _Top Right Menu_ -> _Installation_
+5. Invoke 'ruby test/moesif_rack_test.rb'
+
 ## Example Code
 
 [Moesif Rack Example](https://github.com/Moesif/moesif-rack-example) is an
@@ -195,7 +248,7 @@ for reference.
 
 ## Other integrations
 
-To view more more documentation on integration options, please visit __[the Integration Options Documentation](https://www.moesif.com/docs/getting-started/integration-options/).
+To view more more documentation on integration options, please visit [the Integration Options Documentation](https://www.moesif.com/docs/getting-started/integration-options/).
 
 [ico-built-for]: https://img.shields.io/badge/built%20for-rack-blue.svg
 [ico-version]: https://img.shields.io/gem/v/moesif_rack.svg
