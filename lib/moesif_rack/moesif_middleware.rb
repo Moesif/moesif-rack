@@ -2,6 +2,7 @@ require 'moesif_api'
 require 'json'
 require 'time'
 require 'base64'
+require_relative './client_ip.rb'
 
 module MoesifRack
 
@@ -56,6 +57,61 @@ module MoesifRack
       end
       # Return the sample rate
       return sample_rate
+    end
+
+    def update_user(user_profile)
+      if user_profile.any?
+        if user_profile.key?("user_id")
+          begin
+            @api_controller.update_user(MoesifApi::UserModel.from_hash(user_profile))
+            if @debug
+              puts "Update User Successfully"
+            end
+          rescue MoesifApi::APIException => e
+            if e.response_code.between?(401, 403)
+              puts "Unathorized accesss updating user to Moesif. Please verify your Application Id."
+            end
+            if @debug
+              puts "Error updating user to Moesif, with status code: "
+              puts e.response_code
+            end
+          end
+        else 
+          puts "To update an user, an user_id field is required"
+        end
+      else 
+        puts "Expecting the input to be of the type - dictionary while updating user"
+      end
+    end
+
+    def update_users_batch(user_profiles)
+      userModels = []
+      user_profiles.each { |user| 
+      if user.key?("user_id")
+        userModels << MoesifApi::UserModel.from_hash(user)
+      else 
+        puts "To update an user, an user_id field is required"
+      end
+      }
+
+      if userModels.any?
+        begin
+          @api_controller.update_users_batch(userModels)
+          if @debug
+            puts "Update Users Successfully"
+          end
+        rescue MoesifApi::APIException => e
+          if e.response_code.between?(401, 403)
+            puts "Unathorized accesss updating user to Moesif. Please verify your Application Id."
+          end
+          if @debug
+            puts "Error updating user to Moesif, with status code: "
+            puts e.response_code
+          end
+        end
+      else
+        puts "Expecting the input to be of the type - Array of hashes while updating users in batch"
+      end
     end
 
     def call env
@@ -142,7 +198,7 @@ module MoesifRack
           headers["X-Moesif-Transaction-Id"] = transaction_id
         end
 
-        event_req.ip_address = req.ip
+        event_req.ip_address = get_client_address(req.env)
         event_req.headers = req_headers
         event_req.body = req_body
         event_req.transfer_encoding = req_body_transfer_encoding
@@ -205,7 +261,7 @@ module MoesifRack
             end
           else
             if @debug
-              puts("Skipped Event due to sampling percentage: " + @sampling_percentage.to_s + " and random percentage: " + @random_percentage.to_s);
+              puts("Skipped Event due to sampling percentage: " + @sampling_percentage.to_s + " and random percentage: " + @random_percentage.to_s)
             end
           end
         rescue MoesifApi::APIException => e
