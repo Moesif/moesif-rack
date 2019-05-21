@@ -3,6 +3,8 @@ require 'json'
 require 'time'
 require 'base64'
 require_relative './client_ip.rb'
+require_relative './update_user.rb'
+require_relative './update_company.rb'
 
 module MoesifRack
 
@@ -27,6 +29,14 @@ module MoesifRack
       @sampling_percentage = get_config(nil)
       if not @sampling_percentage.is_a? Numeric
         raise "Sampling Percentage should be a number"
+      end
+      @capture_outoing_requests = options['capture_outoing_requests']
+      if @capture_outoing_requests
+        if @debug
+          puts 'Start Capturing outgoing requests'
+        end
+        require_relative '../../moesif_capture_outgoing/httplog.rb'
+        MoesifCaptureOutgoing.start_capture_outgoing(options)
       end
     end
 
@@ -60,58 +70,19 @@ module MoesifRack
     end
 
     def update_user(user_profile)
-      if user_profile.any?
-        if user_profile.key?("user_id")
-          begin
-            @api_controller.update_user(MoesifApi::UserModel.from_hash(user_profile))
-            if @debug
-              puts "Update User Successfully"
-            end
-          rescue MoesifApi::APIException => e
-            if e.response_code.between?(401, 403)
-              puts "Unathorized accesss updating user to Moesif. Please verify your Application Id."
-            end
-            if @debug
-              puts "Error updating user to Moesif, with status code: "
-              puts e.response_code
-            end
-          end
-        else 
-          puts "To update an user, an user_id field is required"
-        end
-      else 
-        puts "Expecting the input to be of the type - dictionary while updating user"
-      end
+      UserHelper.new.update_user(@api_controller, @debug, user_profile)
     end
 
     def update_users_batch(user_profiles)
-      userModels = []
-      user_profiles.each { |user| 
-      if user.key?("user_id")
-        userModels << MoesifApi::UserModel.from_hash(user)
-      else 
-        puts "To update an user, an user_id field is required"
-      end
-      }
+      UserHelper.new.update_users_batch(@api_controller, @debug, user_profiles)
+    end
 
-      if userModels.any?
-        begin
-          @api_controller.update_users_batch(userModels)
-          if @debug
-            puts "Update Users Successfully"
-          end
-        rescue MoesifApi::APIException => e
-          if e.response_code.between?(401, 403)
-            puts "Unathorized accesss updating user to Moesif. Please verify your Application Id."
-          end
-          if @debug
-            puts "Error updating user to Moesif, with status code: "
-            puts e.response_code
-          end
-        end
-      else
-        puts "Expecting the input to be of the type - Array of hashes while updating users in batch"
-      end
+    def update_company(company_profile)
+      CompanyHelper.new.update_company(@api_controller, @debug, company_profile)
+    end
+
+    def update_companies_batch(company_profiles)
+      CompanyHelper.new.update_companies_batch(@api_controller, @debug, company_profiles)
     end
 
     def call env
@@ -185,7 +156,9 @@ module MoesifRack
           # Add Transaction Id to Request Header
           req_headers["X-Moesif-Transaction-Id"] = transaction_id
           # Filter out the old key as HTTP Headers case are not preserved
-          req_headers = req_headers.except("X-MOESIF_TRANSACTION_ID")
+          if req_headers.key?("X-MOESIF_TRANSACTION_ID")
+            req_headers = req_headers.except("X-MOESIF_TRANSACTION_ID")
+          end
         end
 
         # Add Transaction Id to the Response Header

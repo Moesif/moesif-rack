@@ -163,7 +163,7 @@ moesif_options['mask_data'] = Proc.new { |event_model|
 
 ```
 
-For details for the spec of event model, please see the [moesifapi-ruby git](https://github.com/Moesif/moesifapi-ruby)
+For details for the spec of event model, please see the [moesifapi-ruby](https://github.com/Moesif/moesifapi-ruby)
 
 #### __`skip`__
 
@@ -187,10 +187,97 @@ For details for the spec of event model, please see the [Moesif Ruby API Documen
 
 Optional. Boolean. Default false. If true, it will print out debug messages. In debug mode, the processing is not done in backend thread.
 
+#### __`capture_outoing_requests`__
+Optional. boolean, Default `false`. Set to `true` to capture all outgoing API calls from your app to third parties like Stripe, Github or to your own dependencies while using [Net::HTTP](https://ruby-doc.org/stdlib-2.6.3/libdoc/net/http/rdoc/Net/HTTP.html) package. The options below is applied to outgoing API calls. When the request is outgoing, for options functions that take request and response as input arguments, the request and response objects passed in are [Request](https://www.rubydoc.info/stdlib/net/Net/HTTPRequest) request and [Response](https://www.rubydoc.info/stdlib/net/Net/HTTPResponse) response objects.
+
+
+##### __`identify_user_outgoing`__
+
+Optional.
+identify_user_outgoing is a Proc that takes request and response as arguments and returns a user_id string. This helps us attribute requests to unique users. Even though Moesif can automatically retrieve the user_id without this, this is highly recommended to ensure accurate attribution.
+
+```ruby
+
+moesif_options['identify_user_outgoing'] = Proc.new { |request, response|
+
+  #snip
+
+  'the_user_id'
+}
+
+```
+
+##### __`get_metadata_outgoing`__
+
+Optional.
+get_metadata_outgoing is a Proc that takes request and response as arguments and returns a Hash that is
+representation of a JSON object. This allows you to attach any
+metadata to this event.
+
+```ruby
+
+moesif_options['get_metadata_outgoing'] = Proc.new { |request, response|
+
+  #snip
+  value = {
+      'foo'  => 'abc',
+      'bar'  => '123'
+  }
+
+  value
+}
+```
+
+##### __`identify_session_outgoing`__
+
+Optional. A Proc that takes request, response and returns a string.
+
+```ruby
+
+moesif_options['identify_session_outgoing'] = Proc.new { |request, response|
+
+  #snip
+
+  'the_session_token'
+}
+
+```
+
+##### __`skip_outgoing`__
+
+Optional. A Proc that takes request, response and returns a boolean. If `true` would skip sending the particular event.
+
+```ruby
+
+moesif_options['skip_outgoing'] = Proc.new{ |request, response|
+
+  #snip
+
+  false
+}
+
+```
+
+##### __`mask_data_outgoing`__
+
+Optional. A Proc that takes event_model as an argument and returns event_model.
+With mask_data_outgoing, you can make modifications to headers or body of the event before it is sent to Moesif.
+
+```ruby
+
+moesif_options['mask_data_outgoing'] = Proc.new { |event_model|
+
+  #snip
+
+  event_model
+}
+
+```
+
 ## Update User
 
 ### update_user method
-A method is attached to the moesif middleware object to update the users profile or metadata.
+A method is attached to the moesif middleware object to update the user profile or metadata.
 The metadata field can be any custom data you want to set on the user. The `user_id` field is required.
 
 ```ruby
@@ -232,6 +319,48 @@ user_models << user_model_A << user_model_B
 response = MoesifRack::MoesifMiddleware.new(@app, @options).update_users_batch(user_models)
 ```
 
+## Update Company
+
+### update_company method
+A method is attached to the moesif middleware object to update the company profile or metadata.
+The metadata field can be any custom data you want to set on the company. The `company_id` field is required.
+
+```ruby
+metadata = JSON.parse('{'\
+      '"email": "testrubyapi@company.com",'\
+      '"name": "ruby api company",'\
+      '"custom": "testdata"'\
+    '}')
+
+company_model = { "company_id" => "testrubyapicompany", 
+                "metadata" => metadata }
+
+update_company = MoesifRack::MoesifMiddleware.new(@app, @options).update_company(company_model)
+```
+
+### update_companies_batch method
+A method is attached to the moesif middleware object to update the companies profile or metadata in batch.
+The metadata field can be any custom data you want to set on the company. The `company_id` field is required.
+
+```ruby
+metadata = JSON.parse('{'\
+      '"email": "testrubyapi@user.com",'\
+      '"name": "ruby api user",'\
+      '"custom": "testdata"'\
+    '}')
+
+company_models = []
+
+company_model_A = { "company_id" => "testrubyapicompany",
+                "metadata" => metadata }
+
+company_model_B = { "company_id" => "testrubyapicompany1",
+                "metadata" => metadata }
+
+company_models << company_model_A << company_model_B
+response = MoesifRack::MoesifMiddleware.new(@app, @options).update_companies_batch(company_models)
+```
+
 ## How to test
 
 1. Manually clone the git repo
@@ -239,12 +368,11 @@ response = MoesifRack::MoesifMiddleware.new(@app, @options).update_users_batch(u
 3. Invoke 'gem install moesif_rack'
 4. Add your own application id to 'test/moesif_rack_test.rb'. You can find your Application Id from [_Moesif Dashboard_](https://www.moesif.com/) -> _Top Right Menu_ -> _Installation_
 5. Invoke 'ruby test/moesif_rack_test.rb'
+6. Invoke 'ruby -I test test/moesif_rack_test.rb -n test_capture_outgoing' to test capturing outgoing API calls from your app to third parties like Stripe, Github or to your own dependencies.
 
 ## Example Code
 
-[Moesif Rack Example](https://github.com/Moesif/moesif-rack-example) is an
-example of Moesif Rack applied to an Rail application. Please check it out
-for reference.
+[Moesif Rack Example](https://github.com/Moesif/moesif-rack-example) is an example of Moesif Rack applied to an Rail application. Please check it out for reference.
 
 ## Other integrations
 
