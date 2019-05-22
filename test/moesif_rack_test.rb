@@ -1,5 +1,6 @@
 require 'test/unit'
 require 'rack'
+require 'net/http'
 require_relative '../lib/moesif_rack'
 
 class MoesifRackTest < Test::Unit::TestCase
@@ -7,8 +8,37 @@ class MoesifRackTest < Test::Unit::TestCase
     @app = ->(env) { [200, { "Content-Type" => "application/json" }, ["{ \"key\": \"value\"}"]]}
     @options = { 'application_id' => 'Your Application Id',
     'debug' => true,
-    'disable_transaction_id' => true}
+    'disable_transaction_id' => true,
+    'capture_outoing_requests' => true,
+    'get_metadata_outgoing' => Proc.new {|request, response|
+      {
+        'foo'  => 'abc',
+        'bar'  => '123'
+      }
+    },
+    'identify_user_outgoing' => Proc.new{|request, response|
+      'outgoing_user'
+    },
+    'identify_session_outgoing' => Proc.new{|request, response|
+      'outgoing_session'
+    },
+    'skip_outgoing' => Proc.new{|request, response|
+      false
+    },
+    'mask_data_outgoing' => Proc.new{|event_model|
+      event_model
+    }
+  }
     @moesif_rack_app = MoesifRack::MoesifMiddleware.new(@app, @options)
+  end
+
+  def test_capture_outgoing
+    url = URI.parse('https://api.github.com')
+    req = Net::HTTP::Get.new(url.to_s)
+    res = Net::HTTP.start(url.host, url.port, :use_ssl => url.scheme == 'https') {|http|
+      http.request(req)
+    }
+    assert_not_equal res, nil
   end
 
   def test_new_calls_to_middleware
@@ -30,7 +60,7 @@ class MoesifRackTest < Test::Unit::TestCase
     assert_equal response, nil
   end
 
-def test_update_users_batch
+  def test_update_users_batch
     metadata = JSON.parse('{'\
       '"email": "testrubyapi@user.com",'\
       '"name": "ruby api user",'\
@@ -59,6 +89,40 @@ def test_update_users_batch
 
   def test_get_config
     assert_operator 100, :>=, @moesif_rack_app.get_config(nil)
+  end
+
+  def test_update_company
+    metadata = JSON.parse('{'\
+      '"email": "testrubyapi@company.com",'\
+      '"name": "ruby api company",'\
+      '"custom": "testdata"'\
+    '}')
+
+    company_model = { "company_id" => "testrubyapicompany", 
+                   "metadata" => metadata }
+
+    response = @moesif_rack_app.update_company(company_model)
+    assert_equal response, nil
+  end
+
+  def test_update_companies_batch
+    metadata = JSON.parse('{'\
+      '"email": "testrubyapi@company.com",'\
+      '"name": "ruby api company",'\
+      '"custom": "testdata"'\
+    '}')
+
+    company_models = []
+
+    company_model_A = { "company_id" => "testrubyapicompany",
+                   "metadata" => metadata }
+    
+    company_model_B = { "company_id" => "testrubyapicompany1",
+                    "metadata" => metadata }
+
+    company_models << company_model_A << company_model_B
+    response = @moesif_rack_app.update_companies_batch(company_models)
+    assert_equal response, nil
   end
 
 end
