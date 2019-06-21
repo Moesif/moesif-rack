@@ -20,7 +20,7 @@ gem install moesif_rack
 and if you have a `Gemfile` in your project, please add this line to
 
 ```
-gem 'moesif_rack', '~> 1.2.6'
+gem 'moesif_rack', '~> 1.3.1'
 
 ```
 
@@ -107,6 +107,22 @@ moesif_options['identify_user'] = Proc.new { |env, headers, body|
   #snip
 
   'the_user_id'
+}
+
+```
+
+#### __`identify_company`__
+
+Optional.
+identify_company is a Proc that takes env, headers, and body as arguments and returns a company_id string. This helps us attribute requests to unique company.
+
+```ruby
+
+moesif_options['identify_company'] = Proc.new { |env, headers, body|
+
+  #snip
+
+  'the_company_id'
 }
 
 ```
@@ -203,6 +219,22 @@ moesif_options['identify_user_outgoing'] = Proc.new { |request, response|
   #snip
 
   'the_user_id'
+}
+
+```
+
+##### __`identify_company_outgoing`__
+
+Optional.
+identify_company_outgoing is a Proc that takes request and response as arguments and returns a company_id string. This helps us attribute requests to unique company.
+
+```ruby
+
+moesif_options['identify_company_outgoing'] = Proc.new { |request, response|
+
+  #snip
+
+  'the_company_id'
 }
 
 ```

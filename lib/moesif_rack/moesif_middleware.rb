@@ -19,6 +19,7 @@ module MoesifRack
 
       @api_version = options['api_version']
       @identify_user = options['identify_user']
+      @identify_company = options['identify_company']
       @get_metadata = options['get_metadata']
       @identify_session = options['identify_session']
       @mask_data = options['mask_data']
@@ -192,6 +193,13 @@ module MoesifRack
             puts "calling identify user proc"
           end
           event_model.user_id = @identify_user.call(env, headers, body)
+        end
+
+        if @identify_company
+          if @debug
+            puts "calling identify company proc"
+          end
+          event_model.company_id = @identify_company.call(env, headers, body)
         end
 
         if @get_metadata

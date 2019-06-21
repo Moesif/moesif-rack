@@ -10,14 +10,29 @@ class MoesifRackTest < Test::Unit::TestCase
     'debug' => true,
     'disable_transaction_id' => true,
     'capture_outoing_requests' => true,
+    'get_metadata' => Proc.new {|request, response|
+      {
+        'foo'  => 'abc',
+        'bar'  => '123'
+      }
+    },
     'get_metadata_outgoing' => Proc.new {|request, response|
       {
         'foo'  => 'abc',
         'bar'  => '123'
       }
     },
+    'identify_user' => Proc.new{|request, response|
+      'my_user_id'
+    },
+    'identify_company' => Proc.new{|request, response|
+      '12345'
+    },
     'identify_user_outgoing' => Proc.new{|request, response|
-      'outgoing_user'
+      'outgoing_user_id'
+    },
+    'identify_company_outgoing' => Proc.new{|request, response|
+      'outgoing_company_id'
     },
     'identify_session_outgoing' => Proc.new{|request, response|
       'outgoing_session'
