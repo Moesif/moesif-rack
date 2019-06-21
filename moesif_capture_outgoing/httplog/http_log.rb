@@ -18,6 +18,7 @@ module MoesifCaptureOutgoing
       @debug = @moesif_options['debug']
       @get_metadata_outgoing = @moesif_options['get_metadata_outgoing']
       @identify_user_outgoing = @moesif_options['identify_user_outgoing']
+      @identify_company_outgoing = @moesif_options['identify_company_outgoing']
       @identify_session_outgoing = @moesif_options['identify_session_outgoing']
       @skip_outgoing = options['skip_outgoing']
       @mask_data_outgoing = options['mask_data_outgoing']
@@ -108,6 +109,14 @@ module MoesifCaptureOutgoing
             puts "calling identify_user_outgoing proc"
           end
           event_model.user_id = @identify_user_outgoing.call(request, response)
+        end
+
+        # Identify Company
+        if @identify_company_outgoing
+          if @debug
+            puts "calling identify_company_outgoing proc"
+          end
+          event_model.company_id = @identify_company_outgoing.call(request, response)
         end
 
         # Session Token
