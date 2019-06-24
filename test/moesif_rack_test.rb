@@ -114,6 +114,7 @@ class MoesifRackTest < Test::Unit::TestCase
     '}')
 
     company_model = { "company_id" => "testrubyapicompany", 
+                      "company_domain" => "acmeinc.com", 
                    "metadata" => metadata }
 
     response = @moesif_rack_app.update_company(company_model)
@@ -130,9 +131,11 @@ class MoesifRackTest < Test::Unit::TestCase
     company_models = []
 
     company_model_A = { "company_id" => "testrubyapicompany",
+                        "company_domain" => "nowhere.com", 
                    "metadata" => metadata }
     
     company_model_B = { "company_id" => "testrubyapicompany1",
+                        "company_domain" => "acmeinc.com", 
                     "metadata" => metadata }
 
     company_models << company_model_A << company_model_B
