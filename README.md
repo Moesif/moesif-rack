@@ -31,7 +31,6 @@ gem 'moesif_rack', '~> 1.3.3'
 ```ruby
 moesif_options = {
   'application_id' => 'Your application Id',
-  'debug' => true,
   'log_body' => true,
 }
 ```
