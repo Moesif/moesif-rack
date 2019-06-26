@@ -22,6 +22,7 @@ module MoesifCaptureOutgoing
       @identify_session_outgoing = @moesif_options['identify_session_outgoing']
       @skip_outgoing = options['skip_outgoing']
       @mask_data_outgoing = options['mask_data_outgoing']
+      @log_body_outgoing = options.fetch('log_body_outgoing', true)
     end
 
     def call (url, request, request_time, response, response_time)
@@ -50,25 +51,32 @@ module MoesifCaptureOutgoing
         # Request Body
         req_body_string = request.body.nil? || request.body.empty? ? nil : request.body
         req_body_transfer_encoding = nil
-        if req_body_string && req_body_string.length != 0
-          begin
-            req_body = JSON.parse(req_body_string)
-          rescue
-            req_body = Base64.encode64(req_body_string)
-            req_body_transfer_encoding = 'base64'
+        req_body = nil
+
+        if @log_body_outgoing
+          if req_body_string && req_body_string.length != 0
+            begin
+              req_body = JSON.parse(req_body_string)
+            rescue
+              req_body = Base64.encode64(req_body_string)
+              req_body_transfer_encoding = 'base64'
+            end
           end
         end
 
         # Response Body and encoding
         rsp_body_string = get_response_body(response.body)
         rsp_body_transfer_encoding = nil
+        rsp_body = nil
 
-        if rsp_body_string && rsp_body_string.length != 0
-          begin
-            rsp_body = JSON.parse(rsp_body_string)
-          rescue
-            rsp_body = Base64.encode64(rsp_body_string)
-            rsp_body_transfer_encoding = 'base64'
+        if @log_body_outgoing
+          if rsp_body_string && rsp_body_string.length != 0
+            begin
+              rsp_body = JSON.parse(rsp_body_string)
+            rescue
+              rsp_body = Base64.encode64(rsp_body_string)
+              rsp_body_transfer_encoding = 'base64'
+            end
           end
         end
 
@@ -79,7 +87,7 @@ module MoesifCaptureOutgoing
         event_req.verb = request.method.to_s.upcase
         event_req.headers = request.each_header.collect.to_h
         event_req.api_version = nil
-        event_req.body = req_body_string
+        event_req.body = req_body
         event_req.transfer_encoding = req_body_transfer_encoding
 
         # Event Response 
@@ -87,7 +95,7 @@ module MoesifCaptureOutgoing
         event_rsp.time = response_time
         event_rsp.status = response.code.to_i
         event_rsp.headers = response.each_header.collect.to_h
-        event_rsp.body = rsp_body_string
+        event_rsp.body = rsp_body
         event_rsp.transfer_encoding = rsp_body_transfer_encoding
 
         # Prepare Event Model

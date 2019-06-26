@@ -203,6 +203,10 @@ For details for the spec of event model, please see the [Moesif Ruby API Documen
 
 Optional. Boolean. Default false. If true, it will print out debug messages. In debug mode, the processing is not done in backend thread.
 
+#### __`log_body`__
+
+Optional. Boolean. Default true. If false, will not log request and response body to Moesif.
+
 #### __`capture_outoing_requests`__
 Optional. boolean, Default `false`. Set to `true` to capture all outgoing API calls from your app to third parties like Stripe, Github or to your own dependencies while using [Net::HTTP](https://ruby-doc.org/stdlib-2.6.3/libdoc/net/http/rdoc/Net/HTTP.html) package. The options below is applied to outgoing API calls. When the request is outgoing, for options functions that take request and response as input arguments, the request and response objects passed in are [Request](https://www.rubydoc.info/stdlib/net/Net/HTTPRequest) request and [Response](https://www.rubydoc.info/stdlib/net/Net/HTTPResponse) response objects.
 
@@ -305,6 +309,10 @@ moesif_options['mask_data_outgoing'] = Proc.new { |event_model|
 }
 
 ```
+
+#### __`log_body_outgoing`__
+
+Optional. Boolean. Default true. If false, will not log request and response body to Moesif.
 
 ## Update User
 
