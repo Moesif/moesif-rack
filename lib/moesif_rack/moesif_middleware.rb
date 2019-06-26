@@ -27,6 +27,7 @@ module MoesifRack
       @debug = options['debug']
       @config_dict = Hash.new
       @disable_transaction_id = options['disable_transaction_id'] || false
+      @log_body = options.fetch('log_body', true)
       @sampling_percentage = get_config(nil)
       if not @sampling_percentage.is_a? Numeric
         raise "Sampling Percentage should be a number"
@@ -110,13 +111,16 @@ module MoesifRack
         req_body_string = req.body.read
         req.body.rewind
         req_body_transfer_encoding = nil
+        req_body = nil
 
-        if req_body_string && req_body_string.length != 0
-          begin
-            req_body = JSON.parse(req_body_string)
-          rescue
-            req_body = Base64.encode64(req_body_string)
-            req_body_transfer_encoding = 'base64'
+        if @log_body
+          if req_body_string && req_body_string.length != 0
+            begin
+              req_body = JSON.parse(req_body_string)
+            rescue
+              req_body = Base64.encode64(req_body_string)
+              req_body_transfer_encoding = 'base64'
+            end
           end
         end
 
@@ -124,13 +128,16 @@ module MoesifRack
 
         rsp_body_string = get_response_body(body);
         rsp_body_transfer_encoding = nil
+        rsp_body = nil
 
-        if rsp_body_string && rsp_body_string.length != 0
-          begin
-            rsp_body = JSON.parse(rsp_body_string)
-          rescue
-            rsp_body = Base64.encode64(rsp_body_string)
-            rsp_body_transfer_encoding = 'base64'
+        if @log_body
+          if rsp_body_string && rsp_body_string.length != 0
+            begin
+              rsp_body = JSON.parse(rsp_body_string)
+            rescue
+              rsp_body = Base64.encode64(rsp_body_string)
+              rsp_body_transfer_encoding = 'base64'
+            end
           end
         end
 
