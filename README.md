@@ -6,7 +6,9 @@
 [![Software License][ico-license]][link-license]
 [![Source Code][ico-source]][link-source]
 
-Rack Middleware that logs _incoming_ API calls to Moesif's AI-powered API analytics service.
+Rack Middleware that logs API calls and sends 
+to [Moesif](https://www.moesif.com) for API analytics and log analysis.
+
 Supports Ruby on Rails apps and other Ruby frameworks built on Rack.
 
 [Source Code on GitHub](https://github.com/moesif/moesif-rack)
@@ -30,12 +32,17 @@ gem 'moesif_rack', '~> 1.3.3'
 
 ```ruby
 moesif_options = {
-  'application_id' => 'Your application Id',
+  'application_id' => 'Your Moesif Application Id',
   'log_body' => true,
 }
 ```
 
-You can find your Application Id from [_Moesif Dashboard_](https://www.moesif.com/) -> _Top Right Menu_ -> _App Setup_
+Your Moesif Application Id can be found in the [_Moesif Portal_](https://www.moesif.com/).
+After signing up for a Moesif account, your Moesif Application Id will be displayed during the onboarding steps. 
+
+You can always find your Moesif Application Id at any time by logging 
+into the [_Moesif Portal_](https://www.moesif.com/), click on the top right menu,
+and then clicking _Installation_.
 
 ### Add to middleware
 
