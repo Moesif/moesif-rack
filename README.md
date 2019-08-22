@@ -22,7 +22,7 @@ gem install moesif_rack
 and if you have a `Gemfile` in your project, please add this line to
 
 ```
-gem 'moesif_rack', '~> 1.3.3'
+gem 'moesif_rack', '~> 1.3.4'
 
 ```
 
@@ -114,7 +114,7 @@ moesif_options['identify_user'] = Proc.new { |env, headers, body|
 
   #snip
 
-  'the_user_id'
+  'my_user_id'
 }
 
 ```
@@ -130,7 +130,7 @@ moesif_options['identify_company'] = Proc.new { |env, headers, body|
 
   #snip
 
-  'the_company_id'
+  'my_company_id'
 }
 
 ```
@@ -335,7 +335,8 @@ metadata = JSON.parse('{'\
       '"custom": "testdata"'\
     '}')
 
-user_model = { "user_id" => "testrubyapiuser", 
+user_model = { "user_id" => "12345",
+                "company_id" => "67890",
                 "modified_time" => Time.now.utc.iso8601, 
                 "metadata" => metadata }
 
@@ -355,11 +356,13 @@ metadata = JSON.parse('{'\
 
 user_models = []
 
-user_model_A = { "user_id" => "testrubyapiuser", 
+user_model_A = { "user_id" => "12345",
+                "company_id" => "67890", 
                 "modified_time" => Time.now.utc.iso8601, 
                 "metadata" => metadata }
 
-user_model_B = { "user_id" => "testrubyapiuser1", 
+user_model_B = { "user_id" => "1234", 
+                "company_id" => "6789",
                 "modified_time" => Time.now.utc.iso8601, 
                 "metadata" => metadata }
 
@@ -380,7 +383,7 @@ metadata = JSON.parse('{'\
       '"custom": "testdata"'\
     '}')
 
-company_model = { "company_id" => "testrubyapicompany", 
+company_model = { "company_id" => "12345", 
                   "company_domain" => "acmeinc.com",
                 "metadata" => metadata }
 
@@ -400,11 +403,11 @@ metadata = JSON.parse('{'\
 
 company_models = []
 
-company_model_A = { "company_id" => "testrubyapicompany",
+company_model_A = { "company_id" => "12345",
                     "company_domain" => "nowhere.com", 
                 "metadata" => metadata }
 
-company_model_B = { "company_id" => "testrubyapicompany1",
+company_model_B = { "company_id" => "67890",
                     "company_domain" => "acmeinc.com",
                 "metadata" => metadata }
 
