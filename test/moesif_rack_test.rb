@@ -6,7 +6,7 @@ require_relative '../lib/moesif_rack'
 class MoesifRackTest < Test::Unit::TestCase
   def setup
     @app = ->(env) { [200, { "Content-Type" => "application/json" }, ["{ \"key\": \"value\"}"]]}
-    @options = { 'application_id' => 'Your Application Id',
+    @options = { 'application_id' => 'Your Moesif Application Id',
     'debug' => true,
     'disable_transaction_id' => true,
     'capture_outoing_requests' => true,
@@ -26,7 +26,7 @@ class MoesifRackTest < Test::Unit::TestCase
       'my_user_id'
     },
     'identify_company' => Proc.new{|request, response|
-      '12345'
+      'my_company_id'
     },
     'identify_user_outgoing' => Proc.new{|request, response|
       'outgoing_user_id'
@@ -67,7 +67,8 @@ class MoesifRackTest < Test::Unit::TestCase
       '"custom": "testdata"'\
     '}')
 
-    user_model = { "user_id" => "testrubyapiuser", 
+    user_model = { "user_id" => "12345", 
+                   "company_id" => "67890",
                    "modified_time" => Time.now.utc.iso8601, 
                    "metadata" => metadata }
 
@@ -84,11 +85,13 @@ class MoesifRackTest < Test::Unit::TestCase
 
     user_models = []
 
-    user_model_A = { "user_id" => "testrubyapiuser", 
+    user_model_A = { "user_id" => "12345", 
+                   "company_id" => "67890",
                    "modified_time" => Time.now.utc.iso8601, 
                    "metadata" => metadata }
     
-    user_model_B = { "user_id" => "testrubyapiuser1", 
+    user_model_B = { "user_id" => "1234",
+                    "company_id" => "6789", 
                     "modified_time" => Time.now.utc.iso8601, 
                     "metadata" => metadata }
 
@@ -113,7 +116,7 @@ class MoesifRackTest < Test::Unit::TestCase
       '"custom": "testdata"'\
     '}')
 
-    company_model = { "company_id" => "testrubyapicompany", 
+    company_model = { "company_id" => "12345", 
                       "company_domain" => "acmeinc.com", 
                    "metadata" => metadata }
 
@@ -130,11 +133,11 @@ class MoesifRackTest < Test::Unit::TestCase
 
     company_models = []
 
-    company_model_A = { "company_id" => "testrubyapicompany",
+    company_model_A = { "company_id" => "12345",
                         "company_domain" => "nowhere.com", 
                    "metadata" => metadata }
     
-    company_model_B = { "company_id" => "testrubyapicompany1",
+    company_model_B = { "company_id" => "1234",
                         "company_domain" => "acmeinc.com", 
                     "metadata" => metadata }
 
