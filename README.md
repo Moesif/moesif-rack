@@ -46,11 +46,26 @@ and then clicking _Installation_.
 
 ### Add to middleware
 
+Using strings or symbols for middleware class names is deprecated for newer frameworks like Ruby 5.0, 
+so you should pass the class directly.
+
+#### For Rails 5.0 or newer:
+
+```ruby
+  class Application < Rails::Application
+    # snip
+
+    config.middleware.use MoesifRack::MoesifMiddleware, moesif_options
+
+    # snip
+  end
+```
+
+#### For other frameworks:
+
 within `config/application.rb`
 
 ```ruby
-
-
   class Application < Rails::Application
     # snip
 
@@ -58,35 +73,37 @@ within `config/application.rb`
 
     # snip
   end
-
 ```
 
 #### Order of Middleware Matters
 
-Since Moesif Rack is basically a logging middleware, the ordering of middleware matters for accuracy and completeness.
-Many middlewares are installed by default by Rails.
+Since Moesif Rack is a logging middleware, the ordering of middleware matters for accuracy and data collection.
+Many middleware are installed by default by Rails.
 
-To see the list of middlewares that your system already have, type this into the bash.
+The best place for "MoesifRack::MoesifMidleware" is on top (so it captures the data closest to the wire).
+Typically, right above the default logger of Rails apps, "Rails::Rack::Logger" is a good spot.
+Or if you want to be as close as wire as possible, put it before "ActionDispatch::Static"
+
+To insert the Moesif middleware before "Rails::Rack::Logger", you can use the `insert_before` method instead of 
+`use`
+
+```ruby
+  class Application < Rails::Application
+    # snip
+
+    config.middleware.insert_before Rails::Rack::Logger, MoesifRack::MoesifMiddleware, moesif_options
+
+    # snip
+  end
+```
+If you are using "Rack::Deflater" or other compression middleware, make sure Moesif is after
+it, so it can capture the uncompressed data.
+
+To see your current list of middleware:
 
 ```bash
   bin/rails middleware
 ```
-
-The best place for "MoesifRack::MoesifMidleware" is on top as possible (so it captures the data closest to the wire).
-Typically, right above the default logger of Rails apps, "Rails::Rack::Logger" is a good spot.
-Or if you want to be as close as wire as possible, put it before "ActionDispatch::Static"
-
-You should use the following line of code to insert the middleware into the right spot.
-
-```ruby
-
-config.middleware.insert_before "Rails::Rack::Logger", "MoesifRack::MoesifMiddleware", moesif_options
-
-```
-
-Please note, if you are using "Rack::Deflater" please make sure that "MoesifRack::MoesifMiddlware"
-is below it, so it can capture uncompressed data.
-
 
 ## Configuration options
 

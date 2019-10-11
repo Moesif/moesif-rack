@@ -285,7 +285,7 @@ module MoesifRack
 
     def get_response_body(response)
       body = response.respond_to?(:body) ? response.body : response
-      body = body.inject("") { |i, a| i << a } if body.respond_to?(:each)
+      body = body.inject("") { |i, a| i << a } if (body.respond_to?(:each) && body.respond_to?(:inject))
       body.to_s
     end
 
