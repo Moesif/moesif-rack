@@ -1,6 +1,7 @@
 require 'test/unit'
 require 'rack'
 require 'net/http'
+require_relative '../lib/moesif_rack/app_config.rb'
 require_relative '../lib/moesif_rack'
 
 class MoesifRackTest < Test::Unit::TestCase
@@ -45,6 +46,7 @@ class MoesifRackTest < Test::Unit::TestCase
     }
   }
     @moesif_rack_app = MoesifRack::MoesifMiddleware.new(@app, @options)
+    @app_config = AppConfig.new
   end
 
   def test_capture_outgoing
@@ -106,7 +108,11 @@ class MoesifRackTest < Test::Unit::TestCase
   end
 
   def test_get_config
-    assert_operator 100, :>=, @moesif_rack_app.get_config(nil)
+    @api_client = MoesifApi::MoesifAPIClient.new(@options['application_id'])
+    @api_controller = @api_client.api
+    @config = @app_config.get_config(@api_controller, @debug)
+    @config_etag, @sampling_percentage, @last_updated_time = @app_config.parse_configuration(@config, @debug)
+    assert_operator 100, :>=, @sampling_percentage
   end
 
   def test_update_company
