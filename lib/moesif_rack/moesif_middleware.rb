@@ -3,6 +3,7 @@ require 'json'
 require 'time'
 require 'base64'
 require_relative './client_ip.rb'
+require_relative './app_config.rb'
 require_relative './update_user.rb'
 require_relative './update_company.rb'
 
@@ -12,7 +13,7 @@ module MoesifRack
     def initialize app, options = {}
       @app = app
       if not options['application_id']
-        raise 'application_id requird for Moesif Middleware'
+        raise 'application_id required for Moesif Middleware'
       end
       @api_client = MoesifApi::MoesifAPIClient.new(options['application_id'])
       @api_controller = @api_client.api
@@ -25,12 +26,23 @@ module MoesifRack
       @mask_data = options['mask_data']
       @skip = options['skip']
       @debug = options['debug']
+      @app_config = AppConfig.new
+      @config = @app_config.get_config(@api_controller, @debug)
+      @config_etag = nil
+      @sampling_percentage = 100
+      @last_updated_time = Time.now.utc
       @config_dict = Hash.new
       @disable_transaction_id = options['disable_transaction_id'] || false
       @log_body = options.fetch('log_body', true)
-      @sampling_percentage = get_config(nil)
-      if not @sampling_percentage.is_a? Numeric
-        raise "Sampling Percentage should be a number"
+      begin
+        if !@config.nil?
+          @config_etag, @sampling_percentage, @last_updated_time = @app_config.parse_configuration(@config, @debug)
+        end
+      rescue => exception
+        if @debug
+          puts 'Error while parsing application configuration on initialization'
+          puts exception.to_s
+        end
       end
       @capture_outoing_requests = options['capture_outoing_requests']
       if @capture_outoing_requests
@@ -40,35 +52,6 @@ module MoesifRack
         require_relative '../../moesif_capture_outgoing/httplog.rb'
         MoesifCaptureOutgoing.start_capture_outgoing(options)
       end
-    end
-
-    def get_config(cached_config_etag)
-      sample_rate = 100
-      begin
-        # Calling the api
-        config_api_response = @api_controller.get_app_config()
-        # Fetch the response ETag
-        response_config_etag = JSON.parse( config_api_response.to_json )["headers"]["x_moesif_config_etag"]
-        # Remove ETag from the global dict if exist
-        if !cached_config_etag.nil? && @config_dict.key?(cached_config_etag)
-            @config_dict.delete(cached_config_etag)
-        end
-        # Fetch the response body
-        @config_dict[response_config_etag] = JSON.parse(JSON.parse( config_api_response.to_json )["raw_body"])
-        # 
-        app_config = @config_dict[response_config_etag]
-        # Fetch the sample rate
-        if !app_config.nil?
-          sample_rate = app_config.fetch("sample_rate", 100)
-        end
-        # Set the last updated time
-        @last_updated_time = Time.now.utc
-        rescue
-          # Set the last updated time
-          @last_updated_time = Time.now.utc
-      end
-      # Return the sample rate
-      return sample_rate
     end
 
     def update_user(user_profile)
@@ -236,13 +219,28 @@ module MoesifRack
         # Perform the API call through the SDK function
         begin
           @random_percentage = Random.rand(0.00..100.00)
+
+          # Event UserId
+          user_id = !event_model.user_id.nil?  ? event_model.user_id : nil
+          # Event CompanyId
+          company_id = !event_model.company_id.nil?  ? event_model.company_id : nil
+          # Get sampling percentage
+          @sampling_percentage = @app_config.get_sampling_percentage(@config, user_id, company_id, @debug)
+
           if @sampling_percentage > @random_percentage
             event_api_response = @api_controller.create_event(event_model)
-            cached_config_etag = @config_dict.keys[0]
             event_response_config_etag = event_api_response[:x_moesif_config_etag]
 
-            if !event_response_config_etag.nil? && cached_config_etag != event_response_config_etag && Time.now.utc > @last_updated_time + 30
-              @sampling_percentage = get_config(cached_config_etag)
+            if !event_response_config_etag.nil? && !@config_etag.nil? && @config_etag != event_response_config_etag && Time.now.utc > @last_updated_time + 300
+              begin 
+                @config = @app_config.get_config(@api_controller, @debug)
+                @config_etag, @sampling_percentage, @last_updated_time = @app_config.parse_configuration(@config, @debug)
+              rescue => exception
+                if @debug
+                  puts 'Error while updating the application configuration'
+                  puts exception.to_s
+                end    
+              end
             end
             if @debug
               puts("Event successfully sent to Moesif")
