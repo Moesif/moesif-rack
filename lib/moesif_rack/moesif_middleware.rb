@@ -220,12 +220,15 @@ module MoesifRack
         begin
           @random_percentage = Random.rand(0.00..100.00)
 
-          # Event UserId
-          user_id = !event_model.user_id.nil?  ? event_model.user_id : nil
-          # Event CompanyId
-          company_id = !event_model.company_id.nil?  ? event_model.company_id : nil
-          # Get sampling percentage
-          @sampling_percentage = @app_config.get_sampling_percentage(@config, user_id, company_id, @debug)
+          begin 
+            @sampling_percentage = @app_config.get_sampling_percentage(@config, event_model.user_id, event_model.company_id, @debug)
+          rescue => exception
+            if @debug
+              puts 'Error while getting sampling percentage, assuming default behavior'
+              puts exception.to_s
+            end
+            @sampling_percentage = 100
+          end
 
           if @sampling_percentage > @random_percentage
             event_api_response = @api_controller.create_event(event_model)

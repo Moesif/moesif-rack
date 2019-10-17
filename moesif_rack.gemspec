@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'moesif_rack'
-  s.version = '1.3.6'
+  s.version = '1.3.7'
   s.summary = 'moesif_rack'
   s.description = 'Collection/Data Ingestion SDK for Rack (also Rails) Middleware / RoR'
   s.authors = ['Moesif, Inc', 'Xing Wang']
