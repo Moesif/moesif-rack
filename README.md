@@ -443,7 +443,9 @@ response = MoesifRack::MoesifMiddleware.new(@app, @options).update_companies_bat
 
 ## Example Code
 
-[Moesif Rack Example](https://github.com/Moesif/moesif-rack-example) is an example of Moesif Rack applied to an Rail application. Please check it out for reference.
+[Moesif Rack Example with Rails](https://github.com/Moesif/moesif-rails-example) is an example of Moesif Rack applied to a Rails application.
+
+[Moesif Rack Example](https://github.com/Moesif/moesif-rack-example) is an example of Moesif Rack applied to a Rack application.
 
 ## Other integrations
 
