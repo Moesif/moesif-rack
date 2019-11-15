@@ -69,10 +69,14 @@ class MoesifRackTest < Test::Unit::TestCase
       '"custom": "testdata"'\
     '}')
 
+    campaign_model = {"utm_source" => "Newsletter",
+                      "utm_medium" => "Email"}
+
     user_model = { "user_id" => "12345", 
                    "company_id" => "67890",
                    "modified_time" => Time.now.utc.iso8601, 
-                   "metadata" => metadata }
+                   "metadata" => metadata,
+                   "campaign" => campaign_model}
 
     response = @moesif_rack_app.update_user(user_model)
     assert_equal response, nil
@@ -122,9 +126,13 @@ class MoesifRackTest < Test::Unit::TestCase
       '"custom": "testdata"'\
     '}')
 
+    campaign_model = {"utm_source" => "Adwords",
+                      "utm_medium" => "Twitter"}
+
     company_model = { "company_id" => "12345", 
                       "company_domain" => "acmeinc.com", 
-                   "metadata" => metadata }
+                      "metadata" => metadata,
+                      "campaign" => campaign_model }
 
     response = @moesif_rack_app.update_company(company_model)
     assert_equal response, nil
