@@ -177,6 +177,7 @@ module MoesifRack
         event_model = MoesifApi::EventModel.new()
         event_model.request = event_req
         event_model.response = event_rsp
+        event_model.direction = "Incoming"
         
         if @identify_user
           if @debug
