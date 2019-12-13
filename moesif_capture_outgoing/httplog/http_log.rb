@@ -102,6 +102,7 @@ module MoesifCaptureOutgoing
         event_model = MoesifApi::EventModel.new()
         event_model.request = event_req
         event_model.response = event_rsp
+        event_model.direction = "Outgoing"
 
         # Metadata for Outgoing Request
         if @get_metadata_outgoing

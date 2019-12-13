@@ -22,7 +22,7 @@ gem install moesif_rack
 and if you have a `Gemfile` in your project, please add this line to
 
 ```
-gem 'moesif_rack', '~> 1.3.8'
+gem 'moesif_rack', '~> 1.3.9'
 
 ```
 
@@ -457,7 +457,7 @@ response = MoesifRack::MoesifMiddleware.new(@app, @options).update_companies_bat
 
 ## Other integrations
 
-To view more more documentation on integration options, please visit [the Integration Options Documentation](https://www.moesif.com/docs/getting-started/integration-options/).
+To view more documentation on integration options, please visit [the Integration Options Documentation](https://www.moesif.com/docs/getting-started/integration-options/).
 
 [ico-built-for]: https://img.shields.io/badge/built%20for-rack-blue.svg
 [ico-version]: https://img.shields.io/gem/v/moesif_rack.svg
