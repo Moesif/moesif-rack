@@ -126,12 +126,10 @@ Optional.
 identify_user is a Proc that takes env, headers, and body as arguments and returns a user_id string. This helps us attribute requests to unique users. Even though Moesif can automatically retrieve the user_id without this, this is highly recommended to ensure accurate attribution.
 
 ```ruby
-
 moesif_options['identify_user'] = Proc.new { |env, headers, body|
 
-  #snip
-
-  'my_user_id'
+  # Add your custom code that returns a string for user id
+  '12345'
 }
 
 ```
@@ -145,11 +143,22 @@ identify_company is a Proc that takes env, headers, and body as arguments and re
 
 moesif_options['identify_company'] = Proc.new { |env, headers, body|
 
-  #snip
-
-  'my_company_id'
+  # Add your custom code that returns a string for company id
+  '67890'
 }
 
+```
+
+#### __`identify_session`__
+
+Optional. A Proc that takes env, headers, body and returns a string.
+
+```ruby
+
+moesif_options['identify_session'] = Proc.new { |env, headers, body|
+    # Add your custom code that returns a string for session/API token
+    'XXXXXXXXX'
+}
 ```
 
 #### __`get_metadata`__
@@ -162,31 +171,15 @@ metadata to this event.
 ```ruby
 
 moesif_options['get_metadata'] = Proc.new { |env, headers, body|
-
-  #snip
+  # Add your custom code that returns a dictionary
   value = {
-      'foo'  => 'abc',
-      'bar'  => '123'
+      'datacenter'  => 'westus',
+      'deployment_version'  => 'v1.2.3'
   }
-
   value
 }
 ```
 
-#### __`identify_session`__
-
-Optional. A Proc that takes env, headers, body and returns a string.
-
-```ruby
-
-moesif_options['identify_session'] = Proc.new { |env, headers, body|
-
-  #snip
-
-  'the_session_token'
-}
-
-```
 
 #### __`mask_data`__
 
@@ -196,9 +189,8 @@ With mask_data, you can make modifications to headers or body of the event befor
 ```ruby
 
 moesif_options['mask_data'] = Proc.new { |event_model|
-
-  #snip
-
+  # Add your custom code that returns a event_model after modifying any fields
+  event_model.response.body.password = nil
   event_model
 }
 
@@ -213,9 +205,7 @@ Optional. A Proc that takes env, headers, body and returns a boolean.
 ```ruby
 
 moesif_options['skip'] = Proc.new { |env, headers, body|
-
-  #snip
-
+  # Add your custom code that returns true to skip logging the API call
   false
 }
 
@@ -245,9 +235,8 @@ identify_user_outgoing is a Proc that takes request and response as arguments an
 
 moesif_options['identify_user_outgoing'] = Proc.new { |request, response|
 
-  #snip
-
-  'the_user_id'
+  # Add your custom code that returns a string for user id
+  '12345'
 }
 
 ```
@@ -261,9 +250,8 @@ identify_company_outgoing is a Proc that takes request and response as arguments
 
 moesif_options['identify_company_outgoing'] = Proc.new { |request, response|
 
-  #snip
-
-  'the_company_id'
+  # Add your custom code that returns a string for company id
+  '67890'
 }
 
 ```
@@ -279,12 +267,11 @@ metadata to this event.
 
 moesif_options['get_metadata_outgoing'] = Proc.new { |request, response|
 
-  #snip
+  # Add your custom code that returns a dictionary
   value = {
-      'foo'  => 'abc',
-      'bar'  => '123'
+      'datacenter'  => 'westus',
+      'deployment_version'  => 'v1.2.3'
   }
-
   value
 }
 ```
@@ -297,9 +284,8 @@ Optional. A Proc that takes request, response and returns a string.
 
 moesif_options['identify_session_outgoing'] = Proc.new { |request, response|
 
-  #snip
-
-  'the_session_token'
+    # Add your custom code that returns a string for session/API token
+    'XXXXXXXXX'
 }
 
 ```
@@ -312,8 +298,7 @@ Optional. A Proc that takes request, response and returns a boolean. If `true` w
 
 moesif_options['skip_outgoing'] = Proc.new{ |request, response|
 
-  #snip
-
+  # Add your custom code that returns true to skip logging the API call
   false
 }
 
@@ -328,8 +313,8 @@ With mask_data_outgoing, you can make modifications to headers or body of the ev
 
 moesif_options['mask_data_outgoing'] = Proc.new { |event_model|
 
-  #snip
-
+  # Add your custom code that returns a event_model after modifying any fields
+  event_model.response.body.password = nil
   event_model
 }
 
@@ -341,32 +326,51 @@ Optional. Boolean. Default true. If false, will not log request and response bod
 
 ## Update User
 
-### update_user method
-A method is attached to the moesif middleware object to update the user profile or metadata.
-The metadata field can be any custom data you want to set on the user. The `user_id` field is required.
+### Update a Single User
+Create or update a user profile in Moesif.
+The metadata field can be any customer demographic or other info you want to store.
+Only the `user_id` field is required.
+This method is a convenient helper that calls the Moesif API lib.
+For details, visit the [Ruby API Reference](https://www.moesif.com/docs/api?ruby#update-a-user).
 
 ```ruby
-metadata = JSON.parse('{'\
-      '"email": "testrubyapi@user.com",'\
-      '"name": "ruby api user",'\
-      '"custom": "testdata"'\
-    '}')
+metadata => {
+  :email => 'john@acmeinc.com',
+  :first_name => 'John',
+  :last_name => 'Doe',
+  :title => 'Software Engineer',
+  :salesInfo => {
+      :stage => 'Customer',
+      :lifetime_value => 24000,
+      :accountOwner => 'mary@contoso.com',
+  }
+}
 
-campaign_model = {"utm_source" => "Newsletter",
-                  "utm_medium" => "Email"}
+# Campaign object is optional, but useful if you want to track ROI of acquisition channels
+# See https://www.moesif.com/docs/api#users for campaign schema
+campaign = CampaignModel.new()
+campaign.utm_source = "google"
+campaign.utm_medium = "cpc"
+campaign.utm_campaign = "adwords"
+campaign.utm_term = "api+tooling"
+campaign.utm_content = "landing"
 
-user_model = { "user_id" => "12345",
-                "company_id" => "67890",
-                "modified_time" => Time.now.utc.iso8601, 
-                "metadata" => metadata,
-                "campaign" => campaign_model }
+# Only user_id is required.
+# metadata can be any custom object
+user = UserModel.new()
+user.user_id = "12345"
+user.company_id = "67890" # If set, associate user with a company object
+user.campaign = campaign
+user.metadata = metadata
 
 update_user = MoesifRack::MoesifMiddleware.new(@app, @options).update_user(user_model)
 ```
 
-### update_users_batch method
-A method is attached to the moesif middleware object to update the users profile or metadata in batch.
-The metadata field can be any custom data you want to set on the user. The `user_id` field is required.
+### Update Users in Batch
+Similar to update_user, but used to update a list of users in one batch. 
+Only the `user_id` field is required.
+This method is a convenient helper that calls the Moesif API lib.
+For details, visit the [Ruby API Reference](https://www.moesif.com/docs/api?ruby#update-users-in-batch).
 
 ```ruby
 metadata = JSON.parse('{'\
@@ -375,49 +379,88 @@ metadata = JSON.parse('{'\
       '"custom": "testdata"'\
     '}')
 
-user_models = []
+users = []
 
-user_model_A = { "user_id" => "12345",
-                "company_id" => "67890", 
-                "modified_time" => Time.now.utc.iso8601, 
-                "metadata" => metadata }
+metadata => {
+  :email => 'john@acmeinc.com',
+  :first_name => 'John',
+  :last_name => 'Doe',
+  :title => 'Software Engineer',
+  :salesInfo => {
+      :stage => 'Customer',
+      :lifetime_value => 24000,
+      :accountOwner => 'mary@contoso.com',
+  }
+}
 
-user_model_B = { "user_id" => "1234", 
-                "company_id" => "6789",
-                "modified_time" => Time.now.utc.iso8601, 
-                "metadata" => metadata }
+# Campaign object is optional, but useful if you want to track ROI of acquisition channels
+# See https://www.moesif.com/docs/api#users for campaign schema
+campaign = CampaignModel.new()
+campaign.utm_source = "google"
+campaign.utm_medium = "cpc"
+campaign.utm_campaign = "adwords"
+campaign.utm_term = "api+tooling"
+campaign.utm_content = "landing"
 
-user_models << user_model_A << user_model_B
-response = MoesifRack::MoesifMiddleware.new(@app, @options).update_users_batch(user_models)
+# Only user_id is required.
+# metadata can be any custom object
+user = UserModel.new()
+user.user_id = "12345"
+user.company_id = "67890" # If set, associate user with a company object
+user.campaign = campaign
+user.metadata = metadata
+
+users << user
+
+response = MoesifRack::MoesifMiddleware.new(@app, @options).update_users_batch(users)
 ```
 
 ## Update Company
 
-### update_company method
-A method is attached to the moesif middleware object to update the company profile or metadata.
-The metadata field can be any custom data you want to set on the company. The `company_id` field is required.
+### Update a Single Company
+Create or update a company profile in Moesif.
+The metadata field can be any company demographic or other info you want to store.
+Only the `company_id` field is required.
+This method is a convenient helper that calls the Moesif API lib.
+For details, visit the [Ruby API Reference](https://www.moesif.com/docs/api?ruby#update-a-company).
 
 ```ruby
-metadata = JSON.parse('{'\
-      '"email": "testrubyapi@company.com",'\
-      '"name": "ruby api company",'\
-      '"custom": "testdata"'\
-    '}')
+metadata => {
+  :org_name => 'Acme, Inc',
+  :plan_name => 'Free',
+  :deal_stage => 'Lead',
+  :mrr => 24000,
+  :demographics => {
+      :alexa_ranking => 500000,
+      :employee_count => 47
+  }
+}
 
-campaign_model = {"utm_source" => "Adwords",
-                  "utm_medium" => "Twitter"}
+# Campaign object is optional, but useful if you want to track ROI of acquisition channels
+# See https://www.moesif.com/docs/api#update-a-company for campaign schema
+campaign = CampaignModel.new()
+campaign.utm_source = "google"
+campaign.utm_medium = "cpc"
+campaign.utm_campaign = "adwords"
+campaign.utm_term = "api+tooling"
+campaign.utm_content = "landing"
 
-company_model = { "company_id" => "12345", 
-                  "company_domain" => "acmeinc.com",
-                  "metadata" => metadata,
-                  "campaign" => campaign_model }
+# Only company_id is required.
+# metadata can be any custom object
+company = CompanyModel.new()
+company.company_id = "67890"
+company.company_domain = "acmeinc.com" # If domain is set, Moesif will enrich your profiles with publicly available info 
+company.campaign = campaign
+company.metadata = metadata
 
 update_company = MoesifRack::MoesifMiddleware.new(@app, @options).update_company(company_model)
 ```
 
-### update_companies_batch method
-A method is attached to the moesif middleware object to update the companies profile or metadata in batch.
-The metadata field can be any custom data you want to set on the company. The `company_id` field is required.
+### Update Companies in Batch
+Similar to update_company, but used to update a list of companies in one batch. 
+Only the `company_id` field is required.
+This method is a convenient helper that calls the Moesif API lib.
+For details, visit the [Ruby API Reference](https://www.moesif.com/docs/api?ruby#update-companies-in-batch).
 
 ```ruby
 metadata = JSON.parse('{'\
@@ -426,18 +469,38 @@ metadata = JSON.parse('{'\
       '"custom": "testdata"'\
     '}')
 
-company_models = []
+companies = []
 
-company_model_A = { "company_id" => "12345",
-                    "company_domain" => "nowhere.com", 
-                "metadata" => metadata }
+metadata => {
+  :org_name => 'Acme, Inc',
+  :plan_name => 'Free',
+  :deal_stage => 'Lead',
+  :mrr => 24000,
+  :demographics => {
+      :alexa_ranking => 500000,
+      :employee_count => 47
+  }
+}
 
-company_model_B = { "company_id" => "67890",
-                    "company_domain" => "acmeinc.com",
-                "metadata" => metadata }
+# Campaign object is optional, but useful if you want to track ROI of acquisition channels
+# See https://www.moesif.com/docs/api#update-a-company for campaign schema
+campaign = CampaignModel.new()
+campaign.utm_source = "google"
+campaign.utm_medium = "cpc"
+campaign.utm_campaign = "adwords"
+campaign.utm_term = "api+tooling"
+campaign.utm_content = "landing"
 
-company_models << company_model_A << company_model_B
-response = MoesifRack::MoesifMiddleware.new(@app, @options).update_companies_batch(company_models)
+# Only company_id is required.
+# metadata can be any custom object
+company = CompanyModel.new()
+company.company_id = "67890"
+company.company_domain = "acmeinc.com" # If domain is set, Moesif will enrich your profiles with publicly available info 
+company.campaign = campaign
+company.metadata = metadata
+
+companies << company
+response = MoesifRack::MoesifMiddleware.new(@app, @options).update_companies_batch(companies)
 ```
 
 ## How to test
