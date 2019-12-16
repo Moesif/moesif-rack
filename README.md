@@ -222,7 +222,7 @@ Optional. Boolean. Default false. If true, it will print out debug messages. In 
 
 Optional. Boolean. Default true. If false, will not log request and response body to Moesif.
 
-#### __`capture_outoing_requests`__
+#### __`capture_outgoing_requests`__
 Optional. boolean, Default `false`. Set to `true` to capture all outgoing API calls from your app to third parties like Stripe, Github or to your own dependencies while using [Net::HTTP](https://ruby-doc.org/stdlib-2.6.3/libdoc/net/http/rdoc/Net/HTTP.html) package. The options below is applied to outgoing API calls. When the request is outgoing, for options functions that take request and response as input arguments, the request and response objects passed in are [Request](https://www.rubydoc.info/stdlib/net/Net/HTTPRequest) request and [Response](https://www.rubydoc.info/stdlib/net/Net/HTTPResponse) response objects.
 
 

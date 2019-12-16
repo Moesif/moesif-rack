@@ -45,7 +45,8 @@ module MoesifRack
         end
       end
       @capture_outoing_requests = options['capture_outoing_requests']
-      if @capture_outoing_requests
+      @capture_outgoing_requests = options['capture_outgoing_requests']
+      if @capture_outoing_requests || @capture_outgoing_requests
         if @debug
           puts 'Start Capturing outgoing requests'
         end

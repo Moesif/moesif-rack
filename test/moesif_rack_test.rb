@@ -10,7 +10,7 @@ class MoesifRackTest < Test::Unit::TestCase
     @options = { 'application_id' => 'Your Moesif Application Id',
     'debug' => true,
     'disable_transaction_id' => true,
-    'capture_outoing_requests' => true,
+    'capture_outgoing_requests' => true,
     'get_metadata' => Proc.new {|request, response|
       {
         'foo'  => 'abc',
