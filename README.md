@@ -373,12 +373,6 @@ This method is a convenient helper that calls the Moesif API lib.
 For details, visit the [Ruby API Reference](https://www.moesif.com/docs/api?ruby#update-users-in-batch).
 
 ```ruby
-metadata = JSON.parse('{'\
-      '"email": "testrubyapi@user.com",'\
-      '"name": "ruby api user",'\
-      '"custom": "testdata"'\
-    '}')
-
 users = []
 
 metadata => {
@@ -463,12 +457,6 @@ This method is a convenient helper that calls the Moesif API lib.
 For details, visit the [Ruby API Reference](https://www.moesif.com/docs/api?ruby#update-companies-in-batch).
 
 ```ruby
-metadata = JSON.parse('{'\
-      '"email": "testrubyapi@user.com",'\
-      '"name": "ruby api user",'\
-      '"custom": "testdata"'\
-    '}')
-
 companies = []
 
 metadata => {
