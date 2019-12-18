@@ -118,4 +118,8 @@ class AppConfig
             return nil
         end
     end
+
+    def calculate_weight(sample_rate)
+        return sample_rate == 0 ? 1 : (100 / sample_rate).floor
+    end
 end
