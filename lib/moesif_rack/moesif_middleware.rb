@@ -233,6 +233,7 @@ module MoesifRack
           end
 
           if @sampling_percentage > @random_percentage
+            event_model.weight = @app_config.calculate_weight(@sampling_percentage)
             event_api_response = @api_controller.create_event(event_model)
             event_response_config_etag = event_api_response[:x_moesif_config_etag]
 

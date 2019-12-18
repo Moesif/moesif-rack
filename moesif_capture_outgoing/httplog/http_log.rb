@@ -3,6 +3,7 @@ require 'rack'
 require 'moesif_api'
 require 'json'
 require 'base64'
+require_relative '../../lib/moesif_rack/app_config.rb'
 
 module MoesifCaptureOutgoing
 
@@ -23,6 +24,22 @@ module MoesifCaptureOutgoing
       @skip_outgoing = options['skip_outgoing']
       @mask_data_outgoing = options['mask_data_outgoing']
       @log_body_outgoing = options.fetch('log_body_outgoing', true)
+      @app_config = AppConfig.new
+      @config = @app_config.get_config(@api_controller, @debug)
+      @config_etag = nil
+      @sampling_percentage = 100
+      @last_updated_time = Time.now.utc
+      @config_dict = Hash.new
+      begin
+        if !@config.nil?
+          @config_etag, @sampling_percentage, @last_updated_time = @app_config.parse_configuration(@config, @debug)
+        end
+      rescue => exception
+        if @debug
+          puts 'Error while parsing application configuration on initialization'
+          puts exception.to_s
+        end
+      end
     end
 
     def call (url, request, request_time, response, response_time)
@@ -157,11 +174,45 @@ module MoesifCaptureOutgoing
 
           # Send Event to Moesif
           begin
-            if @debug
-              puts 'Sending Outgoing Request Data to Moesif'
-              puts event_model.to_json
+            @random_percentage = Random.rand(0.00..100.00)
+            begin 
+              @sampling_percentage = @app_config.get_sampling_percentage(@config, event_model.user_id, event_model.company_id, @debug)
+            rescue => exception
+              if @debug
+                puts 'Error while getting sampling percentage, assuming default behavior'
+                puts exception.to_s
+              end
+              @sampling_percentage = 100
             end
-            @api_controller.create_event(event_model)
+
+            if @sampling_percentage > @random_percentage
+              event_model.weight = @app_config.calculate_weight(@sampling_percentage)
+              if @debug
+                puts 'Sending Outgoing Request Data to Moesif'
+                puts event_model.to_json
+              end
+              event_api_response = @api_controller.create_event(event_model)
+              event_response_config_etag = event_api_response[:x_moesif_config_etag]
+
+              if !event_response_config_etag.nil? && !@config_etag.nil? && @config_etag != event_response_config_etag && Time.now.utc > @last_updated_time + 300
+                begin 
+                  @config = @app_config.get_config(@api_controller, @debug)
+                  @config_etag, @sampling_percentage, @last_updated_time = @app_config.parse_configuration(@config, @debug)
+                rescue => exception
+                  if @debug
+                    puts 'Error while updating the application configuration'
+                    puts exception.to_s
+                  end
+                end
+              end
+              if @debug
+                puts("Event successfully sent to Moesif")
+              end
+            else
+              if @debug
+                puts("Skipped outgoing Event due to sampling percentage: " + @sampling_percentage.to_s + " and random percentage: " + @random_percentage.to_s)
+              end
+            end
           rescue MoesifApi::APIException => e
             if e.response_code.between?(401, 403)
               puts "Unathorized accesss sending event to Moesif. Please verify your Application Id."
