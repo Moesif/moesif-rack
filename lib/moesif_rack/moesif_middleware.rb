@@ -6,6 +6,8 @@ require_relative './client_ip.rb'
 require_relative './app_config.rb'
 require_relative './update_user.rb'
 require_relative './update_company.rb'
+require 'zlib'
+require 'stringio'
 
 module MoesifRack
 
@@ -71,6 +73,39 @@ module MoesifRack
       CompanyHelper.new.update_companies_batch(@api_controller, @debug, company_profiles)
     end
 
+    def start_with_json(body)
+      body.start_with?('{') || body.start_with?('[')
+    end
+
+    def decompress_body(body)
+      Zlib::GzipReader.new(StringIO.new(body)).read
+    end
+
+    def transform_headers(headers)
+      Hash[headers.map { |k, v| [k.downcase, v]}]
+    end
+
+    def base64_encode_body(body)
+      return Base64.encode64(body), 'base64'
+    end
+
+    def parse_body(body, headers)
+      begin
+        if start_with_json(body)
+          parsed_body = JSON.parse(body)
+          transfer_encoding = 'json'
+        elsif headers.key?('content-encoding') && ((headers['content-encoding'].downcase).include? "gzip")
+          uncompressed_string = decompress_body(body)
+          parsed_body, transfer_encoding = base64_encode_body(uncompressed_string)
+        else
+          parsed_body, transfer_encoding = base64_encode_body(body)
+        end
+      rescue
+        parsed_body, transfer_encoding = base64_encode_body(body)
+      end
+      return parsed_body, transfer_encoding
+    end
+
     def call env
       start_time = Time.now.utc.iso8601
 
@@ -86,7 +121,7 @@ module MoesifRack
         complex_copy = env.dup
 
         req_headers = {}
-        complex_copy.select {|k,v| k.start_with? 'HTTP_'}.each do |key, val|
+        complex_copy.select {|k,v| k.start_with?('HTTP_', 'CONTENT_') }.each do |key, val|
           new_key = key.sub(/^HTTP_/, '')
           new_key = new_key.sub('_', '-')
           req_headers[new_key] = val
@@ -99,12 +134,7 @@ module MoesifRack
 
         if @log_body
           if req_body_string && req_body_string.length != 0
-            begin
-              req_body = JSON.parse(req_body_string)
-            rescue
-              req_body = Base64.encode64(req_body_string)
-              req_body_transfer_encoding = 'base64'
-            end
+            req_body, req_body_transfer_encoding = parse_body(req_body_string, transform_headers(req_headers))
           end
         end
 
@@ -116,12 +146,7 @@ module MoesifRack
 
         if @log_body
           if rsp_body_string && rsp_body_string.length != 0
-            begin
-              rsp_body = JSON.parse(rsp_body_string)
-            rescue
-              rsp_body = Base64.encode64(rsp_body_string)
-              rsp_body_transfer_encoding = 'base64'
-            end
+            rsp_body, rsp_body_transfer_encoding = parse_body(rsp_body_string, transform_headers(rsp_headers))
           end
         end
 

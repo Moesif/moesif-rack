@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    moesif_rack (1.4.0)
+    moesif_rack (1.4.1)
       moesif_api (~> 1.2.11)
       test-unit (~> 3.1.5)
 
@@ -18,9 +18,9 @@ GEM
     json (2.3.0)
     json_mapper (0.2.1)
       json (>= 1.4.3)
-    mime-types (3.3)
+    mime-types (3.3.1)
       mime-types-data (~> 3.2015)
-    mime-types-data (3.2019.1009)
+    mime-types-data (3.2020.0425)
     moesif_api (1.2.11)
       json_mapper (~> 0.2.1)
       moesif_unirest (~> 1.1.5)
@@ -30,8 +30,8 @@ GEM
       json (>= 1.8.1)
       rest-client (>= 1.8.0)
     netrc (0.11.0)
-    power_assert (1.1.5)
-    public_suffix (4.0.1)
+    power_assert (1.2.0)
+    public_suffix (4.0.4)
     rake (13.0.1)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
@@ -42,7 +42,7 @@ GEM
       power_assert
     unf (0.1.4)
       unf_ext
-    unf_ext (0.0.7.6)
+    unf_ext (0.0.7.7)
 
 PLATFORMS
   ruby
@@ -52,4 +52,4 @@ DEPENDENCIES
   rake
 
 BUNDLED WITH
-   2.0.1
+   2.1.4
