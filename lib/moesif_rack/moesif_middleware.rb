@@ -47,14 +47,9 @@ module MoesifRack
                 batch_events = []
                 until batch_events.size == @batch_size || @events_queue.empty? do 
                   batch_events << @events_queue.pop
-                  if (batch_events.size == @batch_size) 
-                    event_api_response =  @api_controller.create_events_batch(batch_events)
-                    @event_response_config_etag = event_api_response[:x_moesif_config_etag]
-                  elsif(@events_queue.empty? && !batch_events.empty?)
-                    event_api_response =  @api_controller.create_events_batch(batch_events)
-                    @event_response_config_etag = event_api_response[:x_moesif_config_etag]
-                  end
                 end 
+                event_api_response =  @api_controller.create_events_batch(batch_events)
+                @event_response_config_etag = event_api_response[:x_moesif_config_etag]
                 if @debug
                   puts("Events successfully sent to Moesif")
                 end
