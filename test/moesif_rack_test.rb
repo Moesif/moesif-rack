@@ -108,6 +108,8 @@ class MoesifRackTest < Test::Unit::TestCase
 
   def test_log_event
     response = @moesif_rack_app.call(Rack::MockRequest.env_for("https://acmeinc.com/items/42752/reviews"))
+    # Sleep to allow queue to flush for testing purpose
+    sleep 5
     assert_equal response, @app.call(nil)
   end
 

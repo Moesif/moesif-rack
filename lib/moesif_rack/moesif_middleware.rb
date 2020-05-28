@@ -36,6 +36,60 @@ module MoesifRack
       @config_dict = Hash.new
       @disable_transaction_id = options['disable_transaction_id'] || false
       @log_body = options.fetch('log_body', true)
+      @batch_size = options['batch_size'] || 25
+      @events_queue = Queue.new
+      @event_response_config_etag = nil
+
+      Thread::new do
+        loop do
+          begin
+            if @events_queue.size > 0
+              has_events = true
+            else
+              has_events = false
+            end
+  
+            until has_events == false do 
+              if @events_queue.size > 0
+                batch_events = []
+                until batch_events.size == @batch_size || @events_queue.empty? do 
+                  batch_events << @events_queue.pop
+                  if (batch_events.size == @batch_size) 
+                    event_api_response =  @api_controller.create_events_batch(batch_events)
+                    @event_response_config_etag = event_api_response[:x_moesif_config_etag]
+                  elsif(@events_queue.size == 0 && batch_events.size > 0)
+                    event_api_response =  @api_controller.create_events_batch(batch_events)
+                    @event_response_config_etag = event_api_response[:x_moesif_config_etag]
+                  end
+                end 
+                if @debug
+                  puts("Event successfully sent to Moesif")
+                end
+              else
+                has_events = false
+              end
+            end
+            
+            if !has_events
+              if @debug
+                puts("No events to read from the queue")
+              end
+            end
+  
+            # Sleep for 5 seconds
+            sleep 5
+          rescue MoesifApi::APIException => e
+            if e.response_code.between?(401, 403)
+              puts "Unathorized accesss sending event to Moesif. Please verify your Application Id."
+            end
+            if @debug
+              puts "Error sending event to Moesif, with status code: "
+              puts e.response_code
+            end
+          end
+        end
+      end
+
       begin
         if !@config.nil?
           @config_etag, @sampling_percentage, @last_updated_time = @app_config.parse_configuration(@config, @debug)
@@ -259,10 +313,13 @@ module MoesifRack
 
           if @sampling_percentage > @random_percentage
             event_model.weight = @app_config.calculate_weight(@sampling_percentage)
-            event_api_response = @api_controller.create_event(event_model)
-            event_response_config_etag = event_api_response[:x_moesif_config_etag]
+            # Add Event to the queue
+            @events_queue << event_model
+            if @debug
+              puts("Event added to the queue ")
+            end
 
-            if !event_response_config_etag.nil? && !@config_etag.nil? && @config_etag != event_response_config_etag && Time.now.utc > @last_updated_time + 300
+            if !@event_response_config_etag.nil? && !@config_etag.nil? && @config_etag != @event_response_config_etag && Time.now.utc > @last_updated_time + 300
               begin 
                 @config = @app_config.get_config(@api_controller, @debug)
                 @config_etag, @sampling_percentage, @last_updated_time = @app_config.parse_configuration(@config, @debug)
@@ -273,21 +330,15 @@ module MoesifRack
                 end    
               end
             end
-            if @debug
-              puts("Event successfully sent to Moesif")
-            end
           else
             if @debug
               puts("Skipped Event due to sampling percentage: " + @sampling_percentage.to_s + " and random percentage: " + @random_percentage.to_s)
             end
           end
-        rescue MoesifApi::APIException => e
-          if e.response_code.between?(401, 403)
-            puts "Unathorized accesss sending event to Moesif. Please verify your Application Id."
-          end
+        rescue => exception
           if @debug
-            puts "Error sending event to Moesif, with status code: "
-            puts e.response_code
+            puts "Error adding event to the queue "
+            puts exception.to_s
           end
         end
 
