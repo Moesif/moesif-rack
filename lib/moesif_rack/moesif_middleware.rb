@@ -50,7 +50,7 @@ module MoesifRack
                   if (batch_events.size == @batch_size) 
                     event_api_response =  @api_controller.create_events_batch(batch_events)
                     @event_response_config_etag = event_api_response[:x_moesif_config_etag]
-                  elsif(@events_queue.size == 0 && batch_events.size > 0)
+                  elsif(@events_queue.empty? && !batch_events.empty?)
                     event_api_response =  @api_controller.create_events_batch(batch_events)
                     @event_response_config_etag = event_api_response[:x_moesif_config_etag]
                   end
