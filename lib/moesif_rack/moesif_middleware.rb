@@ -43,14 +43,7 @@ module MoesifRack
       Thread::new do
         loop do
           begin
-            if @events_queue.size > 0
-              has_events = true
-            else
-              has_events = false
-            end
-  
-            until has_events == false do 
-              if @events_queue.size > 0
+            until @events_queue.empty? do
                 batch_events = []
                 until batch_events.size == @batch_size || @events_queue.empty? do 
                   batch_events << @events_queue.pop
@@ -63,14 +56,11 @@ module MoesifRack
                   end
                 end 
                 if @debug
-                  puts("Event successfully sent to Moesif")
+                  puts("Events successfully sent to Moesif")
                 end
-              else
-                has_events = false
-              end
             end
             
-            if !has_events
+            if @events_queue.empty?
               if @debug
                 puts("No events to read from the queue")
               end
