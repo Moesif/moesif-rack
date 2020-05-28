@@ -22,7 +22,7 @@ gem install moesif_rack
 and if you have a `Gemfile` in your project, please add this line to
 
 ```
-gem 'moesif_rack', '~> 1.4.1'
+gem 'moesif_rack', '~> 1.4.2'
 
 ```
 
