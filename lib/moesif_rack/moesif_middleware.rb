@@ -32,65 +32,29 @@ module MoesifRack
       @config = @app_config.get_config(@api_controller, @debug)
       @config_etag = nil
       @sampling_percentage = 100
-      @last_updated_time = Time.now.utc
+      @last_config_download_time = Time.now.utc
+      @last_worker_run = Time.now.utc
       @config_dict = Hash.new
       @disable_transaction_id = options['disable_transaction_id'] || false
       @log_body = options.fetch('log_body', true)
       @batch_size = options['batch_size'] || 25
+      @batch_max_time = options['batch_max_time'] || 2
       @events_queue = Queue.new
       @event_response_config_etag = nil
-
-      Thread::new do
-        loop do
-          begin
-            until @events_queue.empty? do
-                batch_events = []
-                until batch_events.size == @batch_size || @events_queue.empty? do 
-                  batch_events << @events_queue.pop
-                end 
-                event_api_response =  @api_controller.create_events_batch(batch_events)
-                @event_response_config_etag = event_api_response[:x_moesif_config_etag]
-                if @debug
-                  puts("Events successfully sent to Moesif")
-                end
-            end
-            
-            if @events_queue.empty?
-              if @debug
-                puts("No events to read from the queue")
-              end
-            end
-  
-            # Sleep for 5 seconds
-            sleep 5
-          rescue MoesifApi::APIException => e
-            if e.response_code.between?(401, 403)
-              puts "Unathorized accesss sending event to Moesif. Please verify your Application Id."
-            end
-            if @debug
-              puts "Error sending event to Moesif, with status code: "
-              puts e.response_code
-            end
-          end
-        end
-      end
+      start_worker()
 
       begin
         if !@config.nil?
-          @config_etag, @sampling_percentage, @last_updated_time = @app_config.parse_configuration(@config, @debug)
+          @config_etag, @sampling_percentage, @last_config_download_time = @app_config.parse_configuration(@config, @debug)
         end
       rescue => exception
-        if @debug
-          puts 'Error while parsing application configuration on initialization'
-          puts exception.to_s
-        end
+        log_debug 'Error while parsing application configuration on initialization'
+        log_debug exception.to_s
       end
       @capture_outoing_requests = options['capture_outoing_requests']
       @capture_outgoing_requests = options['capture_outgoing_requests']
       if @capture_outoing_requests || @capture_outgoing_requests
-        if @debug
-          puts 'Start Capturing outgoing requests'
-        end
+        log_debug 'Start Capturing outgoing requests'
         require_relative '../../moesif_capture_outgoing/httplog.rb'
         MoesifCaptureOutgoing.start_capture_outgoing(options)
       end
@@ -128,6 +92,12 @@ module MoesifRack
       return Base64.encode64(body), 'base64'
     end
 
+    def log_debug(message)
+      if @debug
+        puts("#{Time.now.to_s} [Moesif Middleware] PID #{Process.pid} TID #{Thread.current.object_id} #{message}")
+      end
+    end
+
     def parse_body(body, headers)
       begin
         if start_with_json(body)
@@ -145,12 +115,45 @@ module MoesifRack
       return parsed_body, transfer_encoding
     end
 
+    def start_worker
+      Thread::new do
+        @last_worker_run = Time.now.utc
+        loop do
+          begin
+            until @events_queue.empty? do
+                batch_events = []
+                until batch_events.size == @batch_size || @events_queue.empty? do 
+                  batch_events << @events_queue.pop
+                end 
+                log_debug("Sending #{batch_events.size.to_s} events to Moesif")
+                event_api_response =  @api_controller.create_events_batch(batch_events)
+                @event_response_config_etag = event_api_response[:x_moesif_config_etag]
+                log_debug(event_api_response.to_s)
+                log_debug("Events successfully sent to Moesif")
+            end
+            
+            if @events_queue.empty?
+              log_debug("No events to read from the queue")
+            end
+  
+            sleep @batch_max_time
+          rescue MoesifApi::APIException => e
+            if e.response_code.between?(401, 403)
+              puts "Unathorized accesss sending event to Moesif. Please verify your Application Id."
+              log_debug(e.to_s)
+            end
+            log_debug("Error sending event to Moesif, with status code #{e.response_code.to_s}")
+          rescue => e
+            log_debug(e.to_s)
+          end
+        end
+      end
+    end
+
     def call env
       start_time = Time.now.utc.iso8601
 
-      if @debug
-        puts 'inside moesif middleware'
-      end
+      log_debug('Calling Moesif middleware')
 
       status, headers, body = @app.call env
       end_time = Time.now.utc.iso8601
@@ -245,43 +248,31 @@ module MoesifRack
         event_model.direction = "Incoming"
         
         if @identify_user
-          if @debug
-            puts "calling identify user proc"
-          end
+          log_debug "calling identify user proc"
           event_model.user_id = @identify_user.call(env, headers, body)
         end
 
         if @identify_company
-          if @debug
-            puts "calling identify company proc"
-          end
+          log_debug "calling identify company proc"
           event_model.company_id = @identify_company.call(env, headers, body)
         end
 
         if @get_metadata
-          if @debug
-            puts "calling get_metadata proc"
-          end
+          log_debug "calling get_metadata proc"
           event_model.metadata = @get_metadata.call(env, headers, body)
         end
 
         if @identify_session
-          if @debug
-            puts "calling identify session proc"
-          end
+          log_debug "calling identify session proc"
           event_model.session_token = @identify_session.call(env, headers, body)
         end
         if @mask_data
-          if @debug
-            puts "calling mask_data proc"
-          end
+          log_debug "calling mask_data proc"
           event_model = @mask_data.call(event_model)
         end
 
-        if @debug
-          puts "sending data to moesif"
-          puts event_model.to_json
-        end
+        log_debug "sending data to moesif"
+        log_debug event_model.to_json
         # Perform the API call through the SDK function
         begin
           @random_percentage = Random.rand(0.00..100.00)
@@ -289,10 +280,8 @@ module MoesifRack
           begin 
             @sampling_percentage = @app_config.get_sampling_percentage(@config, event_model.user_id, event_model.company_id, @debug)
           rescue => exception
-            if @debug
-              puts 'Error while getting sampling percentage, assuming default behavior'
-              puts exception.to_s
-            end
+            log_debug 'Error while getting sampling percentage, assuming default behavior'
+            log_debug exception.to_s
             @sampling_percentage = 100
           end
 
@@ -300,31 +289,26 @@ module MoesifRack
             event_model.weight = @app_config.calculate_weight(@sampling_percentage)
             # Add Event to the queue
             @events_queue << event_model
-            if @debug
-              puts("Event added to the queue ")
+            log_debug("Event added to the queue ")
+            if Time.now.utc > (@last_config_download_time + 60)
+              start_worker()
             end
 
-            if !@event_response_config_etag.nil? && !@config_etag.nil? && @config_etag != @event_response_config_etag && Time.now.utc > @last_updated_time + 300
+            if !@event_response_config_etag.nil? && !@config_etag.nil? && @config_etag != @event_response_config_etag && Time.now.utc > (@last_config_download_time + 300)
               begin 
                 @config = @app_config.get_config(@api_controller, @debug)
-                @config_etag, @sampling_percentage, @last_updated_time = @app_config.parse_configuration(@config, @debug)
+                @config_etag, @sampling_percentage, @last_config_download_time = @app_config.parse_configuration(@config, @debug)
               rescue => exception
-                if @debug
-                  puts 'Error while updating the application configuration'
-                  puts exception.to_s
-                end    
+                log_debug 'Error while updating the application configuration'
+                log_debug exception.to_s
               end
             end
           else
-            if @debug
-              puts("Skipped Event due to sampling percentage: " + @sampling_percentage.to_s + " and random percentage: " + @random_percentage.to_s)
-            end
+            log_debug("Skipped Event due to sampling percentage: " + @sampling_percentage.to_s + " and random percentage: " + @random_percentage.to_s)
           end
         rescue => exception
-          if @debug
-            puts "Error adding event to the queue "
-            puts exception.to_s
-          end
+          log_debug "Error adding event to the queue "
+          log_debug exception.to_s
         end
 
       end
@@ -338,11 +322,7 @@ module MoesifRack
       end
 
       if !should_skip
-        if @debug
-          process_send.call
-        else
-          Thread.start(&process_send)
-        end
+        process_send.call
       end
 
       [status, headers, body]

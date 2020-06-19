@@ -19,7 +19,12 @@ class AppConfig
                 puts 'Error getting application configuration, with status code:'
                 puts e.response_code
             end
+        rescue => e
+            if debug
+                puts e.to_s
+            end
         end
+        rescue
     end
 
     def parse_configuration(config_api_response, debug)
