@@ -1,9 +1,8 @@
 PATH
   remote: .
   specs:
-    moesif_rack (1.4.2)
-      moesif_api (~> 1.2.12)
-      test-unit (~> 3.1.5)
+    moesif_rack (1.4.3)
+      moesif_api (~> 1.2, >= 1.2.12)
 
 GEM
   remote: https://rubygems.org/
@@ -48,8 +47,10 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  moesif_api
   moesif_rack!
   rake
+  test-unit (~> 3.1, >= 3.1.5)
 
 BUNDLED WITH
    2.1.4

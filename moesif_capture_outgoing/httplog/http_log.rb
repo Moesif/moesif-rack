@@ -221,6 +221,10 @@ module MoesifCaptureOutgoing
               puts "Error sending event to Moesif, with status code: "
               puts e.response_code
             end
+          rescue => e
+            if debug
+                puts e.to_s
+            end
           end
         else 
           if @debug
