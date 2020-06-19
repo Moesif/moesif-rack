@@ -12,4 +12,14 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '~> 2.0'
   s.files = Dir['{bin,lib,moesif_capture_outgoing,man,test,spec}/**/*', 'README*', 'LICENSE*']
   s.require_paths = ['lib']
+  s.metadata = {
+    "bug_tracker_uri"   => "https://github.com/Moesif/moesif-rack/issues",
+    "changelog_uri"     => "https://github.com/Moesif/moesif-rack/releases",
+    "documentation_uri" => "https://www.moesif.com/docs/server-integration/rack/",
+    "homepage_uri"      => "https://www.moesif.com",
+    "mailing_list_uri"  => "https://github.com/Moesif/moesif-rack",
+    "source_code_uri"   => "https://github.com/Moesif/moesif-rack",
+    "wiki_uri"          => "https://github.com/Moesif/moesif-rack"
+  }
+  
 end
