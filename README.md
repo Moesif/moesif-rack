@@ -22,7 +22,7 @@ gem install moesif_rack
 and if you have a `Gemfile` in your project, please add this line to
 
 ```
-gem 'moesif_rack', '~> 1.4.2'
+gem 'moesif_rack'
 
 ```
 
@@ -500,11 +500,11 @@ response = MoesifRack::MoesifMiddleware.new(@app, @options).update_companies_bat
 5. Invoke 'ruby test/moesif_rack_test.rb'
 6. Invoke 'ruby -I test test/moesif_rack_test.rb -n test_capture_outgoing' to test capturing outgoing API calls from your app to third parties like Stripe, Github or to your own dependencies.
 
-## Example Code
+## Example Projects
 
-[Moesif Rack Example with Rails](https://github.com/Moesif/moesif-rails-example) is an example of Moesif Rack applied to a Rails application.
-
-[Moesif Rack Example](https://github.com/Moesif/moesif-rack-example) is an example of Moesif Rack applied to a Rack application.
+- [Moesif Rails 5 Example](https://github.com/Moesif/moesif-rails5-example) is an example of Moesif with a Ruby on Rails 5 application.
+- [Moesif Rails 4 Example](https://github.com/Moesif/moesif-rails4-example) is an example of Moesif with a Ruby on Rails 4 application.
+- [Moesif Rack Example](https://github.com/Moesif/moesif-rack-example) is an example of Moesif applied to a Rack application.
 
 ## Other integrations
 
