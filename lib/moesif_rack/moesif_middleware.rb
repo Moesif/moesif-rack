@@ -328,7 +328,12 @@ module MoesifRack
       end
 
       if !should_skip
-        process_send.call
+        begin 
+          process_send.call
+        rescue => exception
+          @helpers.log_debug 'Error while logging event - '
+          @helpers.log_debug exception.to_s
+        end
       end
 
       [status, headers, body]
