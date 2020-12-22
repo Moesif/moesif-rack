@@ -206,7 +206,12 @@ Optional. A Proc that takes env, headers, body and returns a boolean.
 
 moesif_options['skip'] = Proc.new { |env, headers, body|
   # Add your custom code that returns true to skip logging the API call
-  false
+  if env.key?("REQUEST_URI") 
+      # Skip probes to health page
+      env["REQUEST_URI"].include? "/health"
+  else
+      false
+  end
 }
 
 ```
