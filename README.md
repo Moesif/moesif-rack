@@ -7,33 +7,37 @@
 [![Source Code][ico-source]][link-source]
 
 Rack Middleware that logs API calls and sends 
-to [Moesif](https://www.moesif.com) for API analytics and log analysis.
+to [Moesif](https://www.moesif.com) for API analytics and monitoring.
 
-Supports Ruby on Rails apps and other Ruby frameworks built on Rack.
+Supports Ruby on Rails, Grape, and other Ruby frameworks built on Rack.
 
 [Source Code on GitHub](https://github.com/moesif/moesif-rack)
 
 ## How to install
 
+Install the Moesif gem. 
+
 ```bash
 gem install moesif_rack
 ```
 
-and if you have a `Gemfile` in your project, please add this line to
+If you're using Bundler, add the gem to your `Gemfile`.
 
-```
+```ruby
 gem 'moesif_rack'
-
 ```
+
+Then, run `bundle install`
 
 ## How to use
 
-### Create the options
+### 1. Enter Moesif Application Id
+
+Create an options hash containing application_id and any other options.
 
 ```ruby
 moesif_options = {
-  'application_id' => 'Your Moesif Application Id',
-  'log_body' => true,
+  'application_id' => 'Your Moesif Application Id'
 }
 ```
 
@@ -44,43 +48,67 @@ You can always find your Moesif Application Id at any time by logging
 into the [_Moesif Portal_](https://www.moesif.com/), click on the top right menu,
 and then clicking _Installation_.
 
-### Add to middleware
+### 2. Add the middleware
+
+#### For Rails 5.0 or newer:
 
 Using strings or symbols for middleware class names is deprecated for newer frameworks like Ruby 5.0, 
 so you should pass the class directly.
 
-#### For Rails 5.0 or newer:
-
 ```ruby
   class Application < Rails::Application
-    # snip
+    moesif_options = {
+      'application_id' => 'Your Moesif Application Id'
+    }
 
     config.middleware.use MoesifRack::MoesifMiddleware, moesif_options
-
-    # snip
   end
 ```
 
-#### For other frameworks:
+#### For Rails 4.0 and other frameworks:
+
+For most rack-based frameworks including Rails 4.x or older, add the middleware `MoesifRack::MoesifMiddleware`.
 
 within `config/application.rb`
 
 ```ruby
   class Application < Rails::Application
-    # snip
+    moesif_options = {
+      'application_id' => 'Your Moesif Application Id'
+    }
 
     config.middleware.use "MoesifRack::MoesifMiddleware", moesif_options
-
-    # snip
   end
+```
+
+#### For Grape API:
+
+For [Grape APIs](https://github.com/ruby-grape/grape), we can add the middleware after any custom parsers or formatters.
+
+```ruby
+module Acme
+  class Ping < Grape::API
+    format :json
+
+    moesif_options = {
+      'application_id' => 'Your Moesif Application Id'
+    }
+
+    insert_after Grape::Middleware::Formatter, MoesifRack::MoesifMiddleware, moesif_options
+
+    get '/ping' do
+      { ping: 'pong' }
+    end
+  end
+end
 ```
 
 #### Order of Middleware Matters
 
-Since Moesif Rack is a logging middleware, the ordering of middleware matters for accuracy and data collection.
-Many middleware are installed by default by Rails.
+Since Moesif Rack is a logging middleware, the ordering of middleware matters.
+The best place for "MoesifRack::MoesifMidleware" is near the top (so it captures the data closest to the wire), but after 
+any body parsers or authentication  middleware.
 
-The best place for "MoesifRack::MoesifMidleware" is on top (so it captures the data closest to the wire).
 Typically, right above the default logger of Rails apps, "Rails::Rack::Logger" is a good spot.
 Or if you want to be as close as wire as possible, put it before "ActionDispatch::Static"
 
@@ -107,7 +135,7 @@ To see your current list of middleware:
 
 ## Configuration options
 
-The options is a hash with these possible key value pairs.
+Options is a hash with these possible key/value pairs.
 
 #### __`application_id`__
 

@@ -102,7 +102,10 @@ module MoesifRack
 
     def parse_body(body, headers)
       begin
-        if start_with_json(body)
+        if (body.instance_of?(Hash) || body.instance_of?(Array))
+          parsed_body = body
+          transfer_encoding = 'json'
+        elsif start_with_json(body)
           parsed_body = JSON.parse(body)
           transfer_encoding = 'json'
         elsif headers.key?('content-encoding') && ((headers['content-encoding'].downcase).include? "gzip")
@@ -341,6 +344,9 @@ module MoesifRack
 
     def get_response_body(response)
       body = response.respond_to?(:body) ? response.body : response
+      if (body.instance_of?(Hash) || body.instance_of?(Array))
+        return body
+      end
       body = body.inject("") { |i, a| i << a } if (body.respond_to?(:each) && body.respond_to?(:inject))
       body.to_s
     end
