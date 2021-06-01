@@ -296,7 +296,7 @@ module MoesifRack
             # Add Event to the queue
             @events_queue << event_model
             @helpers.log_debug("Event added to the queue ")
-            if Time.now.utc > (@last_config_download_time + 60)
+            if Time.now.utc > (@last_worker_run + 60)
               start_worker()
             end
 
