@@ -25,14 +25,14 @@ module MoesifCaptureOutgoing
       @mask_data_outgoing = options['mask_data_outgoing']
       @log_body_outgoing = options.fetch('log_body_outgoing', true)
       @app_config = AppConfig.new(@debug)
-      @config = @app_config.get_config(@api_controller)
       @config_etag = nil
       @sampling_percentage = 100
       @last_updated_time = Time.now.utc
       @config_dict = Hash.new
       begin
-        if !@config.nil?
-          @config_etag, @sampling_percentage, @last_updated_time = @app_config.parse_configuration(@config, @debug)
+        new_config = @app_config.get_config(@api_controller)
+        if !new_config.nil?
+          @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
         end
       rescue => exception
         if @debug
@@ -176,7 +176,7 @@ module MoesifCaptureOutgoing
           begin
             @random_percentage = Random.rand(0.00..100.00)
             begin 
-              @sampling_percentage = @app_config.get_sampling_percentage(@config, event_model.user_id, event_model.company_id, @debug)
+              @sampling_percentage = @app_config.get_sampling_percentage(@config, event_model.user_id, event_model.company_id)
             rescue => exception
               if @debug
                 puts 'Error while getting sampling percentage, assuming default behavior'
@@ -196,8 +196,10 @@ module MoesifCaptureOutgoing
 
               if !event_response_config_etag.nil? && !@config_etag.nil? && @config_etag != event_response_config_etag && Time.now.utc > @last_updated_time + 300
                 begin 
-                  @config = @app_config.get_config(@api_controller, @debug)
-                  @config_etag, @sampling_percentage, @last_updated_time = @app_config.parse_configuration(@config, @debug)
+                  new_config = @app_config.get_config(@api_controller)
+                  if !new_config.nil?
+                    @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
+                  end
                 rescue => exception
                   if @debug
                     puts 'Error while updating the application configuration'
