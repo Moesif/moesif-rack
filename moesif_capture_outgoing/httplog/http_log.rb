@@ -24,8 +24,8 @@ module MoesifCaptureOutgoing
       @skip_outgoing = options['skip_outgoing']
       @mask_data_outgoing = options['mask_data_outgoing']
       @log_body_outgoing = options.fetch('log_body_outgoing', true)
-      @app_config = AppConfig.new
-      @config = @app_config.get_config(@api_controller, @debug)
+      @app_config = AppConfig.new(@debug)
+      @config = @app_config.get_config(@api_controller)
       @config_etag = nil
       @sampling_percentage = 100
       @last_updated_time = Time.now.utc
@@ -222,7 +222,7 @@ module MoesifCaptureOutgoing
               puts e.response_code
             end
           rescue => e
-            if debug
+            if @debug
                 puts e.to_s
             end
           end
