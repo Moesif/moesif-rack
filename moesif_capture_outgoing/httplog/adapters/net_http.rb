@@ -7,7 +7,7 @@ module Net
       def request(request, body = nil, &block)
 
         # Request Start Time
-        request_time = Time.now.utc.iso8601
+        request_time = Time.now.utc.iso8601(3)
         
         # URL
         url = "https://#{@address}#{request.path}"
@@ -16,7 +16,7 @@ module Net
         @response = orig_request(request, body, &block)
 
         # Response Time
-        response_time = Time.now.utc.iso8601
+        response_time = Time.now.utc.iso8601(3)
   
         # Log Event to Moesif
         if started?

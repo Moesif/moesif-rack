@@ -156,12 +156,12 @@ module MoesifRack
     end
 
     def call env
-      start_time = Time.now.utc.iso8601
+      start_time = Time.now.utc.iso8601(3)
 
       @helpers.log_debug('Calling Moesif middleware')
 
       status, headers, body = @app.call env
-      end_time = Time.now.utc.iso8601
+      end_time = Time.now.utc.iso8601(3)
 
       process_send = lambda do
         req = Rack::Request.new(env)
