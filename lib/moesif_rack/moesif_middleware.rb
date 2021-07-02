@@ -336,6 +336,7 @@ module MoesifRack
         rescue => exception
           @helpers.log_debug 'Error while logging event - '
           @helpers.log_debug exception.to_s
+          @helpers.log_debug exception.backtrace
         end
       end
 
