@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    moesif_rack (1.4.12)
+    moesif_rack (1.4.13)
       moesif_api (~> 1.2, >= 1.2.12)
 
 GEM

@@ -167,6 +167,9 @@ module MoesifRack
         req = Rack::Request.new(env)
         complex_copy = env.dup
 
+        # Filter hash to only have keys of type string
+        complex_copy = complex_copy.select { |k, v| k.is_a? String }
+
         req_headers = {}
         complex_copy.select {|k,v| k.start_with?('HTTP_', 'CONTENT_') }.each do |key, val|
           new_key = key.sub(/^HTTP_/, '')
