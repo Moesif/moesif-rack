@@ -45,13 +45,13 @@ class AppConfig
             else
                 @helpers.log_debug 'Response body is nil, assuming default behavior'
                 # Response body is nil, so assuming default behavior
-                return nil, 100, Time.now.utc
+                return nil, nil, Time.now.utc
             end
         rescue => exception
             @helpers.log_debug 'Error while parsing the configuration object, assuming default behavior'
             @helpers.log_debug exception.to_s
             # Assuming default behavior
-            return nil, 100, Time.now.utc
+            return nil, nil, Time.now.utc
         end
     end
 

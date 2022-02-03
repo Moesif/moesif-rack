@@ -529,7 +529,7 @@ response = MoesifRack::MoesifMiddleware.new(@app, @options).update_companies_bat
 1. Manually clone the git repo
 2. From terminal/cmd navigate to the root directory of the middleware.
 3. Invoke 'gem install moesif_rack'
-4. Add your own application id to 'test/moesif_rack_test.rb'. You can find your Application Id from [_Moesif Dashboard_](https://www.moesif.com/) -> _Top Right Menu_ -> _Installation_
+4. Add your own application id to 'test/moesif_rack_test.rb'. You can find your Application Id from [_Moesif Dashboard_](https://www.moesif.com/) -> _Bottom Left Menu_ -> _Installation_
 5. Invoke 'ruby test/moesif_rack_test.rb'
 6. Invoke 'ruby -I test test/moesif_rack_test.rb -n test_capture_outgoing' to test capturing outgoing API calls from your app to third parties like Stripe, Github or to your own dependencies.
 
