@@ -15,7 +15,6 @@ GEM
     http-cookie (1.0.4)
       domain_name (~> 0.5)
     json (2.6.1)
-    json (2.6.1-java)
     json_mapper (0.2.1)
       json (>= 1.4.3)
     mime-types (3.4.1)
@@ -41,13 +40,12 @@ GEM
       power_assert
     unf (0.1.4)
       unf_ext
-    unf (0.1.4-java)
     unf_ext (0.0.8)
 
 PLATFORMS
-  java
+  arm64-darwin-21
   ruby
-  universal-java-1.8
+  x86_64-linux
 
 DEPENDENCIES
   moesif_api
