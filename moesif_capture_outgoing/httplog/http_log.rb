@@ -176,7 +176,7 @@ module MoesifCaptureOutgoing
           begin
             @random_percentage = Random.rand(0.00..100.00)
             begin 
-              @sampling_percentage = @app_config.get_sampling_percentage(@config, event_model.user_id, event_model.company_id)
+              @sampling_percentage = @app_config.get_sampling_percentage(event_model, @config, event_model.user_id, event_model.company_id)
             rescue => exception
               if @debug
                 puts 'Error while getting sampling percentage, assuming default behavior'

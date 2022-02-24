@@ -1,15 +1,14 @@
 require 'moesif_api'
-require 'json'
-require 'time'
-require 'zlib'
-require 'stringio'
+
 require_relative './helpers.rb'
+require_relative './regex_config_helper.rb'
 
 class AppConfig
 
     def initialize debug
         @debug = debug
         @helpers = Helpers.new(debug)
+        @regex_config_helper = RegexConfigHelper.new(debug)
     end
 
     def get_config(api_controller)
@@ -55,13 +54,24 @@ class AppConfig
         end
     end
 
-    def get_sampling_percentage(config_api_response, user_id, company_id)
+    def get_sampling_percentage(event_model, config_api_response, user_id, company_id)
         # Get sampling percentage
         begin
             # Check if response body is not nil
             if !config_api_response.nil? then 
                 @helpers.log_debug("Getting sample rate for user #{user_id} company #{company_id}")
                 @helpers.log_debug(config_api_response.to_s)
+
+                # Get Regex Sampling rate
+                regex_config = config_api_response.fetch('regex_config', nil)
+
+                if !regex_config.nil? and !event_model.nil?
+                    config_mapping = @regex_config_helper.prepare_config_mapping(event_model)
+                    regex_sample_rate = @regex_config_helper.fetch_sample_rate_on_regex_match(regex_config, config_mapping)
+                    if !regex_sample_rate.nil?
+                        return regex_sample_rate
+                    end
+                end
 
                 # Get user sample rate object
                 user_sample_rate = config_api_response.fetch('user_sample_rate', nil)
@@ -87,6 +97,7 @@ class AppConfig
             end
         rescue => exception
             @helpers.log_debug 'Error while geting sampling percentage, assuming default behavior'
+            @helpers.log_debug exception.to_s
             return 100
         end
     end
