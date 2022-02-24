@@ -1,5 +1,8 @@
 require 'moesif_api'
-
+require 'json'
+require 'time'
+require 'zlib'
+require 'stringio'
 require_relative './helpers.rb'
 require_relative './regex_config_helper.rb'
 

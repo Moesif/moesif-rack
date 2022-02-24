@@ -1,5 +1,9 @@
 require 'moesif_api'
-
+require 'json'
+require 'time'
+require 'base64'
+require 'zlib'
+require 'stringio'
 require_relative './client_ip.rb'
 require_relative './app_config.rb'
 require_relative './update_user.rb'
