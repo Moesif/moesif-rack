@@ -2,13 +2,13 @@ require 'moesif_api'
 require 'json'
 require 'time'
 require 'base64'
+require 'zlib'
+require 'stringio'
 require_relative './client_ip.rb'
 require_relative './app_config.rb'
 require_relative './update_user.rb'
 require_relative './update_company.rb'
 require_relative './helpers.rb'
-require 'zlib'
-require 'stringio'
 
 module MoesifRack
 
@@ -286,7 +286,7 @@ module MoesifRack
           random_percentage  = Random.rand(0.00..100.00)
 
           begin 
-            sampling_percentage = @app_config.get_sampling_percentage(@config, event_model.user_id, event_model.company_id)
+            sampling_percentage = @app_config.get_sampling_percentage(event_model, @config, event_model.user_id, event_model.company_id)
             @helpers.log_debug "Using sample rate #{sampling_percentage}"
           rescue => exception
             @helpers.log_debug 'Error while getting sampling percentage, assuming default behavior'
@@ -341,6 +341,8 @@ module MoesifRack
           @helpers.log_debug exception.to_s
           @helpers.log_debug exception.backtrace
         end
+      else
+         @helpers.log_debug "Skipped Event using should_skip configuration option."
       end
 
       [status, headers, body]

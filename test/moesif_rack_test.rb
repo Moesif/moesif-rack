@@ -118,7 +118,7 @@ class MoesifRackTest < Test::Unit::TestCase
     @api_controller = @api_client.api
     @config = @app_config.get_config(@api_controller)
     @config_body, @config_etag, @last_updated_time = @app_config.parse_configuration(@config)
-    @sampling_percentage = @app_config.get_sampling_percentage(@config_body, nil, nil)
+    @sampling_percentage = @app_config.get_sampling_percentage(nil, @config_body, nil, nil)
     assert_operator 100, :>=, @sampling_percentage
   end
 
