@@ -1,6 +1,6 @@
 require 'time'
 
-class Helpers
+class MoesifHelpers
 
     def initialize debug
         @debug = debug

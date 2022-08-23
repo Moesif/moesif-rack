@@ -8,7 +8,7 @@ require_relative './client_ip.rb'
 require_relative './app_config.rb'
 require_relative './update_user.rb'
 require_relative './update_company.rb'
-require_relative './helpers.rb'
+require_relative './moesif_helpers.rb'
 
 module MoesifRack
 
@@ -30,7 +30,7 @@ module MoesifRack
       @skip = options['skip']
       @debug = options['debug']
       @app_config = AppConfig.new(@debug)
-      @helpers = Helpers.new(@debug)
+      @helpers = MoesifHelpers.new(@debug)
       @config = @app_config.get_config(@api_controller)
       @config_etag = nil
       @last_config_download_time = Time.now.utc

@@ -3,14 +3,14 @@ require 'json'
 require 'time'
 require 'zlib'
 require 'stringio'
-require_relative './helpers.rb'
+require_relative './moesif_helpers.rb'
 require_relative './regex_config_helper.rb'
 
 class AppConfig
 
     def initialize debug
         @debug = debug
-        @helpers = Helpers.new(debug)
+        @helpers = MoesifHelpers.new(debug)
         @regex_config_helper = RegexConfigHelper.new(debug)
     end
 
