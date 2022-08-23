@@ -1,6 +1,6 @@
 require 'moesif_api'
 
-require_relative './helpers.rb'
+require_relative './moesif_helpers.rb'
 
 class RegexConfigHelper
 
