@@ -10,7 +10,7 @@ class AppConfig
 
     def initialize debug
         @debug = debug
-        @helpers = MoesifHelpers.new(debug)
+        @moesif_helpers = MoesifHelpers.new(debug)
         @regex_config_helper = RegexConfigHelper.new(debug)
     end
 
@@ -18,17 +18,17 @@ class AppConfig
         # Get Application Config
         begin 
             config_api_response = api_controller.get_app_config()
-            @helpers.log_debug("new config downloaded")
-            @helpers.log_debug(config_api_response.to_s)
+            @moesif_helpers.log_debug("new config downloaded")
+            @moesif_helpers.log_debug(config_api_response.to_s)
             return config_api_response
         rescue MoesifApi::APIException => e
             if e.response_code.between?(401, 403)
-                @helpers.log_debug 'Unauthorized access getting application configuration. Please check your Appplication Id.'
+                @moesif_helpers.log_debug 'Unauthorized access getting application configuration. Please check your Appplication Id.'
             end
-            @helpers.log_debug 'Error getting application configuration, with status code:'
-            @helpers.log_debug e.response_code
+            @moesif_helpers.log_debug 'Error getting application configuration, with status code:'
+            @moesif_helpers.log_debug e.response_code
         rescue => e
-            @helpers.log_debug e.to_s
+            @moesif_helpers.log_debug e.to_s
         end
         rescue
     end
@@ -38,20 +38,20 @@ class AppConfig
         begin
             # Rails return gzipped compressed response body, so decompressing it and getting JSON response body
             response_body = decompress_gzip_body(config_api_response)
-            @helpers.log_debug(response_body.to_s)
+            @moesif_helpers.log_debug(response_body.to_s)
 
             # Check if response body is not nil
             if !response_body.nil? then 
                 # Return Etag, sample rate and last updated time
                 return response_body, config_api_response.headers[:x_moesif_config_etag], Time.now.utc
             else
-                @helpers.log_debug 'Response body is nil, assuming default behavior'
+                @moesif_helpers.log_debug 'Response body is nil, assuming default behavior'
                 # Response body is nil, so assuming default behavior
                 return nil, nil, Time.now.utc
             end
         rescue => exception
-            @helpers.log_debug 'Error while parsing the configuration object, assuming default behavior'
-            @helpers.log_debug exception.to_s
+            @moesif_helpers.log_debug 'Error while parsing the configuration object, assuming default behavior'
+            @moesif_helpers.log_debug exception.to_s
             # Assuming default behavior
             return nil, nil, Time.now.utc
         end
@@ -62,8 +62,8 @@ class AppConfig
         begin
             # Check if response body is not nil
             if !config_api_response.nil? then 
-                @helpers.log_debug("Getting sample rate for user #{user_id} company #{company_id}")
-                @helpers.log_debug(config_api_response.to_s)
+                @moesif_helpers.log_debug("Getting sample rate for user #{user_id} company #{company_id}")
+                @moesif_helpers.log_debug(config_api_response.to_s)
 
                 # Get Regex Sampling rate
                 regex_config = config_api_response.fetch('regex_config', nil)
@@ -95,12 +95,12 @@ class AppConfig
                 # Return sample rate
                 return config_api_response.fetch('sample_rate', 100)
             else 
-                @helpers.log_debug 'Assuming default behavior as response body is nil - '
+                @moesif_helpers.log_debug 'Assuming default behavior as response body is nil - '
                 return 100
             end
         rescue => exception
-            @helpers.log_debug 'Error while geting sampling percentage, assuming default behavior'
-            @helpers.log_debug exception.to_s
+            @moesif_helpers.log_debug 'Error while geting sampling percentage, assuming default behavior'
+            @moesif_helpers.log_debug exception.to_s
             return 100
         end
     end
@@ -120,12 +120,12 @@ class AppConfig
                 # Return the parsed body
                 return JSON.parse( uncompressed_string )
             else
-                @helpers.log_debug 'Content Encoding is of type other than gzip, returning nil'
+                @moesif_helpers.log_debug 'Content Encoding is of type other than gzip, returning nil'
                 return nil
             end
         rescue => exception
-            @helpers.log_debug 'Error while decompressing the response body'
-            @helpers.log_debug exception.to_s
+            @moesif_helpers.log_debug 'Error while decompressing the response body'
+            @moesif_helpers.log_debug exception.to_s
             return nil
         end
     end
