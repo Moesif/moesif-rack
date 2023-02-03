@@ -117,26 +117,8 @@ module MoesifRack
       @moesif_helpers.log_debug(result.inspect)
       @moesif_helpers.log_debug("result params before selection")
       @moesif_helpers.log_debug(JSON.pretty_generate(result.params))
+      # this is a hash shold be treated as JSON down the road.
       result.params
-      # final_result = result.params.map { |key, value|
-      #    #we want to skip the files but still want to keep the record of what is sent
-      #   @moesif_helpers.log_debug("try to process #{key} #{value}")
-      #   if value.is_a?(Hash)
-      #     if value.has_key?(:original_filename)
-      #       new_value = { :original_filename => value[:original_filename] }
-      #     elsif value.has_key?(:filename)
-      #       new_value = { :filename => value[:filename] }
-      #     else
-      #       new_value = value
-      #     end
-      #   else
-      #     new_value = value
-      #   end
-      #   [key, new_value]
-      # }.to_h
-      # @moesif_helpers.log_debug("final_result after transform selection")
-      # @moesif_helpers.log_debug(final_result.inspect)
-      # final_result
     end
 
     def parse_body(body, headers)
