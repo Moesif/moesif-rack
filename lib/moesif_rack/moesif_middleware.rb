@@ -4,6 +4,7 @@ require 'time'
 require 'base64'
 require 'zlib'
 require 'stringio'
+require 'rack'
 require_relative './client_ip.rb'
 require_relative './app_config.rb'
 require_relative './update_user.rb'
@@ -100,6 +101,24 @@ module MoesifRack
       end
     end
 
+    def parse_multipart(multipart_form_data, content_type)
+      @moesif_helpers.log_debug("try to parse multiple part #{content_type}")
+
+      sanitized_multipart_form_data = multipart_form_data.gsub(/\r?\n/, "\r\n")
+
+      io = StringIO.new(sanitized_multipart_form_data)
+      tempfile = Rack::Multipart::Parser::TEMPFILE_FACTORY
+      bufsize = Rack::Multipart::Parser::BUFSIZE
+      query_parser = Rack::Utils.default_query_parser
+      result = Rack::Multipart::Parser.parse(io, sanitized_multipart_form_data.length, content_type, tempfile, bufsize, query_parser)
+
+      @moesif_helpers.log_debug("multipart parse result")
+      @moesif_helpers.log_debug(result.inspect)
+
+      # this is a hash shold be treated as JSON down the road.
+      result.params
+    end
+
     def parse_body(body, headers)
       begin
         if (body.instance_of?(Hash) || body.instance_of?(Array))
@@ -107,6 +126,9 @@ module MoesifRack
           transfer_encoding = 'json'
         elsif start_with_json(body)
           parsed_body = JSON.parse(body)
+          transfer_encoding = 'json'
+        elsif headers.key?('content-type') && ((headers['content-type'].downcase).include? 'multipart/form-data')
+          parsed_body = parse_multipart(body, headers['content-type'])
           transfer_encoding = 'json'
         elsif headers.key?('content-encoding') && ((headers['content-encoding'].downcase).include? "gzip")
           uncompressed_string = decompress_body(body)
@@ -127,20 +149,20 @@ module MoesifRack
           begin
             until @events_queue.empty? do
                 batch_events = []
-                until batch_events.size == @batch_size || @events_queue.empty? do 
+                until batch_events.size == @batch_size || @events_queue.empty? do
                   batch_events << @events_queue.pop
-                end 
+                end
                 @moesif_helpers.log_debug("Sending #{batch_events.size.to_s} events to Moesif")
                 event_api_response =  @api_controller.create_events_batch(batch_events)
                 @event_response_config_etag = event_api_response[:x_moesif_config_etag]
                 @moesif_helpers.log_debug(event_api_response.to_s)
                 @moesif_helpers.log_debug("Events successfully sent to Moesif")
             end
-            
+
             if @events_queue.empty?
               @moesif_helpers.log_debug("No events to read from the queue")
             end
-  
+
             sleep @batch_max_time
           rescue MoesifApi::APIException => e
             if e.response_code.between?(401, 403)
@@ -177,6 +199,8 @@ module MoesifRack
           req_headers[new_key] = val
         end
 
+        # rewind first in case someone else already read the body
+        req.body.rewind
         req_body_string = req.body.read
         req.body.rewind
         req_body_transfer_encoding = nil
@@ -229,12 +253,12 @@ module MoesifRack
         end
 
         # Add Transaction Id to the Response Header
-        if !transaction_id.nil?  
+        if !transaction_id.nil?
           rsp_headers["X-Moesif-Transaction-Id"] = transaction_id
         end
 
         # Add Transaction Id to the Repsonse Header sent to the client
-        if !transaction_id.nil?  
+        if !transaction_id.nil?
           headers["X-Moesif-Transaction-Id"] = transaction_id
         end
 
@@ -254,7 +278,7 @@ module MoesifRack
         event_model.request = event_req
         event_model.response = event_rsp
         event_model.direction = "Incoming"
-        
+
         if @identify_user
           @moesif_helpers.log_debug "calling identify user proc"
           event_model.user_id = @identify_user.call(env, headers, body)
@@ -285,7 +309,7 @@ module MoesifRack
         begin
           random_percentage  = Random.rand(0.00..100.00)
 
-          begin 
+          begin
             sampling_percentage = @app_config.get_sampling_percentage(event_model, @config, event_model.user_id, event_model.company_id)
             @moesif_helpers.log_debug "Using sample rate #{sampling_percentage}"
           rescue => exception
@@ -294,7 +318,7 @@ module MoesifRack
             sampling_percentage = 100
           end
 
-          if sampling_percentage > random_percentage 
+          if sampling_percentage > random_percentage
             event_model.weight = @app_config.calculate_weight(sampling_percentage)
             # Add Event to the queue
             @events_queue << event_model
@@ -304,7 +328,7 @@ module MoesifRack
             end
 
             if !@event_response_config_etag.nil? && !@config_etag.nil? && @config_etag != @event_response_config_etag && Time.now.utc > (@last_config_download_time + 300)
-              begin 
+              begin
                 new_config = @app_config.get_config(@api_controller)
                 if !new_config.nil?
                   @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
@@ -334,7 +358,7 @@ module MoesifRack
       end
 
       if !should_skip
-        begin 
+        begin
           process_send.call
         rescue => exception
           @moesif_helpers.log_debug 'Error while logging event - '
