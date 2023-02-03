@@ -112,11 +112,9 @@ module MoesifRack
       query_parser = Rack::Utils.default_query_parser
       result = Rack::Multipart::Parser.parse(io, sanitized_multipart_form_data.length, content_type, tempfile, bufsize, query_parser)
 
-
-      @moesif_helpers.log_debug("result before selection")
+      @moesif_helpers.log_debug("multipart parse result")
       @moesif_helpers.log_debug(result.inspect)
-      @moesif_helpers.log_debug("result params before selection")
-      @moesif_helpers.log_debug(JSON.pretty_generate(result.params))
+
       # this is a hash shold be treated as JSON down the road.
       result.params
     end
