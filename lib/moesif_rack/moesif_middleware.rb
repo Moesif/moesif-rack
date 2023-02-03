@@ -201,8 +201,6 @@ module MoesifRack
           req_headers[new_key] = val
         end
 
-        #req.body.rewind
-        puts('nihao, this is xing special gem')
         # rewind first in case someone else already read the body
         req.body.rewind
         req_body_string = req.body.read
