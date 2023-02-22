@@ -329,7 +329,7 @@ module MoesifRack
             event_model.weight = @app_config.calculate_weight(sampling_percentage)
             # Add Event to the queue
             if @events_queue.size >= @event_queue_size
-              @moesif_helpers.log_debug("Skipped Event [#{event_model.object_id}] due to event events_queue size [#{@events_queue.size}] is over max #{@event_queue_size}")
+              @moesif_helpers.log_debug("Skipped Event due to event events_queue size [#{@events_queue.size}] is over max #{@event_queue_size} ")
             else
               @events_queue << event_model
               @moesif_helpers.log_debug("Event added to the queue ")
