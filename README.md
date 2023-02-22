@@ -259,7 +259,7 @@ Optional. Boolean. Default true. If false, will not log request and response bod
 Optional. int, default 200, Maximum batch size when sending to Moesif.
 
 #### __`batch_max_time`__
-Optional. int in seconds Default 5.	This is the maximum wait time (approximately) before triggering flushing of the queue and sending to Moesif.
+Optional. int in seconds Default 2.	This is the maximum wait time (approximately) before triggering flushing of the queue and sending to Moesif.
 
 #### __`event_queue_size`__
 Optional. int, Default 1000, Maximum number of events to hold in queue before sending to Moesif. In case of network issues when not able to connect/send event to Moesif, skips adding new to event to queue to prevent memory overflow.

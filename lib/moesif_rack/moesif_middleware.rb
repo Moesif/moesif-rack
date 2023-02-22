@@ -40,7 +40,7 @@ module MoesifRack
       @log_body = options.fetch('log_body', true)
       @batch_size = options['batch_size'] || 200
       @event_queue_size = options['event_queue_size'] || 1000
-      @batch_max_time = options['batch_max_time'] || 5
+      @batch_max_time = options['batch_max_time'] || 2
       @events_queue = Queue.new
       @event_response_config_etag = nil
 
