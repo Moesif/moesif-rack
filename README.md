@@ -255,8 +255,17 @@ Optional. Boolean. Default false. If true, it will print out debug messages. In 
 
 Optional. Boolean. Default true. If false, will not log request and response body to Moesif.
 
+#### __`batch_size`__
+Optional. int, default 200, Maximum batch size when sending to Moesif.
+
+#### __`batch_max_time`__
+Optional. int in seconds Default 5.	This is the maximum wait time (approximately) before triggering flushing of the queue and sending to Moesif.
+
+#### __`event_queue_size`__
+Optional. int, Default 1000, Maximum number of events to hold in queue before sending to Moesif. In case of network issues when not able to connect/send event to Moesif, skips adding new to event to queue to prevent memory overflow.
+
 #### __`capture_outgoing_requests`__
-Optional. boolean, Default `false`. Set to `true` to capture all outgoing API calls from your app to third parties like Stripe, Github or to your own dependencies while using [Net::HTTP](https://ruby-doc.org/stdlib-2.6.3/libdoc/net/http/rdoc/Net/HTTP.html) package. The options below is applied to outgoing API calls. When the request is outgoing, for options functions that take request and response as input arguments, the request and response objects passed in are [Request](https://www.rubydoc.info/stdlib/net/Net/HTTPRequest) request and [Response](https://www.rubydoc.info/stdlib/net/Net/HTTPResponse) response objects.
+Optional. Boolean, Default `false`. Set to `true` to capture all outgoing API calls from your app to third parties like Stripe, Github or to your own dependencies while using [Net::HTTP](https://ruby-doc.org/stdlib-2.6.3/libdoc/net/http/rdoc/Net/HTTP.html) package. The options below is applied to outgoing API calls. When the request is outgoing, for options functions that take request and response as input arguments, the request and response objects passed in are [Request](https://www.rubydoc.info/stdlib/net/Net/HTTPRequest) request and [Response](https://www.rubydoc.info/stdlib/net/Net/HTTPResponse) response objects.
 
 
 ##### __`identify_user_outgoing`__
