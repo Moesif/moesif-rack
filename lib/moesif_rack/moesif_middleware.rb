@@ -35,14 +35,17 @@ module MoesifRack
       @config = @app_config.get_config(@api_controller)
       @config_etag = nil
       @last_config_download_time = Time.now.utc
-      @last_worker_run = Time.now.utc
       @config_dict = Hash.new
       @disable_transaction_id = options['disable_transaction_id'] || false
       @log_body = options.fetch('log_body', true)
-      @batch_size = options['batch_size'] || 25
+      @batch_size = options['batch_size'] || 200
+      @event_queue_size = options['event_queue_size'] || 1000
       @batch_max_time = options['batch_max_time'] || 2
       @events_queue = Queue.new
       @event_response_config_etag = nil
+
+      # start the worker and Update the last worker run
+      @last_worker_run = Time.now.utc
       start_worker()
 
       begin
@@ -144,10 +147,14 @@ module MoesifRack
 
     def start_worker
       Thread::new do
-        @last_worker_run = Time.now.utc
         loop do
+          # Update the last worker run, in case the events_queue is empty
+          @last_worker_run = Time.now.utc
           begin
             until @events_queue.empty? do
+                # Update the last worker run in case sending events take more than 60 seconds
+                @last_worker_run = Time.now.utc
+                # Populate the batch events from queue
                 batch_events = []
                 until batch_events.size == @batch_size || @events_queue.empty? do
                   batch_events << @events_queue.pop
@@ -321,8 +328,13 @@ module MoesifRack
           if sampling_percentage > random_percentage
             event_model.weight = @app_config.calculate_weight(sampling_percentage)
             # Add Event to the queue
-            @events_queue << event_model
-            @moesif_helpers.log_debug("Event added to the queue ")
+            if @events_queue.size >= @event_queue_size
+              @moesif_helpers.log_debug("Skipped Event due to events_queue size [#{@events_queue.size}] is over max #{@event_queue_size} ")
+            else
+              @events_queue << event_model
+              @moesif_helpers.log_debug("Event added to the queue ")
+            end
+
             if Time.now.utc > (@last_worker_run + 60)
               start_worker()
             end
