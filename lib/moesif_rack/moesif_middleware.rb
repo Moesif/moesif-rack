@@ -148,10 +148,12 @@ module MoesifRack
     def start_worker
       Thread::new do
         loop do
-          # Update the last worker run
+          # Update the last worker run, in case the events_queue is empty
           @last_worker_run = Time.now.utc
           begin
             until @events_queue.empty? do
+                # Update the last worker run in case sending events take more than 60 seconds
+                @last_worker_run = Time.now.utc
                 # Populate the batch events from queue
                 batch_events = []
                 until batch_events.size == @batch_size || @events_queue.empty? do
