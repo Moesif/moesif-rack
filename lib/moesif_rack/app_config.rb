@@ -16,7 +16,7 @@ class AppConfig
 
     def get_config(api_controller)
         # Get Application Config
-        begin 
+        begin
             config_api_response = api_controller.get_app_config()
             @moesif_helpers.log_debug("new config downloaded")
             @moesif_helpers.log_debug(config_api_response.to_s)
@@ -30,7 +30,6 @@ class AppConfig
         rescue => e
             @moesif_helpers.log_debug e.to_s
         end
-        rescue
     end
 
     def parse_configuration(config_api_response)
@@ -41,7 +40,7 @@ class AppConfig
             @moesif_helpers.log_debug(response_body.to_s)
 
             # Check if response body is not nil
-            if !response_body.nil? then 
+            if !response_body.nil? then
                 # Return Etag, sample rate and last updated time
                 return response_body, config_api_response.headers[:x_moesif_config_etag], Time.now.utc
             else
@@ -61,7 +60,7 @@ class AppConfig
         # Get sampling percentage
         begin
             # Check if response body is not nil
-            if !config_api_response.nil? then 
+            if !config_api_response.nil? then
                 @moesif_helpers.log_debug("Getting sample rate for user #{user_id} company #{company_id}")
                 @moesif_helpers.log_debug(config_api_response.to_s)
 
@@ -94,7 +93,7 @@ class AppConfig
 
                 # Return sample rate
                 return config_api_response.fetch('sample_rate', 100)
-            else 
+            else
                 @moesif_helpers.log_debug 'Assuming default behavior as response body is nil - '
                 return 100
             end
@@ -110,13 +109,13 @@ class AppConfig
         begin
             # Check if the content-encoding header exist and is of type zip
             if config_api_response.headers.key?(:content_encoding) && config_api_response.headers[:content_encoding].eql?( 'gzip' ) then
-                
+
                 # Create a GZipReader object to read data
                 gzip_reader = Zlib::GzipReader.new(StringIO.new(config_api_response.raw_body.to_s))
-                
+
                 # Read the body
                 uncompressed_string = gzip_reader.read
-                
+
                 # Return the parsed body
                 return JSON.parse( uncompressed_string )
             else
