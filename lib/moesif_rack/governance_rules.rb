@@ -5,6 +5,17 @@ require 'stringio'
 require_relative './moesif_helpers'
 require_relative './regex_config_helper'
 
+module APPLY_TO
+  MATCHING = :matching
+  NOT_MATCHING = :not_matching
+end
+
+module RULE_TYPES
+  USER = :user
+  COMPANY = :company
+  REGEX = :regex
+end
+
 class GovernanceRules
   def initialize(debug)
     @debug = debug
@@ -17,7 +28,9 @@ class GovernanceRules
     rules_response = api_controller.get_rules
     @moesif_helpers.log_debug('new config downloaded')
     @moesif_helpers.log_debug(rules.response.to_s)
-    rules_response
+    rules = decompress_gzip_body(rules_response)
+    @last_fetch = Time.now.utc
+    generate_rule_cache(rules)
   rescue MoesifApi::APIException => e
     if e.response_code.between?(401, 403)
       @moesif_helpers.log_debug 'Unauthorized access getting application configuration. Please check your Appplication Id.'
@@ -26,5 +39,68 @@ class GovernanceRules
     @moesif_helpers.log_debug e.response_code
   rescue StandardError => e
     @moesif_helpers.log_debug e.to_s
+  end
+
+  def generate_rules_caching(rules)
+    @rules = rules
+    @regex_rules = []
+    @user_rules = {}
+    @unidentified_user_rules = []
+    @company_rules = {}
+    @unidentified_company_rules = []
+    if !rules.nil? && !rules.empty?
+      rules.each do |rule|
+        rule_id = rule.fetch('_id')
+        applied_to_unidentified
+        case rule.fetch(:type)
+        when RULE_TYPES::USER
+          @user_rules[rule_id] = rule
+          @unidentified_user_rules.push(rule) if rule.fetch(:applied_to_unidentified, false)
+        when RULE_TYPES::COMMPNAY
+          @company_rules[rule_id] = rule
+          @unidentified_company_rules.push(rule) if rule.fetch(:applied_to_unidentified, false)
+        when RULE_TYPES::REGEX
+          @regex_rules.push(rule)
+        else
+          @moesif_helpers.log_debug 'rule type not found for id ' + rule_id
+        end
+      end
+    end
+  rescue StandardError => e
+    @moesif_helpers.log_debug e.to_s
+  end
+
+  def reload_rules_if_needed(api_controller)
+    # ten minutes to refech
+    return unless Time.now.utc > (60 * 10 + @last_fetch)
+
+    get_rules(api_controller)
+  end
+
+  def apply_regex_rules(_config, _env, _event_model)
+    return if @regex_rules.empty?
+  end
+
+  def govern_request(_config, _env, _user_id, _company_id, _event_model)
+    # we can skip if rules does not exist or config does not exist
+    return [] if @rules.nil? || _config.nil?
+
+    # apply in reverse order of priority.
+    # Priority is user rule, company rule, and regex.
+    # by apply in reverse order, the last rule is highest priority.
+    # regex rules first.
+    # company rules
+
+    user_id_matched_rule_ids = _config.dig('user_rules', _user_id)
+    unless user_id_match.nil?
+      # apply user rule
+    end
+
+    company_id_matched_rule_ids = _config.dig('company_rules', _company_id)
+    unless company_id_match.nil?
+      # apply compnay rule.
+    end
+
+    [block, new_status, additional_headers, new_body]
   end
 end

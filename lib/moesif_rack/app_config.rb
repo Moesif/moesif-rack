@@ -15,7 +15,6 @@ class AppConfig
 
   def get_config(api_controller)
     # Get Application Config
-
     config_api_response = api_controller.get_app_config
     @moesif_helpers.log_debug('new config downloaded')
     @moesif_helpers.log_debug(config_api_response.to_s)

@@ -30,7 +30,7 @@ module MoesifRack
       @debug = options['debug']
       @app_config = AppConfig.new(@debug)
       @moesif_helpers = MoesifHelpers.new(@debug)
-      @config = @app_config.get_config(@api_controller)
+      # @config = @app_config.get_config(@api_controller)
       @config_etag = nil
       @last_config_download_time = Time.now.utc
       @config_dict = {}

@@ -1,2 +1,11 @@
 Layout/IndentationWidth:
   Width: 2
+
+Metrics/MethodLength:
+  Max: 50
+
+Metrics/AbcSize:
+  Max: 50
+
+Style/Documentation:
+  Enabled: false
