@@ -16,6 +16,16 @@ module RULE_TYPES
   REGEX = :regex
 end
 
+FIELDS_SUBJECT_TO_REGEX = {
+  verb: {
+    field: 'request.verb'
+  },
+  route: {
+    field: 'request.route'
+  }
+
+}
+
 class GovernanceRules
   def initialize(debug)
     @debug = debug
@@ -77,8 +87,50 @@ class GovernanceRules
     get_rules(api_controller)
   end
 
+  #TODO
+  def convert_uri_to_route(uri); end
+
+  def prepare_request_config_based_on_regex_config(_env, _event_model)
+    regex_config = {
+      'request.verb': _event_model.dig('request', 'verb'),
+      'request.ip_address': _event_model.dig('request', 'ip_address'),
+      'request.route': convert_uri_to_route(_event_model.dig('request', 'uri'))
+      'request.body.operationName': _event_model.dig('request', 'body', 'operationName')
+    }
+
+    request_body = _event_model.dig('request', 'body')
+
+    if request_body
+      regex_config['request.body'] = request_body
+    end
+
+    regex_config
+  end
+
+  def check_request_with_regex_math(regex_config, request_fields, request_body)
+
+  end
+
+  def get_rule_ids_if_governance_rule_matched(_env, _event_model)
+    request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
+    #FIXME
+    rquest_body = _event_model.dig('request', 'body')
+
+    matched_rules = @regex_rules.select { |rule|
+      regex_config = rule.fetch('regex_config')
+      return false unless regex_config
+
+      matched = check_request_with_regex_match(regex_config, request_fields, request_body)
+      matched
+    }
+
+    matched_rules.map {|rule| rule['_id']}
+  end
+
   def apply_regex_rules(_config, _env, _event_model)
     return if @regex_rules.empty?
+
+    matched_rule_id = get_rule_ids_if_governance_rule_matched(_env, _event_model)
   end
 
   def govern_request(_config, _env, _user_id, _company_id, _event_model)
@@ -88,18 +140,19 @@ class GovernanceRules
     # apply in reverse order of priority.
     # Priority is user rule, company rule, and regex.
     # by apply in reverse order, the last rule is highest priority.
-    # regex rules first.
-    # company rules
+
+
+    company_id_matched_rule_ids = _config.dig('company_rules', _company_id)
+    unless company_id_matched_ruled_ids.nil?
+      # apply compnay rule.
+    end
 
     user_id_matched_rule_ids = _config.dig('user_rules', _user_id)
-    unless user_id_match.nil?
+    unless user_id_matched_rule_ids.nil?
       # apply user rule
     end
 
-    company_id_matched_rule_ids = _config.dig('company_rules', _company_id)
-    unless company_id_match.nil?
-      # apply compnay rule.
-    end
+
 
     [block, new_status, additional_headers, new_body]
   end
