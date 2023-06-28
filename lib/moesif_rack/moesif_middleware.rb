@@ -352,7 +352,9 @@ module MoesifRack
 
       should_skip = true if @skip && @skip.call(env, headers, body)
 
-      event_model = make_event_model.call
+      should_govern = false
+
+      event_model = make_event_model.call if !should_skip || should_govern
 
       if !should_skip
         begin
@@ -366,9 +368,11 @@ module MoesifRack
         @moesif_helpers.log_debug 'Skipped Event using should_skip configuration option.'
       end
 
-      # now we can do govern based on
-      # override_response = govern(env, event_model)
-      # return override_response if override_response
+      if should_govern
+        # now we can do govern based on
+        # override_response = govern(env, event_model)
+        # return override_response if override_response
+      end
 
       [status, headers, body]
     end
