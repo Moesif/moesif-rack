@@ -173,7 +173,10 @@ class GovernanceRules
   end
 
   # TODO
-  def convert_uri_to_route(uri); end
+  def convert_uri_to_route(uri)
+    # TODO: for now just retur uri
+    uri
+  end
 
   def prepare_request_fields_based_on_regex_config(_env, _event_model)
     field_values = {
@@ -191,6 +194,14 @@ class GovernanceRules
     field_values
   end
 
+  def get_field_value_for_path(path, request_fields, _request_body)
+    if path.starts_with?('request.body.') && _request_body
+      body_key = path.sub('request.body.', '')
+      return _request_body.fetch(body_key)
+    end
+    request_fields.fetch(path)
+  end
+
   def check_request_with_regex_math(regex_configs, request_fields, _request_body)
     array_to_or = regex_configs.map do |or_group_of_regex_rule|
       conditions = or_group_of_regex_rule.fetch('conditions', [])
@@ -199,7 +210,8 @@ class GovernanceRules
         return false unless all_match
 
         path = condition.fetch('path')
-        field_value = request_fields.fetch(path)
+
+        field_value = get_field_value_for_path(path, request_fields, _request_body)
         reg_ex = Regexp.new condition.fetch('value')
 
         field_value =~ reg_ex
@@ -228,7 +240,11 @@ class GovernanceRules
   def apply_regex_rules(_config, _env, _event_model)
     return if @regex_rules.empty?
 
-    matched_rule_id = get_rule_ids_if_governance_rule_matched(_env, _event_model)
+    matched_rule_ids = get_rule_ids_if_governance_rule_matched(_env, _event_model)
+  end
+
+  def modify_reponse_for_matched_rule_id(_status, _headers, _body, _rule_id)
+    # For matched rule, we can now modify the response
   end
 
   def govern_request(_config, _env, _user_id, _company_id, _event_model)
