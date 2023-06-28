@@ -187,7 +187,7 @@ module MoesifRack
       status, headers, body = @app.call env
       end_time = Time.now.utc.iso8601(3)
 
-      process_send = lambda do
+      make_event_model = lambda do
         req = Rack::Request.new(env)
         complex_copy = env.dup
 
@@ -264,44 +264,51 @@ module MoesifRack
         event_rsp.body = rsp_body
         event_rsp.transfer_encoding = rsp_body_transfer_encoding
 
-        event_model = MoesifApi::EventModel.new
-        event_model.request = event_req
-        event_model.response = event_rsp
-        event_model.direction = 'Incoming'
+        _event_model = MoesifApi::EventModel.new
+        _event_model.request = event_req
+        _event_model.response = event_rsp
+        _event_model.direction = 'Incoming'
 
         if @identify_user
           @moesif_helpers.log_debug 'calling identify user proc'
-          event_model.user_id = @identify_user.call(env, headers, body)
+          _event_model.user_id = @identify_user.call(env, headers, body)
         end
 
         if @identify_company
           @moesif_helpers.log_debug 'calling identify company proc'
-          event_model.company_id = @identify_company.call(env, headers, body)
+          _event_model.company_id = @identify_company.call(env, headers, body)
         end
 
         if @get_metadata
           @moesif_helpers.log_debug 'calling get_metadata proc'
-          event_model.metadata = @get_metadata.call(env, headers, body)
+          _event_model.metadata = @get_metadata.call(env, headers, body)
         end
 
         if @identify_session
           @moesif_helpers.log_debug 'calling identify session proc'
-          event_model.session_token = @identify_session.call(env, headers, body)
+          _event_model.session_token = @identify_session.call(env, headers, body)
         end
         if @mask_data
           @moesif_helpers.log_debug 'calling mask_data proc'
-          event_model = @mask_data.call(event_model)
+          _event_model = @mask_data.call(_event_model)
         end
 
+        return _event_model
+      rescue StandardError => e
+        @moesif_helpers.log_debug 'Error making event model'
+        @moesif_helpers.log_debug e.to_s
+      end
+
+      process_send = lambda do |_event_mode|
         @moesif_helpers.log_debug 'sending data to moesif'
-        @moesif_helpers.log_debug event_model.to_json
+        @moesif_helpers.log_debug _event_model.to_json
         # Perform the API call through the SDK function
         begin
           random_percentage = Random.rand(0.00..100.00)
 
           begin
-            sampling_percentage = @app_config.get_sampling_percentage(event_model, @config, event_model.user_id,
-                                                                      event_model.company_id)
+            sampling_percentage = @app_config.get_sampling_percentage(_event_model, @config, _event_model.user_id,
+                                                                      _event_model.company_id)
             @moesif_helpers.log_debug "Using sample rate #{sampling_percentage}"
           rescue StandardError => e
             @moesif_helpers.log_debug 'Error while getting sampling percentage, assuming default behavior'
@@ -310,12 +317,12 @@ module MoesifRack
           end
 
           if sampling_percentage > random_percentage
-            event_model.weight = @app_config.calculate_weight(sampling_percentage)
+            _event_model.weight = @app_config.calculate_weight(sampling_percentage)
             # Add Event to the queue
             if @events_queue.size >= @event_queue_size
               @moesif_helpers.log_debug("Skipped Event due to events_queue size [#{@events_queue.size}] is over max #{@event_queue_size} ")
             else
-              @events_queue << event_model
+              @events_queue << _event_model
               @moesif_helpers.log_debug('Event added to the queue ')
             end
 
@@ -345,9 +352,11 @@ module MoesifRack
 
       should_skip = true if @skip && @skip.call(env, headers, body)
 
+      event_model = make_event_model.call
+
       if !should_skip
         begin
-          process_send.call
+          process_send.call(event_model)
         rescue StandardError => e
           @moesif_helpers.log_debug 'Error while logging event - '
           @moesif_helpers.log_debug e.to_s
@@ -356,6 +365,10 @@ module MoesifRack
       else
         @moesif_helpers.log_debug 'Skipped Event using should_skip configuration option.'
       end
+
+      # now we can do govern based on
+      # override_response = govern(env, event_model)
+      # return override_response if override_response
 
       [status, headers, body]
     end

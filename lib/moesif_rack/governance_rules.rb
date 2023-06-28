@@ -212,7 +212,7 @@ class GovernanceRules
   def get_rule_ids_if_governance_rule_matched(_env, _event_model)
     request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
     # FIXME
-    rquest_body = _event_model.dig('request', 'body')
+    request_body = _event_model.dig('request', 'body')
 
     matched_rules = @regex_rules.select do |rule|
       regex_configs = rule.fetch('regex_config')
