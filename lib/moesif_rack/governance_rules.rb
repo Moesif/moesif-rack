@@ -248,14 +248,26 @@ class GovernanceRules
     end
   end
 
-  def replace_merge_tag_values(template_obj, mergetag_values)
+  def replace_merge_tag_values(template_obj_or_val, mergetag_values)
     # take the template, either headers or body, and replace with mergetag_values
     # recursively
-    return template_obj unless mergedtag_values
+    return template_obj_or_val unless mergedtag_values
 
-    result_hash = {}
-    template_obj.each do |key, template_value|
-      
+    if template_obj_or_val.nil?
+      return template_obj_or_val
+    elsif template_value.kind_of?(String)
+      temp_val = template_value
+      mergetag_values.each {|merge_key, merge_value| temp_val = temp_val.sub(merge_key, merge_value)}
+      return temp_val
+    elsif template_obj_or_val.is_a?(Array)
+      return tempplate_obj_or_val.map { |entry| replace_merge_tag_values(entry, mergetag_values)}
+    elsif template_obj_or_val.is_a?(Hash)
+      result_hash = {}
+      template_obj_or_val.each do |key, entry|
+        result_hash[key] = replace_merge_tag_values(entry, mergetag_values)
+      end
+    else
+      return template_obj_or_val
     end
   end
 
