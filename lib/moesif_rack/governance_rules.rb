@@ -240,11 +240,11 @@ class GovernanceRules
     matched_rules = get_rules_if_governance_rule_matched(_env, _event_model)
     return if matched_rules.empty? || matched_rules.nil?
 
-    matched_rules.reduce do |prev_response, _rule|
+    matched_rules.reduce do |prev_response, rule|
       prev_status = prev_response.nil? ? _status : prev_response[:status]
       prev_headers = prev_response.nil? ? _headers : prev_response[:headers]
-      prev_body = prev_respond.nil ? _body : prev_response[:body]
-      modiify_response_for_matched_rule(_rule, _status, _headers, _body)
+      prev_body = prev_response.nil ? _body : prev_response[:body]
+      modiify_response_for_matched_rule(rule, prev_status, prev_headers, prev_body)
     end
   end
 
@@ -254,20 +254,20 @@ class GovernanceRules
     return template_obj_or_val unless mergedtag_values
 
     if template_obj_or_val.nil?
-      return template_obj_or_val
-    elsif template_value.kind_of?(String)
+      template_obj_or_val
+    elsif template_value.is_a?(String)
       temp_val = template_value
-      mergetag_values.each {|merge_key, merge_value| temp_val = temp_val.sub(merge_key, merge_value)}
-      return temp_val
+      mergetag_values.each { |merge_key, merge_value| temp_val = temp_val.sub(merge_key, merge_value) }
+      temp_val
     elsif template_obj_or_val.is_a?(Array)
-      return tempplate_obj_or_val.map { |entry| replace_merge_tag_values(entry, mergetag_values)}
+      tempplate_obj_or_val.map { |entry| replace_merge_tag_values(entry, mergetag_values) }
     elsif template_obj_or_val.is_a?(Hash)
       result_hash = {}
       template_obj_or_val.each do |key, entry|
         result_hash[key] = replace_merge_tag_values(entry, mergetag_values)
       end
     else
-      return template_obj_or_val
+      template_obj_or_val
     end
   end
 
