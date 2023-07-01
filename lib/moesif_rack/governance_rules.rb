@@ -108,7 +108,6 @@ FIELDS_SUBJECT_TO_REGEX = {
   route: {
     field: 'request.route'
   }
-
 }
 
 class GovernanceRules
@@ -221,30 +220,49 @@ class GovernanceRules
     array_to_or.reduce(false) { |anysofar, curr| anysofar || curr }
   end
 
-  def get_rule_ids_if_governance_rule_matched(_env, _event_model)
+  def get_rules_if_governance_rule_matched(_env, _event_model)
     request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
     # FIXME
     request_body = _event_model.dig('request', 'body')
 
-    matched_rules = @regex_rules.select do |rule|
+    @regex_rules.select do |rule|
       regex_configs = rule.fetch('regex_config')
       return false unless regex_config
 
       matched = check_request_with_regex_match(regex_configs, request_fields, request_body)
       matched
     end
-
-    matched_rules.map { |rule| rule['_id'] }
   end
 
-  def apply_regex_rules(_config, _env, _event_model)
+  def apply_regex_rules(_config, _env, _event_model, _status, _headers, _body)
     return if @regex_rules.empty?
 
-    matched_rule_ids = get_rule_ids_if_governance_rule_matched(_env, _event_model)
+    matched_rules = get_rules_if_governance_rule_matched(_env, _event_model)
+    return if matched_rules.empty? || matched_rules.nil?
+
+    matched_rules.reduce do |prev_response, _rule|
+      prev_status = prev_response.nil? ? _status : prev_response[:status]
+      prev_headers = prev_response.nil? ? _headers : prev_response[:headers]
+      prev_body = prev_respond.nil ? _body : prev_response[:body]
+      modiify_response_for_matched_rule(_rule, _status, _headers, _body)
+    end
   end
 
-  def modify_reponse_for_matched_rule_id(_status, _headers, _body, _rule_id)
+  def replace_merge_tag_values(template_obj, mergetag_values)
+    # take the template, either headers or body, and replace with mergetag_values
+    # recursively
+    return template_obj unless mergedtag_values
+
+    result_hash = {}
+    template_obj.each do |key, template_value|
+      
+    end
+  end
+
+  def modify_reponse_for_matched_rule(rule, _status, _headers, _body, _mergetag_values)
     # For matched rule, we can now modify the response
+    # response is a hash with :status, :headers and :body or nil
+    return unless rule[:blocking]
   end
 
   def govern_request(_config, _env, _user_id, _company_id, _event_model)
