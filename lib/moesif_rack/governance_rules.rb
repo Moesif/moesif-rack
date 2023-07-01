@@ -220,7 +220,7 @@ class GovernanceRules
     array_to_or.reduce(false) { |anysofar, curr| anysofar || curr }
   end
 
-  def get_matched_regex_rules(_env, _event_model)
+  def get_applicable_regex_rules(_env, _event_model)
     request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
     # FIXME
     request_body = _event_model.dig('request', 'body')
@@ -232,6 +232,70 @@ class GovernanceRules
       matched = check_request_with_regex_match(regex_configs, request_fields, request_body)
       matched
     end
+  end
+
+  def get_applicable_user_rules_for_unidentified_users(_env, _event_model, _config)
+    request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
+    request_body = _event_model.dig('request', 'body')
+    applicable_rules_list = []
+
+    unidentified_rules = @unidentified_user_rules.select do |rule|
+      # matching is an allow rule
+      # we only care about deny rules.
+      regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), rqeuest_fields, request_body)
+
+      # default is "matching" so if nil means "matching"
+      if rule[:applied_to] == 'not_matching'
+        return !regex_matched
+      else
+        return regex_matched
+    end
+
+    applicable_rules_list.concat(unidentified_rules)
+  end
+
+  def get_config_user_rules_values(config, user_id)
+    config.dig('user_rules', user_id)
+  end
+
+
+  def get_applicable_user_rules(_env, _event_model, config, user_id)
+    request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
+    request_body = _event_model.dig('request', 'body')
+    applicable_rules_list = []
+
+    config_user_rules_values = get_config_user_rules_values(config, user_id)
+
+    # handle uses where user_id is in the cohort of the rules.
+    if config_user_rules_values
+      config_user_rules_values.each do | entry |
+        rule_id = entry[:rules]
+        # this is user_id matched cohort set in the rule.
+        mergetag_values = entry[:values]
+
+        found_rule = @user_rules[rule_id]
+        if !found_rule.nil?
+          regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), rqeuest_fields, request_body)
+
+          if found_rule[:applied_to] == "not_matching" && !regex_matched
+            # if regex did not match, the user_id matched above, it is considered not matched, we still apply the rule..
+            applicable_rules_list.push(found_rule)
+          elsif regex_matched
+            applicable_rules_list.push(found_rule)
+        end
+      end
+    end
+
+    # now user id is NOT associated with any cohort
+    @user_rules.each do |rule_id, rule|
+      # we want to apply to any "not_matching" rules.
+      # here regex does not matter since it is already NOT matched.
+      if rule[:applied_to] == "not_matching"
+        applicable_rules_list.push(rule)
+      end
+    end
+
+    applicable_rules_list
   end
 
   def replace_merge_tag_values(template_obj_or_val, mergetag_values)
@@ -257,7 +321,7 @@ class GovernanceRules
     end
   end
 
-  def modify_reponse_for_matched_rule(rule, status, headers, body, mergetag_values)
+  def modify_response_for_applicable_rule(rule, status, headers, body, mergetag_values)
     # For matched rule, we can now modify the response
     # response is a hash with :status, :headers and :body or nil
     new_headers = headers.clone
@@ -286,7 +350,7 @@ class GovernanceRules
       prev_status = prev_response.nil? ? curr_status : prev_response[:status]
       prev_headers = prev_response.nil? ? curr_headers : prev_response[:headers]
       prev_body = prev_response.nil ? curr_body : prev_response[:body]
-      modiify_response_for_matched_rule(rule, prev_status, prev_headers, prev_body, mergetag_values)
+      modify_response_for_applicable_rule(rule, prev_status, prev_headers, prev_body, mergetag_values)
     end
   end
 
