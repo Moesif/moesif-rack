@@ -220,7 +220,7 @@ class GovernanceRules
     array_to_or.reduce(false) { |anysofar, curr| anysofar || curr }
   end
 
-  def get_rules_if_governance_rule_matched(_env, _event_model)
+  def get_matched_regex_rules(_env, _event_model)
     request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
     # FIXME
     request_body = _event_model.dig('request', 'body')
@@ -231,20 +231,6 @@ class GovernanceRules
 
       matched = check_request_with_regex_match(regex_configs, request_fields, request_body)
       matched
-    end
-  end
-
-  def apply_regex_rules(_config, _env, _event_model, _status, _headers, _body)
-    return if @regex_rules.empty?
-
-    matched_rules = get_rules_if_governance_rule_matched(_env, _event_model)
-    return if matched_rules.empty? || matched_rules.nil?
-
-    matched_rules.reduce do |prev_response, rule|
-      prev_status = prev_response.nil? ? _status : prev_response[:status]
-      prev_headers = prev_response.nil? ? _headers : prev_response[:headers]
-      prev_body = prev_response.nil ? _body : prev_response[:body]
-      modiify_response_for_matched_rule(rule, prev_status, prev_headers, prev_body)
     end
   end
 
@@ -275,6 +261,19 @@ class GovernanceRules
     # For matched rule, we can now modify the response
     # response is a hash with :status, :headers and :body or nil
     return unless rule[:blocking]
+  end
+
+  def apply_rules(matched_rules, curr_status, curr_headers, curr_body, rule_values)
+    matched_rules.reduce do |prev_response, rule|
+      if rule_values
+        found_rule_value_pair = rule_values.find { |rule_value_pair| rule_value_pair[:rules] = rule[:_id]}
+        mergetag_values = found_rule_value_pair[:values} if found_rule_value_pair
+      end
+      prev_status = prev_response.nil? ? curr_status : prev_response[:status]
+      prev_headers = prev_response.nil? ? curr_headers : prev_response[:headers]
+      prev_body = prev_response.nil ? curr_body : prev_response[:body]
+      modiify_response_for_matched_rule(rule, prev_status, prev_headers, prev_body, mergetag_values)
+    end
   end
 
   def govern_request(_config, _env, _user_id, _company_id, _event_model)
