@@ -201,7 +201,7 @@ class GovernanceRules
     request_fields.fetch(path)
   end
 
-  def check_request_with_regex_math(regex_configs, request_fields, _request_body)
+  def check_request_with_regex_match(regex_configs, request_fields, _request_body)
     array_to_or = regex_configs.map do |or_group_of_regex_rule|
       conditions = or_group_of_regex_rule.fetch('conditions', [])
 
@@ -257,17 +257,31 @@ class GovernanceRules
     end
   end
 
-  def modify_reponse_for_matched_rule(rule, _status, _headers, _body, _mergetag_values)
+  def modify_reponse_for_matched_rule(rule, status, headers, body, mergetag_values)
     # For matched rule, we can now modify the response
     # response is a hash with :status, :headers and :body or nil
-    return unless rule[:blocking]
+    new_headers = headers.clone
+    # add headers
+    rule_headers = replace_merge_tag_values(rule.dig('response', 'headers'), mergetag_values)
+    # it is an insersion of rule headers not replacement.
+    rule_headers.each { |key, entry| new_headers[key] = entry } if rule_headers
+
+    new_status = status
+    new_body = body
+
+    if rule[:blocking]
+      new_status = rule.dig('response', 'status') || status
+      new_body = replace_merge_tag_values(rule.dig('response', 'body'), mergetag_values)
+    end
+
+    { status: new_status, headers: new_headers, body: new_body }
   end
 
   def apply_rules(matched_rules, curr_status, curr_headers, curr_body, rule_values)
     matched_rules.reduce do |prev_response, rule|
       if rule_values
-        found_rule_value_pair = rule_values.find { |rule_value_pair| rule_value_pair[:rules] = rule[:_id]}
-        mergetag_values = found_rule_value_pair[:values} if found_rule_value_pair
+        found_rule_value_pair = rule_values.find { |rule_value_pair| rule_value_pair[:rules] = rule[:_id] }
+        mergetag_values = found_rule_value_pair[:values] if found_rule_value_pair
       end
       prev_status = prev_response.nil? ? curr_status : prev_response[:status]
       prev_headers = prev_response.nil? ? curr_headers : prev_response[:headers]
