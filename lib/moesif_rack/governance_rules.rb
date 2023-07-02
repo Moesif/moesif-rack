@@ -359,7 +359,7 @@ class GovernanceRules
     # For matched rule, we can now modify the response
     # response is a hash with :status, :headers and :body or nil
     new_headers = headers.clone
-    # add headers
+    # headers are always merged togethe
     rule_headers = replace_merge_tag_values(rule.dig('response', 'headers'), mergetag_values)
     # it is an insersion of rule headers not replacement.
     rule_headers.each { |key, entry| new_headers[key] = entry } if rule_headers
@@ -367,6 +367,7 @@ class GovernanceRules
     new_status = status
     new_body = body
 
+    # only replace status and body if it is blocking.
     if rule[:blocking]
       new_status = rule.dig('response', 'status') || status
       new_body = replace_merge_tag_values(rule.dig('response', 'body'), mergetag_values)
