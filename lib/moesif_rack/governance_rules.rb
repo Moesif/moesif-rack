@@ -228,11 +228,7 @@ class GovernanceRules
     array_to_or.reduce(false) { |anysofar, curr| anysofar || curr }
   end
 
-  def get_applicable_regex_rules(_env, _event_model)
-    request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
-    # FIXME
-    request_body = _event_model.dig('request', 'body')
-
+  def get_applicable_regex_rules(request_fields, request_body)
     @regex_rules.select do |rule|
       regex_configs = rule.fetch('regex_config')
       return false unless regex_config
@@ -242,10 +238,7 @@ class GovernanceRules
     end
   end
 
-  def get_applicable_user_rules_for_unidentified_user(_env, _event_model, _config)
-    request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
-    request_body = _event_model.dig('request', 'body')
-
+  def get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
     applicable_unidentified_rules = @unidentified_user_rules.select do |rule|
       # matching is an allow rule
       # we only care about deny rules.
@@ -261,9 +254,7 @@ class GovernanceRules
     applicable_unidentified_rules
   end
 
-  def get_applicable_user_rules(_env, _event_model, config, user_id)
-    request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
-    request_body = _event_model.dig('request', 'body')
+  def get_applicable_user_rules(request_fields, request_body, config, user_id)
     applicable_rules_list = []
 
     config_user_rules_values = get_config_user_rules_values(config, user_id)
@@ -300,14 +291,11 @@ class GovernanceRules
   end
 
 
-  def get_applicable_company_rules_for_unidentified_company(_env, _event_model, _config)
-    request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
-    request_body = _event_model.dig('request', 'body')
-
+  def get_applicable_company_rules_for_unidentified_company(request_fields, request_body)
     applicable_unidentified_rules = @unidentified_company_rules.select do |rule|
       # matching is an allow rule
       # we only care about deny rules.
-      regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), rqeuest_fields, request_body)
+      regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), request_fields, request_body)
 
       # default is "matching" so if nil means "matching"
       if rule[:applied_to] == 'not_matching'
@@ -320,9 +308,7 @@ class GovernanceRules
   end
 
 
-  def get_applicable_company_rules(_env, _event_model, config, company_id)
-    request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
-    request_body = _event_model.dig('request', 'body')
+  def get_applicable_company_rules(request_fields, request_body, config, company_id)
     applicable_rules_list = []
 
     config_company_rules_values = get_config_company_rules_values(config, company_id)
@@ -401,10 +387,10 @@ class GovernanceRules
     { status: new_status, headers: new_headers, body: new_body }
   end
 
-  def apply_rules(matched_rules, curr_status, curr_headers, curr_body, rule_values)
+  def apply_rules_list(matched_rules, curr_status, curr_headers, curr_body, config_rule_values)
     matched_rules.reduce do |prev_response, rule|
-      if rule_values
-        found_rule_value_pair = rule_values.find { |rule_value_pair| rule_value_pair[:rules] = rule[:_id] }
+      if config_rule_values
+        found_rule_value_pair = config_rule_values.find { |rule_value_pair| rule_value_pair[:rules] = rule[:_id] }
         mergetag_values = found_rule_value_pair[:values] if found_rule_value_pair
       end
       prev_status = prev_response.nil? ? curr_status : prev_response[:status]
@@ -414,23 +400,23 @@ class GovernanceRules
     end
   end
 
-  def govern_request(_config, _env, _user_id, _company_id, _event_model)
+  def govern_request(config, env, event_model, user_id, company_id, status, headers, body)
     # we can skip if rules does not exist or config does not exist
-    return [] if @rules.nil? || _config.nil?
+    return if @rules.nil? || @rules.empty?
+
+    request_fields = prepare_request_fields_based_on_regex_config(env, event_model)
+    request_body = event_model.dig('request', 'body')
+
+
+
 
     # apply in reverse order of priority.
     # Priority is user rule, company rule, and regex.
     # by apply in reverse order, the last rule is highest priority.
 
-    company_id_matched_rule_ids = _config.dig('company_rules', _company_id)
-    unless company_id_matched_ruled_ids.nil?
-      # apply compnay rule.
-    end
 
-    user_id_matched_rule_ids = _config.dig('user_rules', _user_id)
-    unless user_id_matched_rule_ids.nil?
-      # apply user rule
-    end
+
+
 
     [block, new_status, additional_headers, new_body]
   end
