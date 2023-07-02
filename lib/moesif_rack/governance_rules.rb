@@ -173,7 +173,7 @@ class GovernanceRules
 
   # TODO
   def convert_uri_to_route(uri)
-    # TODO: for now just retur uri
+    # TODO: for now just return uri
     uri
   end
 
@@ -191,6 +191,14 @@ class GovernanceRules
     field_values['request.body'] = request_body if request_body
 
     field_values
+  end
+
+  def get_config_user_rules_values(config, user_id)
+    config.dig('user_rules', user_id)
+  end
+
+  def get_config_user_rules_values(config, company_id)
+    config.dig('company_rules', company_id)
   end
 
   def get_field_value_for_path(path, request_fields, _request_body)
@@ -234,12 +242,11 @@ class GovernanceRules
     end
   end
 
-  def get_applicable_user_rules_for_unidentified_users(_env, _event_model, _config)
+  def get_applicable_user_rules_for_unidentified_user(_env, _event_model, _config)
     request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
     request_body = _event_model.dig('request', 'body')
-    applicable_rules_list = []
 
-    unidentified_rules = @unidentified_user_rules.select do |rule|
+    applicable_unidentified_rules = @unidentified_user_rules.select do |rule|
       # matching is an allow rule
       # we only care about deny rules.
       regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), rqeuest_fields, request_body)
@@ -251,13 +258,8 @@ class GovernanceRules
         return regex_matched
     end
 
-    applicable_rules_list.concat(unidentified_rules)
+    applicable_unidentified_rules
   end
-
-  def get_config_user_rules_values(config, user_id)
-    config.dig('user_rules', user_id)
-  end
-
 
   def get_applicable_user_rules(_env, _event_model, config, user_id)
     request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
@@ -285,9 +287,67 @@ class GovernanceRules
         end
       end
     end
-
     # now user id is NOT associated with any cohort
     @user_rules.each do |rule_id, rule|
+      # we want to apply to any "not_matching" rules.
+      # here regex does not matter since it is already NOT matched.
+      if rule[:applied_to] == "not_matching"
+        applicable_rules_list.push(rule)
+      end
+    end
+
+    applicable_rules_list
+  end
+
+
+  def get_applicable_company_rules_for_unidentified_company(_env, _event_model, _config)
+    request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
+    request_body = _event_model.dig('request', 'body')
+
+    applicable_unidentified_rules = @unidentified_company_rules.select do |rule|
+      # matching is an allow rule
+      # we only care about deny rules.
+      regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), rqeuest_fields, request_body)
+
+      # default is "matching" so if nil means "matching"
+      if rule[:applied_to] == 'not_matching'
+        return !regex_matched
+      else
+        return regex_matched
+    end
+
+    applicable_unidentified_rules
+  end
+
+
+  def get_applicable_company_rules(_env, _event_model, config, company_id)
+    request_fields = prepare_request_fields_based_on_regex_config(_env, _event_model)
+    request_body = _event_model.dig('request', 'body')
+    applicable_rules_list = []
+
+    config_company_rules_values = get_config_company_rules_values(config, company_id)
+
+    # handle uses where user_id is in the cohort of the rules.
+    if config_company_rules_values
+      config_company_rules_values.each do | entry |
+        rule_id = entry[:rules]
+        # this is user_id matched cohort set in the rule.
+        mergetag_values = entry[:values]
+
+        found_rule = @company_rules[rule_id]
+        if !found_rule.nil?
+          regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), rqeuest_fields, request_body)
+
+          if found_rule[:applied_to] == "not_matching" && !regex_matched
+            # if regex did not match, the user_id matched above, it is considered not matched, we still apply the rule..
+            applicable_rules_list.push(found_rule)
+          elsif regex_matched
+            applicable_rules_list.push(found_rule)
+        end
+      end
+    end
+    # now user id is NOT associated with any cohort
+    @company_rules.each do |rule_id, rule|
       # we want to apply to any "not_matching" rules.
       # here regex does not matter since it is already NOT matched.
       if rule[:applied_to] == "not_matching"
