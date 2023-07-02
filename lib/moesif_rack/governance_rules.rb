@@ -193,14 +193,6 @@ class GovernanceRules
     field_values
   end
 
-  def get_config_user_rules_values(config, user_id)
-    config.dig('user_rules', user_id)
-  end
-
-  def get_config_user_rules_values(config, company_id)
-    config.dig('company_rules', company_id)
-  end
-
   def get_field_value_for_path(path, request_fields, _request_body)
     if path.starts_with?('request.body.') && _request_body
       body_key = path.sub('request.body.', '')
@@ -254,10 +246,8 @@ class GovernanceRules
     applicable_unidentified_rules
   end
 
-  def get_applicable_user_rules(request_fields, request_body, config, user_id)
+  def get_applicable_user_rules(request_fields, request_body, config_user_rules_values)
     applicable_rules_list = []
-
-    config_user_rules_values = get_config_user_rules_values(config, user_id)
 
     # handle uses where user_id is in the cohort of the rules.
     if config_user_rules_values
@@ -308,10 +298,8 @@ class GovernanceRules
   end
 
 
-  def get_applicable_company_rules(request_fields, request_body, config, company_id)
+  def get_applicable_company_rules(request_fields, request_body, config_company_rules_values)
     applicable_rules_list = []
-
-    config_company_rules_values = get_config_company_rules_values(config, company_id)
 
     # handle uses where user_id is in the cohort of the rules.
     if config_company_rules_values
@@ -384,10 +372,14 @@ class GovernanceRules
       new_body = replace_merge_tag_values(rule.dig('response', 'body'), mergetag_values)
     end
 
-    { status: new_status, headers: new_headers, body: new_body }
+    { :status => new_status, :headers => new_headers, :body => new_body }
   end
 
   def apply_rules_list(matched_rules, curr_status, curr_headers, curr_body, config_rule_values)
+    if matched_rules.nil? || matched_rules.empty?
+      return {:status => curr_status, :headers => curr_headers, :body => curr_body}
+    end
+
     matched_rules.reduce do |prev_response, rule|
       if config_rule_values
         found_rule_value_pair = config_rule_values.find { |rule_value_pair| rule_value_pair[:rules] = rule[:_id] }
@@ -407,17 +399,37 @@ class GovernanceRules
     request_fields = prepare_request_fields_based_on_regex_config(env, event_model)
     request_body = event_model.dig('request', 'body')
 
-
-
-
     # apply in reverse order of priority.
     # Priority is user rule, company rule, and regex.
-    # by apply in reverse order, the last rule is highest priority.
+    # by apply in reverse order, the last rule become highest priority.
 
+    new_response = {
+      :status => status,
+      :headers => headers,
+      :body => body
+    }
 
+    applicable_regex_rules = get_applicable_regex_rules(request_fields, request_body)
+    new_response = apply_rules_list(applicable_regex_rules, new_response[:status], new_response[:headers], new_response[:body])
 
+    if company_id.nil?
+      company_rules = get_applicable_company_rules_for_unidentified_company(request_fields, request_body)
+      new_response = apply_rules_list(company_rules, new_response[:status], new_response[:headers], new_response[:body])
+    elsif
+      config_rule_values = config.dig('company_rules', company_id) if !config.nil?
+      company_rules = get_applicable_user_rules(request_fields, request_body, config_rule_values)
+      new_response = apply_rules_list(company_rules, new_response[:status], new_response[:headers], new_response[:body], config_rule_values)
+    end
 
+    if user_id.nil?
+      user_rules = get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
+      new_response = apply_rules_list(user_rules, new_response[:status], new_response[:headers], new_response[:body])
+    elsif
+      config_rule_values = config.dig('user_rules', user_id) if !config.nil?
+      user_rules = get_applicable_user_rules(request_fields, request_body, config_rule_values)
+      new_response = apply_rules_list(user_rules, new_response[:status], new_response[:headers], new_response[:body], config_rule_values)
+    end
 
-    [block, new_status, additional_headers, new_body]
+    new_response
   end
 end
