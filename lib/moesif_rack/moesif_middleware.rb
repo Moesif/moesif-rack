@@ -371,7 +371,7 @@ module MoesifRack
           event_model.response.status = new_response.fetch(:status, status)
           event_model.response.header = new_response.fetch(:headers, headers).dup
           event_model.response.body = new_response.fetch(:body, body).dup
-          event_model.blocked_by = blocked_rule_id unless blocked_rule_id? nil
+          event_model.blocked_by = new_response.fetch(:block_rule_id)
         end
       end
 

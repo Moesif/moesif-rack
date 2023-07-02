@@ -350,42 +350,39 @@ class GovernanceRules
     end
   end
 
-  def modify_response_for_applicable_rule(rule, status, headers, body, mergetag_values)
+  def modify_response_for_applicable_rule(rule, response, mergetag_values)
     # For matched rule, we can now modify the response
     # response is a hash with :status, :headers and :body or nil
-    new_headers = headers.clone
+    new_headers = response[:headers].clone
     # headers are always merged togethe
     rule_headers = replace_merge_tag_values(rule.dig('response', 'headers'), mergetag_values)
     # it is an insersion of rule headers not replacement.
     rule_headers.each { |key, entry| new_headers[key] = entry } if rule_headers
 
-    new_status = status
-    new_body = body
+    response[:headers] = new_headers;
 
     # only replace status and body if it is blocking.
     if rule[:blocking]
-      new_status = rule.dig('response', 'status') || status
+      response[:status] = rule.dig('response', 'status') || response[:status]
       new_body = replace_merge_tag_values(rule.dig('response', 'body'), mergetag_values)
-      block_rule_id = rule[:_id]
+      response[:body] = new_body
+      response[:block_rule_id] = rule[:_id]
     end
 
-    { :status => new_status, :headers => new_headers, :body => new_body, :block_rule_id => blocked_rule_id},
+    response
   end
 
-  def apply_rules_list(matched_rules, curr_status, curr_headers, curr_body, config_rule_values)
+  def apply_rules_list(matched_rules, response, config_rule_values)
     if matched_rules.nil? || matched_rules.empty?
-      return {:status => curr_status, :headers => curr_headers, :body => curr_body}
+      return response
     end
 
-    matched_rules.reduce do |prev_response, rule|
+    matched_rules.reduce(response) do |prev_response, rule|
       if config_rule_values
         found_rule_value_pair = config_rule_values.find { |rule_value_pair| rule_value_pair[:rules] = rule[:_id] }
         mergetag_values = found_rule_value_pair[:values] if found_rule_value_pair
       end
-      prev_status = prev_response.nil? ? curr_status : prev_response[:status]
-      prev_headers = prev_response.nil? ? curr_headers : prev_response[:headers]
-      prev_body = prev_response.nil ? curr_body : prev_response[:body]
-      modify_response_for_applicable_rule(rule, prev_status, prev_headers, prev_body, mergetag_values)
+      modify_response_for_applicable_rule(rule, prev_response, mergetag_values)
     end
   end
 
@@ -409,24 +406,24 @@ class GovernanceRules
     }
 
     applicable_regex_rules = get_applicable_regex_rules(request_fields, request_body)
-    new_response, block_rule_id = apply_rules_list(applicable_regex_rules, new_response[:status], new_response[:headers], new_response[:body])
+    new_response = apply_rules_list(applicable_regex_rules, new_response)
 
     if company_id.nil?
       company_rules = get_applicable_company_rules_for_unidentified_company(request_fields, request_body)
-      new_response, block_rule_id = apply_rules_list(company_rules, new_response[:status], new_response[:headers], new_response[:body])
+      new_response = apply_rules_list(company_rules, new_response)
     elsif
       config_rule_values = config.dig('company_rules', company_id) if !config.nil?
       company_rules = get_applicable_user_rules(request_fields, request_body, config_rule_values)
-      new_response, blocked_rule_id = apply_rules_list(company_rules, new_response[:status], new_response[:headers], new_response[:body], config_rule_values)
+      new_response = apply_rules_list(company_rules, new_response, config_rule_values)
     end
 
     if user_id.nil?
       user_rules = get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
-      new_response, block_rule_id = apply_rules_list(user_rules, new_response[:status], new_response[:headers], new_response[:body])
+      new_response = apply_rules_list(user_rules, new_response)
     elsif
       config_rule_values = config.dig('user_rules', user_id) if !config.nil?
       user_rules = get_applicable_user_rules(request_fields, request_body, config_rule_values)
-      new_response, block_rule_id = apply_rules_list(user_rules, new_response[:status], new_response[:headers], new_response[:body], config_rule_values)
+      new_response = apply_rules_list(user_rules, new_response, config_rule_values)
     end
 
     new_response
