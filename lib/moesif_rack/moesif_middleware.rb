@@ -10,6 +10,7 @@ require_relative './app_config'
 require_relative './update_user'
 require_relative './update_company'
 require_relative './moesif_helpers'
+require_relative './governance_rules'
 
 module MoesifRack
   class MoesifMiddleware
@@ -41,6 +42,7 @@ module MoesifRack
       @batch_max_time = options['batch_max_time'] || 2
       @events_queue = Queue.new
       @event_response_config_etag = nil
+      @governance = GovernanceRules.new(@debug)
 
       # start the worker and Update the last worker run
       @last_worker_run = Time.now.utc
@@ -51,6 +53,7 @@ module MoesifRack
         unless new_config.nil?
           @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
         end
+        @governance.load_rules(@api_controller)
       rescue StandardError => e
         @moesif_helpers.log_debug 'Error while parsing application configuration on initialization'
         @moesif_helpers.log_debug e.to_s
@@ -334,6 +337,7 @@ module MoesifRack
                 unless new_config.nil?
                   @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
                 end
+                @governance.reload_rules_if_needed(@api_controller)
               rescue StandardError => e
                 @moesif_helpers.log_debug 'Error while updating the application configuration'
                 @moesif_helpers.log_debug e.to_s
@@ -352,9 +356,24 @@ module MoesifRack
 
       should_skip = true if @skip && @skip.call(env, headers, body)
 
-      should_govern = false
+      should_govern = true
 
       event_model = make_event_model.call if !should_skip || should_govern
+
+      if should_govern
+        # now we can do govern based on
+        # override_response = govern(env, event_model)
+        # return override_response if override_response
+        new_response, blocked_rule_id = @governance.govern_request(@config, env, event_model, status, headers, body)
+
+        # update the event model
+        if new_response
+          event_model.response.status = new_response.fetch(:status, status)
+          event_model.response.header = new_response.fetch(:headers, headers).dup
+          event_model.response.body = new_response.fetch(:body, body).dup
+          event_model.blocked_by = blocked_rule_id unless blocked_rule_id? nil
+        end
+      end
 
       if !should_skip
         begin
@@ -368,10 +387,9 @@ module MoesifRack
         @moesif_helpers.log_debug 'Skipped Event using should_skip configuration option.'
       end
 
-      if should_govern
-        # now we can do govern based on
-        # override_response = govern(env, event_model)
-        # return override_response if override_response
+      unless new_response.nil?
+        return [new_response.fetch(:status, status), new_response.fetch(:headers, headers),
+                new_response.fetch(:body, body)]
       end
 
       [status, headers, body]

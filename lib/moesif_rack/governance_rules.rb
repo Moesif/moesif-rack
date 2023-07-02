@@ -117,7 +117,7 @@ class GovernanceRules
     @regex_config_helper = RegexConfigHelper.new(debug)
   end
 
-  def get_rules(api_controller)
+  def load_rules(api_controller)
     # Get Application Config
     rules_response = api_controller.get_rules
     @moesif_helpers.log_debug('new config downloaded')
@@ -168,7 +168,7 @@ class GovernanceRules
     # ten minutes to refech
     return unless Time.now.utc > (60 * 10 + @last_fetch)
 
-    get_rules(api_controller)
+    load_rules(api_controller)
   end
 
   # TODO
@@ -177,18 +177,13 @@ class GovernanceRules
     uri
   end
 
-  def prepare_request_fields_based_on_regex_config(_env, _event_model)
+  def prepare_request_fields_based_on_regex_config(env, event_model)
     field_values = {
-      'request.verb': _event_model.dig('request', 'verb'),
-      'request.ip_address': _event_model.dig('request', 'ip_address'),
-      'request.route': convert_uri_to_route(_event_model.dig('request', 'uri')),
-      'request.body.operationName': _event_model.dig('request', 'body', 'operationName')
+      'request.verb': event_model.dig('request', 'verb'),
+      'request.ip_address': event_model.dig('request', 'ip_address'),
+      'request.route': convert_uri_to_route(event_model.dig('request', 'uri')),
+      'request.body.operationName': event_model.dig('request', 'body', 'operationName')
     }
-
-    # TODO: for body
-    request_body = _event_model.dig('request', 'body')
-
-    field_values['request.body'] = request_body if request_body
 
     field_values
   end
@@ -371,9 +366,10 @@ class GovernanceRules
     if rule[:blocking]
       new_status = rule.dig('response', 'status') || status
       new_body = replace_merge_tag_values(rule.dig('response', 'body'), mergetag_values)
+      block_rule_id = rule[:_id]
     end
 
-    { :status => new_status, :headers => new_headers, :body => new_body }
+    { :status => new_status, :headers => new_headers, :body => new_body, :block_rule_id => blocked_rule_id},
   end
 
   def apply_rules_list(matched_rules, curr_status, curr_headers, curr_body, config_rule_values)
@@ -393,12 +389,14 @@ class GovernanceRules
     end
   end
 
-  def govern_request(config, env, event_model, user_id, company_id, status, headers, body)
+  def govern_request(config, env, event_model, status, headers, body)
     # we can skip if rules does not exist or config does not exist
     return if @rules.nil? || @rules.empty?
 
     request_fields = prepare_request_fields_based_on_regex_config(env, event_model)
     request_body = event_model.dig('request', 'body')
+    user_id = event_model.fetch('user_id');
+    company_id = event_model.fetch('company_id');
 
     # apply in reverse order of priority.
     # Priority is user rule, company rule, and regex.
@@ -411,24 +409,24 @@ class GovernanceRules
     }
 
     applicable_regex_rules = get_applicable_regex_rules(request_fields, request_body)
-    new_response = apply_rules_list(applicable_regex_rules, new_response[:status], new_response[:headers], new_response[:body])
+    new_response, block_rule_id = apply_rules_list(applicable_regex_rules, new_response[:status], new_response[:headers], new_response[:body])
 
     if company_id.nil?
       company_rules = get_applicable_company_rules_for_unidentified_company(request_fields, request_body)
-      new_response = apply_rules_list(company_rules, new_response[:status], new_response[:headers], new_response[:body])
+      new_response, block_rule_id = apply_rules_list(company_rules, new_response[:status], new_response[:headers], new_response[:body])
     elsif
       config_rule_values = config.dig('company_rules', company_id) if !config.nil?
       company_rules = get_applicable_user_rules(request_fields, request_body, config_rule_values)
-      new_response = apply_rules_list(company_rules, new_response[:status], new_response[:headers], new_response[:body], config_rule_values)
+      new_response, blocked_rule_id = apply_rules_list(company_rules, new_response[:status], new_response[:headers], new_response[:body], config_rule_values)
     end
 
     if user_id.nil?
       user_rules = get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
-      new_response = apply_rules_list(user_rules, new_response[:status], new_response[:headers], new_response[:body])
+      new_response, block_rule_id = apply_rules_list(user_rules, new_response[:status], new_response[:headers], new_response[:body])
     elsif
       config_rule_values = config.dig('user_rules', user_id) if !config.nil?
       user_rules = get_applicable_user_rules(request_fields, request_body, config_rule_values)
-      new_response = apply_rules_list(user_rules, new_response[:status], new_response[:headers], new_response[:body], config_rule_values)
+      new_response, block_rule_id = apply_rules_list(user_rules, new_response[:status], new_response[:headers], new_response[:body], config_rule_values)
     end
 
     new_response
