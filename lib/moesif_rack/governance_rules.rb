@@ -7,53 +7,53 @@ require_relative './moesif_helpers'
 require_relative './regex_config_helper'
 
 # rule refereence
-{
-  "_id": "649b64ea96d5e2384e3cece6",
-  "created_at": "2023-06-27T22:38:34.405",
-  "type": "regex",
-  "state": 2,
-  "org_id": "688:25",
-  "app_id": "768:74",
-  "name": "teset govern rule. ",
-  "block": true,
-  "applied_to": "matching",
-  "applied_to_unidentified": false,
-  "response": {
-      "status": 205,
-      "headers": {
-          "X-Test": "12423"
-      },
-      "body": {
-          "hello": "there"
-      }
-  },
-  "regex_config": [
-      {
-          "conditions": [
-              {
-                  "path": "request.route",
-                  "value": "test"
-              },
-              {
-                  "path": "request.verb",
-                  "value": "test"
-              }
-          ]
-      },
-      {
-          "conditions": [
-              {
-                  "path": "request.ip_address",
-                  "value": "teset"
-              },
-              {
-                  "path": "request.verb",
-                  "value": "5"
-              }
-          ]
-      }
-  ]
-}
+# {
+#   "_id": "649b64ea96d5e2384e3cece6",
+#   "created_at": "2023-06-27T22:38:34.405",
+#   "type": "regex",
+#   "state": 2,
+#   "org_id": "688:25",
+#   "app_id": "768:74",
+#   "name": "teset govern rule. ",
+#   "block": true,
+#   "applied_to": "matching",
+#   "applied_to_unidentified": false,
+#   "response": {
+#       "status": 205,
+#       "headers": {
+#           "X-Test": "12423"
+#       },
+#       "body": {
+#           "hello": "there"
+#       }
+#   },
+#   "regex_config": [
+#       {
+#           "conditions": [
+#               {
+#                   "path": "request.route",
+#                   "value": "test"
+#               },
+#               {
+#                   "path": "request.verb",
+#                   "value": "test"
+#               }
+#           ]
+#       },
+#       {
+#           "conditions": [
+#               {
+#                   "path": "request.ip_address",
+#                   "value": "teset"
+#               },
+#               {
+#                   "path": "request.verb",
+#                   "value": "5"
+#               }
+#           ]
+#       }
+#   ]
+# }
 
 # user rule reference.
 
@@ -373,7 +373,7 @@ class GovernanceRules
     # headers are always merged togethe
     rule_headers = replace_merge_tag_values(rule.dig('response', 'headers'), mergetag_values)
     # it is an insersion of rule headers not replacement.
-    rule_headers.each { |key, entry| new_headers[key] = entry } if rule_headers
+    rule_headers.each { |key, entry| new_headers[key] = entry } unless rule_headers.nil?
 
     response[:headers] = new_headers
 
@@ -389,7 +389,9 @@ class GovernanceRules
   end
 
   def apply_rules_list(matched_rules, response, config_rule_values)
-    return response if matched_rules.nil? || matched_rules.empty?
+    if matched_rules.nil? || matched_rules.empty?
+      return response
+    end
 
     matched_rules.reduce(response) do |prev_response, rule|
       if config_rule_values
