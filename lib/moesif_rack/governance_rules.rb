@@ -7,53 +7,53 @@ require_relative './moesif_helpers'
 require_relative './regex_config_helper'
 
 # rule refereence
-# {
-#   "_id": "649b64ea96d5e2384e3cece6",
-#   "created_at": "2023-06-27T22:38:34.405",
-#   "type": "regex",
-#   "state": 2,
-#   "org_id": "688:25",
-#   "app_id": "768:74",
-#   "name": "teset govern rule. ",
-#   "block": true,
-#   "applied_to": "matching",
-#   "applied_to_unidentified": false,
-#   "response": {
-#       "status": 205,
-#       "headers": {
-#           "X-Test": "12423"
-#       },
-#       "body": {
-#           "hello": "there"
-#       }
-#   },
-#   "regex_config": [
-#       {
-#           "conditions": [
-#               {
-#                   "path": "request.route",
-#                   "value": "test"
-#               },
-#               {
-#                   "path": "request.verb",
-#                   "value": "test"
-#               }
-#           ]
-#       },
-#       {
-#           "conditions": [
-#               {
-#                   "path": "request.ip_address",
-#                   "value": "teset"
-#               },
-#               {
-#                   "path": "request.verb",
-#                   "value": "5"
-#               }
-#           ]
-#       }
-#   ]
-# }
+{
+  "_id": "649b64ea96d5e2384e3cece6",
+  "created_at": "2023-06-27T22:38:34.405",
+  "type": "regex",
+  "state": 2,
+  "org_id": "688:25",
+  "app_id": "768:74",
+  "name": "teset govern rule. ",
+  "block": true,
+  "applied_to": "matching",
+  "applied_to_unidentified": false,
+  "response": {
+      "status": 205,
+      "headers": {
+          "X-Test": "12423"
+      },
+      "body": {
+          "hello": "there"
+      }
+  },
+  "regex_config": [
+      {
+          "conditions": [
+              {
+                  "path": "request.route",
+                  "value": "test"
+              },
+              {
+                  "path": "request.verb",
+                  "value": "test"
+              }
+          ]
+      },
+      {
+          "conditions": [
+              {
+                  "path": "request.ip_address",
+                  "value": "teset"
+              },
+              {
+                  "path": "request.verb",
+                  "value": "5"
+              }
+          ]
+      }
+  ]
+}
 
 # user rule reference.
 
@@ -174,6 +174,7 @@ class GovernanceRules
     end
     @moesif_helpers.log_debug('user_rules processed ' + @user_rules.to_s)
     @moesif_helpers.log_debug('unidentified_user_rules' + @unidentified_user_rules.to_s);
+    @moesif_helpers.log_debug('regex_rules' + @regex_rules.to_s);
   rescue StandardError => e
     @moesif_helpers.log_debug e.to_s
   end
@@ -202,7 +203,7 @@ class GovernanceRules
   end
 
   def get_field_value_for_path(path, request_fields, request_body)
-    if path.starts_with?('request.body.') && request_body
+    if path && path.start_with?('request.body.') && request_body
       body_key = path.sub('request.body.', '')
       return request_body.fetch(body_key)
     end
@@ -231,7 +232,7 @@ class GovernanceRules
   def get_applicable_regex_rules(request_fields, request_body)
     @regex_rules.select do |rule|
       regex_configs = rule.fetch('regex_config')
-      return false unless regex_config
+      return false unless !regex_configs.nil?
 
       matched = check_request_with_regex_match(regex_configs, request_fields, request_body)
       matched
