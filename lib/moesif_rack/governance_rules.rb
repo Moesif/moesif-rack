@@ -306,9 +306,7 @@ class GovernanceRules
       regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), request_fields, request_body)
 
       # default is "matching" so if nil means "matching"
-      return !regex_matched if rule["applied_to"] == 'not_matching'
-
-      return regex_matched
+      rule["applied_to"] == 'not_matching' ? !regex_matched : regex_matched
     end
   end
 
