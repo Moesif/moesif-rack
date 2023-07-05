@@ -1,6 +1,7 @@
 require 'moesif_api'
 require 'json'
 require 'time'
+require 'zlib'
 require 'stringio'
 require_relative './moesif_helpers'
 require_relative './regex_config_helper'
@@ -90,21 +91,32 @@ require_relative './regex_config_helper'
 #   ]
 # }
 
+module RULE_TYPES
+  USER = :user
+  COMPANY = :company
+  REGEX = :regex
+end
+
 class GovernanceRules
   def initialize(debug)
     @debug = debug
     @moesif_helpers = MoesifHelpers.new(debug)
     @regex_config_helper = RegexConfigHelper.new(debug)
+    @last_fetch = Time.at(0)
   end
 
   def load_rules(api_controller)
     # Get Application Config
+    @moesif_helpers.log_debug('starting downlaoding rules')
     rules_response = api_controller.get_rules
-    @moesif_helpers.log_debug('new config downloaded')
-    @moesif_helpers.log_debug(rules.response.to_s)
+    @moesif_helpers.log_debug('new ruules downloaded')
+    @moesif_helpers.log_debug(rules_response.to_s)
     rules = decompress_gzip_body(rules_response)
     @last_fetch = Time.now.utc
-    generate_rule_cache(rules)
+
+    @moesif_helpers.log_debug(rules.to_s)
+
+    generate_rules_caching(rules)
   rescue MoesifApi::APIException => e
     if e.response_code.between?(401, 403)
       @moesif_helpers.log_debug 'Unauthorized access getting application configuration. Please check your Appplication Id.'
@@ -115,6 +127,29 @@ class GovernanceRules
     @moesif_helpers.log_debug e.to_s
   end
 
+  def decompress_gzip_body(rules_response)
+    # Decompress gzip response body
+
+    # Check if the content-encoding header exist and is of type zip
+    if rules_response.headers.key?(:content_encoding) && rules_response.headers[:content_encoding].eql?('gzip')
+      # Create a GZipReader object to read data
+      gzip_reader = Zlib::GzipReader.new(StringIO.new(rules_response.raw_body.to_s))
+
+      # Read the body
+      uncompressed_string = gzip_reader.read
+
+      # Return the parsed body
+      JSON.parse(uncompressed_string)
+    else
+      @moesif_helpers.log_debug 'Content Encoding is of type other than gzip, returning nil'
+      nil
+    end
+  rescue StandardError => e
+    @moesif_helpers.log_debug 'Error while decompressing the response body'
+    @moesif_helpers.log_debug e.to_s
+    nil
+  end
+
   def generate_rules_caching(rules)
     @rules = rules
     @regex_rules = []
@@ -122,6 +157,7 @@ class GovernanceRules
     @unidentified_user_rules = []
     @company_rules = {}
     @unidentified_company_rules = []
+    @moesif_helpers.log_debug(@rules.to_s)
     if !rules.nil? && !rules.empty?
       rules.each do |rule|
         rule_id = rule.fetch('_id')
@@ -146,7 +182,8 @@ class GovernanceRules
 
   def reload_rules_if_needed(api_controller)
     # ten minutes to refech
-    return unless Time.now.utc > (60 * 10 + @last_fetch)
+    print Time.now.utc
+    return unless Time.now.utc > (@last_fetch + 60 * 10)
 
     load_rules(api_controller)
   end
