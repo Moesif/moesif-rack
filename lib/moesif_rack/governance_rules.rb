@@ -201,15 +201,15 @@ class GovernanceRules
     }
   end
 
-  def get_field_value_for_path(path, request_fields, _request_body)
-    if path.starts_with?('request.body.') && _request_body
+  def get_field_value_for_path(path, request_fields, request_body)
+    if path.starts_with?('request.body.') && request_body
       body_key = path.sub('request.body.', '')
-      return _request_body.fetch(body_key)
+      return request_body.fetch(body_key)
     end
     request_fields.fetch(path)
   end
 
-  def check_request_with_regex_match(regex_configs, request_fields, _request_body)
+  def check_request_with_regex_match(regex_configs, request_fields, request_body)
     array_to_or = regex_configs.map do |or_group_of_regex_rule|
       conditions = or_group_of_regex_rule.fetch('conditions', [])
 
@@ -218,7 +218,7 @@ class GovernanceRules
 
         path = condition.fetch('path')
 
-        field_value = get_field_value_for_path(path, request_fields, _request_body)
+        field_value = get_field_value_for_path(path, request_fields, request_body)
         reg_ex = Regexp.new condition.fetch('value')
 
         field_value =~ reg_ex
