@@ -90,26 +90,6 @@ require_relative './regex_config_helper'
 #   ]
 # }
 
-module APPLY_TO
-  MATCHING = :matching
-  NOT_MATCHING = :not_matching
-end
-
-module RULE_TYPES
-  USER = :user
-  COMPANY = :company
-  REGEX = :regex
-end
-
-FIELDS_SUBJECT_TO_REGEX = {
-  verb: {
-    field: 'request.verb'
-  },
-  route: {
-    field: 'request.route'
-  }
-}
-
 class GovernanceRules
   def initialize(debug)
     @debug = debug
@@ -177,15 +157,13 @@ class GovernanceRules
     uri
   end
 
-  def prepare_request_fields_based_on_regex_config(env, event_model)
-    field_values = {
-      'request.verb': event_model.dig('request', 'verb'),
-      'request.ip_address': event_model.dig('request', 'ip_address'),
-      'request.route': convert_uri_to_route(event_model.dig('request', 'uri')),
-      'request.body.operationName': event_model.dig('request', 'body', 'operationName')
+  def prepare_request_fields_based_on_regex_config(_env, event_model)
+    {
+      'request.verb' => event_model.dig('request', 'verb'),
+      'request.ip_address' => event_model.dig('request', 'ip_address'),
+      'request.route' => convert_uri_to_route(event_model.dig('request', 'uri')),
+      'request.body.operationName' => event_model.dig('request', 'body', 'operationName')
     }
-
-    field_values
   end
 
   def get_field_value_for_path(path, request_fields, _request_body)
@@ -225,103 +203,93 @@ class GovernanceRules
     end
   end
 
-  def get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
-    applicable_unidentified_rules = @unidentified_user_rules.select do |rule|
+  def get_applicable_user_rules_for_unidentified_user(_request_fields, request_body)
+    @unidentified_user_rules.select do |rule|
       # matching is an allow rule
       # we only care about deny rules.
       regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), rqeuest_fields, request_body)
 
       # default is "matching" so if nil means "matching"
-      if rule[:applied_to] == 'not_matching'
-        return !regex_matched
-      else
-        return regex_matched
-    end
+      return !regex_matched if rule[:applied_to] == 'not_matching'
 
-    applicable_unidentified_rules
+      return regex_matched
+    end
   end
 
-  def get_applicable_user_rules(request_fields, request_body, config_user_rules_values)
+  def get_applicable_user_rules(_request_fields, request_body, config_user_rules_values)
     applicable_rules_list = []
 
     # handle uses where user_id is in the cohort of the rules.
     if config_user_rules_values
-      config_user_rules_values.each do | entry |
+      config_user_rules_values.each do |entry|
         rule_id = entry[:rules]
         # this is user_id matched cohort set in the rule.
         mergetag_values = entry[:values]
 
         found_rule = @user_rules[rule_id]
-        if !found_rule.nil?
-          regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), rqeuest_fields, request_body)
+        next if found_rule.nil?
 
-          if found_rule[:applied_to] == "not_matching" && !regex_matched
-            # if regex did not match, the user_id matched above, it is considered not matched, we still apply the rule..
-            applicable_rules_list.push(found_rule)
-          elsif regex_matched
-            applicable_rules_list.push(found_rule)
+        regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), rqeuest_fields, request_body)
+
+        if found_rule[:applied_to] == 'not_matching' && !regex_matched
+          # if regex did not match, the user_id matched above, it is considered not matched, we still apply the rule..
+          applicable_rules_list.push(found_rule)
+        elsif regex_matched
+          applicable_rules_list.push(found_rule)
         end
       end
     end
     # now user id is NOT associated with any cohort
-    @user_rules.each do |rule_id, rule|
+    @user_rules.each do |_rule_id, rule|
       # we want to apply to any "not_matching" rules.
       # here regex does not matter since it is already NOT matched.
-      if rule[:applied_to] == "not_matching"
-        applicable_rules_list.push(rule)
-      end
+      applicable_rules_list.push(rule) if rule[:applied_to] == 'not_matching'
     end
 
     applicable_rules_list
   end
 
-
   def get_applicable_company_rules_for_unidentified_company(request_fields, request_body)
-    applicable_unidentified_rules = @unidentified_company_rules.select do |rule|
+    @unidentified_company_rules.select do |rule|
       # matching is an allow rule
       # we only care about deny rules.
       regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), request_fields, request_body)
 
       # default is "matching" so if nil means "matching"
-      if rule[:applied_to] == 'not_matching'
-        return !regex_matched
-      else
-        return regex_matched
-    end
+      return !regex_matched if rule[:applied_to] == 'not_matching'
 
-    applicable_unidentified_rules
+      return regex_matched
+    end
   end
 
-
-  def get_applicable_company_rules(request_fields, request_body, config_company_rules_values)
+  def get_applicable_company_rules(_request_fields, request_body, config_company_rules_values)
     applicable_rules_list = []
 
     # handle uses where user_id is in the cohort of the rules.
     if config_company_rules_values
-      config_company_rules_values.each do | entry |
+      config_company_rules_values.each do |entry|
         rule_id = entry[:rules]
         # this is user_id matched cohort set in the rule.
         mergetag_values = entry[:values]
 
         found_rule = @company_rules[rule_id]
-        if !found_rule.nil?
-          regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), rqeuest_fields, request_body)
+        next if found_rule.nil?
 
-          if found_rule[:applied_to] == "not_matching" && !regex_matched
-            # if regex did not match, the user_id matched above, it is considered not matched, we still apply the rule..
-            applicable_rules_list.push(found_rule)
-          elsif regex_matched
-            applicable_rules_list.push(found_rule)
+        regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), rqeuest_fields, request_body)
+
+        if found_rule[:applied_to] == 'not_matching' && !regex_matched
+          # if regex did not match, the user_id matched above, it is considered not matched, we still apply the rule..
+          applicable_rules_list.push(found_rule)
+        elsif regex_matched
+          applicable_rules_list.push(found_rule)
         end
       end
     end
     # now user id is NOT associated with any cohort
-    @company_rules.each do |rule_id, rule|
+    @company_rules.each do |_rule_id, rule|
       # we want to apply to any "not_matching" rules.
       # here regex does not matter since it is already NOT matched.
-      if rule[:applied_to] == "not_matching"
-        applicable_rules_list.push(rule)
-      end
+      applicable_rules_list.push(rule) if rule[:applied_to] == 'not_matching'
     end
 
     applicable_rules_list
@@ -359,7 +327,7 @@ class GovernanceRules
     # it is an insersion of rule headers not replacement.
     rule_headers.each { |key, entry| new_headers[key] = entry } if rule_headers
 
-    response[:headers] = new_headers;
+    response[:headers] = new_headers
 
     # only replace status and body if it is blocking.
     if rule[:blocking]
@@ -373,14 +341,12 @@ class GovernanceRules
   end
 
   def apply_rules_list(matched_rules, response, config_rule_values)
-    if matched_rules.nil? || matched_rules.empty?
-      return response
-    end
+    return response if matched_rules.nil? || matched_rules.empty?
 
     matched_rules.reduce(response) do |prev_response, rule|
       if config_rule_values
         found_rule_value_pair = config_rule_values.find { |rule_value_pair| rule_value_pair[:rules] = rule[:_id] }
-        mergetag_values = found_rule_value_pair[:values] if found_rule_value_pair
+        mergetag_values = found_rule_value_pair[:values] unless found_rule_value_pair.nil?
       end
       modify_response_for_applicable_rule(rule, prev_response, mergetag_values)
     end
@@ -392,17 +358,17 @@ class GovernanceRules
 
     request_fields = prepare_request_fields_based_on_regex_config(env, event_model)
     request_body = event_model.dig('request', 'body')
-    user_id = event_model.fetch('user_id');
-    company_id = event_model.fetch('company_id');
+    user_id = event_model.fetch('user_id')
+    company_id = event_model.fetch('company_id')
 
     # apply in reverse order of priority.
     # Priority is user rule, company rule, and regex.
     # by apply in reverse order, the last rule become highest priority.
 
     new_response = {
-      :status => status,
-      :headers => headers,
-      :body => body
+      status: status,
+      headers: headers,
+      body: body
     }
 
     applicable_regex_rules = get_applicable_regex_rules(request_fields, request_body)
@@ -411,8 +377,8 @@ class GovernanceRules
     if company_id.nil?
       company_rules = get_applicable_company_rules_for_unidentified_company(request_fields, request_body)
       new_response = apply_rules_list(company_rules, new_response)
-    elsif
-      config_rule_values = config.dig('company_rules', company_id) if !config.nil?
+    else
+      config_rule_values = config.dig('company_rules', company_id) unless config.nil?
       company_rules = get_applicable_user_rules(request_fields, request_body, config_rule_values)
       new_response = apply_rules_list(company_rules, new_response, config_rule_values)
     end
@@ -420,12 +386,11 @@ class GovernanceRules
     if user_id.nil?
       user_rules = get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
       new_response = apply_rules_list(user_rules, new_response)
-    elsif
-      config_rule_values = config.dig('user_rules', user_id) if !config.nil?
+    else
+      config_rule_values = config.dig('user_rules', user_id) unless config.nil?
       user_rules = get_applicable_user_rules(request_fields, request_body, config_rule_values)
       new_response = apply_rules_list(user_rules, new_response, config_rule_values)
     end
-
     new_response
   end
 end
