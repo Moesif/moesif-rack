@@ -157,8 +157,8 @@ class GovernanceRules
     @unidentified_company_rules = []
     if !rules.nil? && !rules.empty?
       rules.each do |rule|
-        rule_id = rule.fetch('_id')
-        case rule.fetch("type")
+        rule_id = rule['_id']
+        case rule["type"]
         when RULE_TYPES::USER
           @user_rules[rule_id] = rule
           @unidentified_user_rules.push(rule) if rule.fetch("applied_to_unidentified", false)
@@ -205,9 +205,9 @@ class GovernanceRules
   def get_field_value_for_path(path, request_fields, request_body)
     if path && path.start_with?('request.body.') && request_body
       body_key = path.sub('request.body.', '')
-      return request_body.fetch(body_key)
+      return request_body.fetch(body_key, nil)
     end
-    request_fields.fetch(path)
+    request_fields.fetch(path, nil)
   end
 
   def check_request_with_regex_match(regex_configs, request_fields, request_body)
@@ -217,12 +217,16 @@ class GovernanceRules
       conditions.reduce(true) do |all_match, condition|
         return false unless all_match
 
-        path = condition.fetch('path')
+        path = condition.fetch('path', nil)
 
         field_value = get_field_value_for_path(path, request_fields, request_body)
-        reg_ex = Regexp.new condition.fetch('value')
+        reg_ex = Regexp.new condition.fetch('value', nil)
 
-        field_value =~ reg_ex
+        if path.nil? || field_value.nil? || reg_ex.nil?
+          false
+        else
+          field_value =~ reg_ex
+        end
       end
     end
 
@@ -231,11 +235,16 @@ class GovernanceRules
 
   def get_applicable_regex_rules(request_fields, request_body)
     @regex_rules.select do |rule|
-      regex_configs = rule.fetch('regex_config')
-      return false unless !regex_configs.nil?
-
-      matched = check_request_with_regex_match(regex_configs, request_fields, request_body)
-      matched
+      regex_configs = rule['regex_config']
+      @moesif_helpers.log_debug("checking regex_configs")
+      @moesif_helpers.log_debug(regex_configs.to_s)
+      if regex_configs.nil?
+        false
+      else
+        @moesif_helpers.log_debug("checking regex_configs")
+        @moesif_helpers.log_debug(regex_configs.to_s)
+        check_request_with_regex_match(regex_configs, request_fields, request_body)
+      end
     end
   end
 
@@ -243,12 +252,17 @@ class GovernanceRules
     @unidentified_user_rules.select do |rule|
       # matching is an allow rule
       # we only care about deny rules.
+      @moesif_helpers.log_debug('check unidnetified user rule ' + rule.to_s)
       regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), request_fields, request_body)
+      @moesif_helpers.log_debug('regexmatched')
+      @moesif_helpers.log_debug(regex_matched)
 
       # default is "matching" so if nil means "matching"
-      return !regex_matched if rule["applied_to"] == 'not_matching'
-
-      return regex_matched
+      if rule["applied_to"] === 'not_matching'
+        !regex_matched
+      else
+        regex_matched
+      end
     end
   end
 

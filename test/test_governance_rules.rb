@@ -10,7 +10,7 @@ class GovernanceRulesTest < Test::Unit::TestCase
   self.test_order = :defined
   def setup
     @goverance_rule_manager = GovernanceRules.new(true)
-    @api_client = MoesifApi::MoesifAPIClient.new('Moesif Application Id')
+    @api_client = MoesifApi::MoesifAPIClient.new('Your Moesif Application Id')
     @goverance_rule_manager.reload_rules_if_needed(@api_client.api)
   end
 
@@ -31,9 +31,26 @@ class GovernanceRulesTest < Test::Unit::TestCase
 
 
     result = @goverance_rule_manager.get_applicable_regex_rules(request_fields, request_body)
-    print "Found matched regex rule-------\n"
+    print "\nFound applicable regex rule-------\n"
     print result.to_s
-    print "-------------"
+    print "\n-------------\n"
     assert(result.length === 1, "expect to get at least one regex rule")
   end
+
+
+  def test_get_applicable_user_rules_for_unidentified_user
+    request_fields = {
+      'request.route' => "test/no_italy",
+    }
+    request_body = {
+      "subject" => "should_block"
+    }
+    result = @goverance_rule_manager.get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
+    print "\nFound applicable rule for anonymous user-------\n"
+    print result.to_s
+    print "\n-------------\n"
+    assert(result.length === 2, "expect to get at least one regex rule")
+  end
+
+
 end
