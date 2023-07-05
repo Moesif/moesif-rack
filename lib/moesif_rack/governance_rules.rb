@@ -92,9 +92,9 @@ require_relative './regex_config_helper'
 # }
 
 module RULE_TYPES
-  USER = :user
-  COMPANY = :company
-  REGEX = :regex
+  USER = "user"
+  COMPANY = "company"
+  REGEX = "regex"
 end
 
 class GovernanceRules
@@ -109,11 +109,9 @@ class GovernanceRules
     # Get Application Config
     @moesif_helpers.log_debug('starting downlaoding rules')
     rules_response = api_controller.get_rules
-    @moesif_helpers.log_debug('new ruules downloaded')
-    @moesif_helpers.log_debug(rules_response.to_s)
     rules = decompress_gzip_body(rules_response)
     @last_fetch = Time.now.utc
-
+    @moesif_helpers.log_debug('new ruules downloaded')
     @moesif_helpers.log_debug(rules.to_s)
 
     generate_rules_caching(rules)
@@ -157,18 +155,16 @@ class GovernanceRules
     @unidentified_user_rules = []
     @company_rules = {}
     @unidentified_company_rules = []
-    @moesif_helpers.log_debug(@rules.to_s)
     if !rules.nil? && !rules.empty?
       rules.each do |rule|
         rule_id = rule.fetch('_id')
-        applied_to_unidentified
-        case rule.fetch(:type)
+        case rule.fetch("type")
         when RULE_TYPES::USER
           @user_rules[rule_id] = rule
-          @unidentified_user_rules.push(rule) if rule.fetch(:applied_to_unidentified, false)
-        when RULE_TYPES::COMMPNAY
+          @unidentified_user_rules.push(rule) if rule.fetch("applied_to_unidentified", false)
+        when RULE_TYPES::COMPANY
           @company_rules[rule_id] = rule
-          @unidentified_company_rules.push(rule) if rule.fetch(:applied_to_unidentified, false)
+          @unidentified_company_rules.push(rule) if rule.fetch("applied_to_unidentified", false)
         when RULE_TYPES::REGEX
           @regex_rules.push(rule)
         else
@@ -176,6 +172,8 @@ class GovernanceRules
         end
       end
     end
+    @moesif_helpers.log_debug('user_rules processed ' + @user_rules.to_s)
+    @moesif_helpers.log_debug('unidentified_user_rules' + @unidentified_user_rules.to_s);
   rescue StandardError => e
     @moesif_helpers.log_debug e.to_s
   end
@@ -240,35 +238,35 @@ class GovernanceRules
     end
   end
 
-  def get_applicable_user_rules_for_unidentified_user(_request_fields, request_body)
+  def get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
     @unidentified_user_rules.select do |rule|
       # matching is an allow rule
       # we only care about deny rules.
-      regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), rqeuest_fields, request_body)
+      regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), request_fields, request_body)
 
       # default is "matching" so if nil means "matching"
-      return !regex_matched if rule[:applied_to] == 'not_matching'
+      return !regex_matched if rule["applied_to"] == 'not_matching'
 
       return regex_matched
     end
   end
 
-  def get_applicable_user_rules(_request_fields, request_body, config_user_rules_values)
+  def get_applicable_user_rules(request_fields, request_body, config_user_rules_values)
     applicable_rules_list = []
 
     # handle uses where user_id is in the cohort of the rules.
     if config_user_rules_values
       config_user_rules_values.each do |entry|
-        rule_id = entry[:rules]
+        rule_id = entry["rules"]
         # this is user_id matched cohort set in the rule.
-        mergetag_values = entry[:values]
+        mergetag_values = entry["values"]
 
         found_rule = @user_rules[rule_id]
         next if found_rule.nil?
 
-        regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), rqeuest_fields, request_body)
+        regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), request_fields, request_body)
 
-        if found_rule[:applied_to] == 'not_matching' && !regex_matched
+        if found_rule["applied_to"] == 'not_matching' && !regex_matched
           # if regex did not match, the user_id matched above, it is considered not matched, we still apply the rule..
           applicable_rules_list.push(found_rule)
         elsif regex_matched
@@ -280,7 +278,7 @@ class GovernanceRules
     @user_rules.each do |_rule_id, rule|
       # we want to apply to any "not_matching" rules.
       # here regex does not matter since it is already NOT matched.
-      applicable_rules_list.push(rule) if rule[:applied_to] == 'not_matching'
+      applicable_rules_list.push(rule) if rule["applied_to"] == 'not_matching'
     end
 
     applicable_rules_list
@@ -293,28 +291,28 @@ class GovernanceRules
       regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), request_fields, request_body)
 
       # default is "matching" so if nil means "matching"
-      return !regex_matched if rule[:applied_to] == 'not_matching'
+      return !regex_matched if rule["applied_to"] == 'not_matching'
 
       return regex_matched
     end
   end
 
-  def get_applicable_company_rules(_request_fields, request_body, config_company_rules_values)
+  def get_applicable_company_rules(request_fields, request_body, config_company_rules_values)
     applicable_rules_list = []
 
     # handle uses where user_id is in the cohort of the rules.
     if config_company_rules_values
       config_company_rules_values.each do |entry|
-        rule_id = entry[:rules]
+        rule_id = entry["rules"]
         # this is user_id matched cohort set in the rule.
-        mergetag_values = entry[:values]
+        mergetag_values = entry["values"]
 
         found_rule = @company_rules[rule_id]
         next if found_rule.nil?
 
-        regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), rqeuest_fields, request_body)
+        regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), request_fields, request_body)
 
-        if found_rule[:applied_to] == 'not_matching' && !regex_matched
+        if found_rule["applied_to"] == 'not_matching' && !regex_matched
           # if regex did not match, the user_id matched above, it is considered not matched, we still apply the rule..
           applicable_rules_list.push(found_rule)
         elsif regex_matched
@@ -326,7 +324,7 @@ class GovernanceRules
     @company_rules.each do |_rule_id, rule|
       # we want to apply to any "not_matching" rules.
       # here regex does not matter since it is already NOT matched.
-      applicable_rules_list.push(rule) if rule[:applied_to] == 'not_matching'
+      applicable_rules_list.push(rule) if rule["applied_to"] == 'not_matching'
     end
 
     applicable_rules_list
@@ -367,7 +365,7 @@ class GovernanceRules
     response[:headers] = new_headers
 
     # only replace status and body if it is blocking.
-    if rule[:blocking]
+    if rule["blocking"]
       response[:status] = rule.dig('response', 'status') || response[:status]
       new_body = replace_merge_tag_values(rule.dig('response', 'body'), mergetag_values)
       response[:body] = new_body
@@ -382,8 +380,8 @@ class GovernanceRules
 
     matched_rules.reduce(response) do |prev_response, rule|
       if config_rule_values
-        found_rule_value_pair = config_rule_values.find { |rule_value_pair| rule_value_pair[:rules] = rule[:_id] }
-        mergetag_values = found_rule_value_pair[:values] unless found_rule_value_pair.nil?
+        found_rule_value_pair = config_rule_values.find { |rule_value_pair| rule_value_pair["rules"] == rule["_id"] }
+        mergetag_values = found_rule_value_pair["values"] unless found_rule_value_pair.nil?
       end
       modify_response_for_applicable_rule(rule, prev_response, mergetag_values)
     end
