@@ -289,7 +289,8 @@ class GovernanceRules
         end
       end
     end
-    # now user id is NOT associated with any cohort
+
+    # now user id is NOT associated with any cohort so we have to add user rules that is "Not matching"
     @user_rules.each do |_rule_id, rule|
       # we want to apply to any "not_matching" rules.
       # here regex does not matter since it is already NOT matched.
@@ -352,7 +353,7 @@ class GovernanceRules
       template_obj_or_val
     elsif template_value.is_a?(String)
       temp_val = template_value
-      mergetag_values.each { |merge_key, merge_value| temp_val = temp_val.sub(merge_key, merge_value) }
+      mergetag_values.each { |merge_key, merge_value| temp_val = temp_val.sub('{{' + merge_key + '}}', merge_value) }
       temp_val
     elsif template_obj_or_val.is_a?(Array)
       tempplate_obj_or_val.map { |entry| replace_merge_tag_values(entry, mergetag_values) }
@@ -408,8 +409,8 @@ class GovernanceRules
 
     request_fields = prepare_request_fields_based_on_regex_config(env, event_model)
     request_body = event_model.dig('request', 'body')
-    user_id = event_model.fetch('user_id')
-    company_id = event_model.fetch('company_id')
+    user_id = event_model.fetch('user_id', nil)
+    company_id = event_model.fetch('company_id', nil)
 
     # apply in reverse order of priority.
     # Priority is user rule, company rule, and regex.
