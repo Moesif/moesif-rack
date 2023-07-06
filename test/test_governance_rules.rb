@@ -49,8 +49,38 @@ class GovernanceRulesTest < Test::Unit::TestCase
     print "\nFound applicable rule for anonymous user-------\n"
     print result.to_s
     print "\n-------------\n"
-    assert(result.length === 2, "expect to get at least one regex rule")
+    assert(result.length === 2, "expect to get 2 unidentified user rules")
   end
 
+  def test_get_applicable_user_rules
+    request_fields = {
+      'request.route' => "test/no_italy",
+    }
+    request_body = {
+      "subject" => "should_block"
+    }
+    user_id = 'rome1'
+
+    #for user id matched rules it depends on getting from config_rules_values
+    #for that particular user id.
+    # for this test case I will use this rule as fake input
+    #https://www.moesif.com/wrap/app/88:210-1051:5/governance-rule/64a5b8f9aca3042266d36ebc
+    config_user_rules_values = [
+      {
+        "rules": "64a5b8f9aca3042266d36ebc",
+        "values": {
+          "1": "some value for 1",
+          "2": "some value for 2",
+        }
+      }
+    ]
+
+    result = @goverance_rule_manager.get_applicable_user_rules(request_fields, request_body, config_user_rules_values)
+    print "\nFound applicable rule for identified user based on event and config user rule values-------\n"
+    print result.to_s
+    print result.length
+    print "\n-------------\n"
+    assert(result.length === 2, "expect 2 rules, because 1 is matching rule, one is not matching rule for canada")
+  end
 
 end
