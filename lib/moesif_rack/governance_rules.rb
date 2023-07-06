@@ -111,7 +111,7 @@ class GovernanceRules
     rules_response = api_controller.get_rules
     rules = decompress_gzip_body(rules_response)
     @last_fetch = Time.now.utc
-    @moesif_helpers.log_debug('new ruules downloaded')
+    @moesif_helpers.log_debug('new rules downloaded')
     @moesif_helpers.log_debug(rules.to_s)
 
     generate_rules_caching(rules)
@@ -262,12 +262,15 @@ class GovernanceRules
   def get_applicable_user_rules(request_fields, request_body, config_user_rules_values)
     applicable_rules_list = []
 
+    rule_ids_hash_that_is_in_cohort = {}
+
     # handle uses where user_id is in the cohort of the rules.
     if !config_user_rules_values.nil?
       config_user_rules_values.each do |entry|
         rule_id = entry["rules"]
         # this is user_id matched cohort set in the rule.
         mergetag_values = entry["values"]
+        rule_ids_hash_that_is_in_cohort[rule_id] = true unless rule_id.nil?
 
         found_rule = @user_rules[rule_id]
         if found_rule.nil?
@@ -275,7 +278,7 @@ class GovernanceRules
           next
         end
 
-        @moesif_helpers.log_debug('found rule in saved entries')
+        @moesif_helpers.log_debug('found rule in saved entries ' + rule_id)
 
         regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), request_fields, request_body)
 
@@ -284,8 +287,11 @@ class GovernanceRules
           next
         end
 
-        if found_rule["applied_to"] != 'not_matching'
+        if found_rule["applied_to"] == 'not_matching'
           # means matching, i.e. we apply the rule since user is in cohort.
+          @moesif_helpers.log_debug('applied to is not matching' + "so skipping add this rule")
+        else
+          @moesif_helpers.log_debug('applied to is matching' + found_rule["applied_to"])
           applicable_rules_list.push(found_rule)
         end
       end
@@ -295,7 +301,7 @@ class GovernanceRules
     @user_rules.each do |_rule_id, rule|
       # we want to apply to any "not_matching" rules.
       # here regex does not matter since it is already NOT matched.
-      if rule["applied_to"] == 'not_matching'
+      if rule["applied_to"] == 'not_matching' && !rule_ids_hash_that_is_in_cohort[_rule_id]
         regex_matched = check_request_with_regex_match(rule.fetch('regex_config', nil), request_fields, request_body)
         if regex_matched
           applicable_rules_list.push(rule)
@@ -317,22 +323,23 @@ class GovernanceRules
   def get_applicable_company_rules(request_fields, request_body, config_company_rules_values)
     applicable_rules_list = []
 
-    # handle uses where user_id is in the cohort of the rules.
+    rule_ids_hash_that_is_in_cohort = {}
 
-    # handle uses where user_id is in the cohort of the rules.
+    # handle where company_id is in the cohort of the rules.
     if !config_company_rules_values.nil?
       config_company_rules_values.each do |entry|
         rule_id = entry["rules"]
         # this is user_id matched cohort set in the rule.
         mergetag_values = entry["values"]
 
+        rule_ids_hash_that_is_in_cohort[rule_id] = true unless rule_id.nil?
+
         found_rule = @company_rules[rule_id]
+
         if found_rule.nil?
           @moesif_helpers.log_debug('company rule for not foun for ' + rule_id.to_s)
           next
         end
-
-        @moesif_helpers.log_debug('found rule in saved entries')
 
         regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), request_fields, request_body)
 
@@ -348,11 +355,11 @@ class GovernanceRules
       end
     end
 
-    # now user id is NOT associated with any cohort rule so we have to add user rules that is "Not matching"
+    # handle is NOT in the cohort of rule so we have to apply rules that are "Not matching"
     @company_rules.each do |_rule_id, rule|
       # we want to apply to any "not_matching" rules.
       # here regex does not matter since it is already NOT matched.
-      if rule["applied_to"] == 'not_matching'
+      if rule["applied_to"] == 'not_matching' && !rule_ids_hash_that_is_in_cohort[_rule_id]
         regex_matched = check_request_with_regex_match(rule.fetch('regex_config', nil), request_fields, request_body)
         if regex_matched
           applicable_rules_list.push(rule)
