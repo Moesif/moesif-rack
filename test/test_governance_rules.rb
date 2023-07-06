@@ -67,10 +67,10 @@ class GovernanceRulesTest < Test::Unit::TestCase
     #https://www.moesif.com/wrap/app/88:210-1051:5/governance-rule/64a5b8f9aca3042266d36ebc
     config_user_rules_values = [
       {
-        "rules": "64a5b8f9aca3042266d36ebc",
-        "values": {
-          "1": "some value for 1",
-          "2": "some value for 2",
+        "rules" => "64a5b8f9aca3042266d36ebc",
+        "values" => {
+          "1" => "some value for 1",
+          "2" => "some value for 2",
         }
       }
     ]
@@ -79,7 +79,7 @@ class GovernanceRulesTest < Test::Unit::TestCase
     print "\nFound #{applicable_rules.length} applicable rule for identified user based on event and config user rule values-------\n"
     print applicable_rules.to_s
     print "\n-------------\n"
-    assert(applicable_rules.length === 2, "expect 2 rules, because 1 is matching rule, one is not matching rule for canada")
+    assert(applicable_rules.length === 1, "expect 1 rules")
 
     fake_response = {
       status: 200,
@@ -89,9 +89,10 @@ class GovernanceRulesTest < Test::Unit::TestCase
       }
     }
 
-    new_response = {
-
-    }
+    new_response = @goverance_rule_manager.apply_rules_list(applicable_rules, fake_response, config_user_rules_values);
+    print "new resposne is: \n"
+    print new_response.to_s
+    print "\n------------------\n"
   end
 
 end

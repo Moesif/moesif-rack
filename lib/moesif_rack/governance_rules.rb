@@ -271,12 +271,16 @@ class GovernanceRules
 
         found_rule = @user_rules[rule_id]
         if found_rule.nil?
+          @moesif_helpers.log_debug('rule for not foun for ' + rule_id.to_s)
           next
         end
+
+        @moesif_helpers.log_debug('found rule in saved entries')
 
         regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), request_fields, request_body)
 
         if !regex_matched
+          @moesif_helpers.log_debug('regex not matched, skipping ' + rule_id.to_s)
           next
         end
 
@@ -294,7 +298,7 @@ class GovernanceRules
       if rule["applied_to"] == 'not_matching'
         regex_matched = check_request_with_regex_match(rule.fetch('regex_config', nil), request_fields, request_body)
         if regex_matched
-            applicable_rules_list.push(rule)
+          applicable_rules_list.push(rule)
         end
       end
     end
@@ -304,12 +308,9 @@ class GovernanceRules
 
   def get_applicable_company_rules_for_unidentified_company(request_fields, request_body)
     @unidentified_company_rules.select do |rule|
-      # matching is an allow rule
-      # we only care about deny rules.
       regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), request_fields, request_body)
 
-      # default is "matching" so if nil means "matching"
-      rule["applied_to"] == 'not_matching' ? !regex_matched : regex_matched
+      regex_matched
     end
   end
 
@@ -317,55 +318,71 @@ class GovernanceRules
     applicable_rules_list = []
 
     # handle uses where user_id is in the cohort of the rules.
-    if config_company_rules_values
+
+    # handle uses where user_id is in the cohort of the rules.
+    if !config_company_rules_values.nil?
       config_company_rules_values.each do |entry|
         rule_id = entry["rules"]
         # this is user_id matched cohort set in the rule.
         mergetag_values = entry["values"]
 
         found_rule = @company_rules[rule_id]
-        next if found_rule.nil?
+        if found_rule.nil?
+          @moesif_helpers.log_debug('company rule for not foun for ' + rule_id.to_s)
+          next
+        end
+
+        @moesif_helpers.log_debug('found rule in saved entries')
 
         regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), request_fields, request_body)
 
-        if found_rule["applied_to"] == 'not_matching' && !regex_matched
-          # if regex did not match, the user_id matched above, it is considered not matched, we still apply the rule..
-          applicable_rules_list.push(found_rule)
-        elsif regex_matched
+        if !regex_matched
+          @moesif_helpers.log_debug('regex not matched, skipping ' + rule_id.to_s)
+          next
+        end
+
+        if found_rule["applied_to"] != 'not_matching'
+          # means matching, i.e. we apply the rule since user is in cohort.
           applicable_rules_list.push(found_rule)
         end
       end
     end
-    # now user id is NOT associated with any cohort
+
+    # now user id is NOT associated with any cohort rule so we have to add user rules that is "Not matching"
     @company_rules.each do |_rule_id, rule|
       # we want to apply to any "not_matching" rules.
       # here regex does not matter since it is already NOT matched.
-      applicable_rules_list.push(rule) if rule["applied_to"] == 'not_matching'
+      if rule["applied_to"] == 'not_matching'
+        regex_matched = check_request_with_regex_match(rule.fetch('regex_config', nil), request_fields, request_body)
+        if regex_matched
+          applicable_rules_list.push(rule)
+        end
+      end
     end
-
     applicable_rules_list
   end
 
   def replace_merge_tag_values(template_obj_or_val, mergetag_values)
     # take the template, either headers or body, and replace with mergetag_values
     # recursively
-    return template_obj_or_val unless mergedtag_values
+    return template_obj_or_val unless mergetag_values
 
     if template_obj_or_val.nil?
-      template_obj_or_val
-    elsif template_value.is_a?(String)
-      temp_val = template_value
+      return template_obj_or_val
+    elsif template_obj_or_val.is_a?(String)
+      temp_val = template_obj_or_val
       mergetag_values.each { |merge_key, merge_value| temp_val = temp_val.sub('{{' + merge_key + '}}', merge_value) }
-      temp_val
+      return temp_val
     elsif template_obj_or_val.is_a?(Array)
-      tempplate_obj_or_val.map { |entry| replace_merge_tag_values(entry, mergetag_values) }
+      return tempplate_obj_or_val.map { |entry| replace_merge_tag_values(entry, mergetag_values) }
     elsif template_obj_or_val.is_a?(Hash)
       result_hash = {}
       template_obj_or_val.each do |key, entry|
         result_hash[key] = replace_merge_tag_values(entry, mergetag_values)
       end
+      return result_hash
     else
-      template_obj_or_val
+      return template_obj_or_val
     end
   end
 
@@ -391,12 +408,12 @@ class GovernanceRules
     response
   end
 
-  def apply_rules_list(matched_rules, response, config_rule_values)
-    if matched_rules.nil? || matched_rules.empty?
+  def apply_rules_list(applicable_rules, response, config_rule_values)
+    if applicable_rules.nil? || applicable_rules.empty?
       return response
     end
 
-    matched_rules.reduce(response) do |prev_response, rule|
+    applicable_rules.reduce(response) do |prev_response, rule|
       if config_rule_values
         found_rule_value_pair = config_rule_values.find { |rule_value_pair| rule_value_pair["rules"] == rule["_id"] }
         mergetag_values = found_rule_value_pair["values"] unless found_rule_value_pair.nil?
@@ -425,11 +442,11 @@ class GovernanceRules
     }
 
     applicable_regex_rules = get_applicable_regex_rules(request_fields, request_body)
-    new_response = apply_rules_list(applicable_regex_rules, new_response)
+    new_response = apply_rules_list(applicable_regex_rules, new_response, nil)
 
     if company_id.nil?
       company_rules = get_applicable_company_rules_for_unidentified_company(request_fields, request_body)
-      new_response = apply_rules_list(company_rules, new_response)
+      new_response = apply_rules_list(company_rules, new_response, nil)
     else
       config_rule_values = config.dig('company_rules', company_id) unless config.nil?
       company_rules = get_applicable_user_rules(request_fields, request_body, config_rule_values)
@@ -438,7 +455,7 @@ class GovernanceRules
 
     if user_id.nil?
       user_rules = get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
-      new_response = apply_rules_list(user_rules, new_response)
+      new_response = apply_rules_list(user_rules, new_response, nil)
     else
       config_rule_values = config.dig('user_rules', user_id) unless config.nil?
       user_rules = get_applicable_user_rules(request_fields, request_body, config_rule_values)
