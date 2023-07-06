@@ -69,6 +69,7 @@ class GovernanceRulesTest < Test::Unit::TestCase
       {
         "rules" => "64a5b8f9aca3042266d36ebc",
         "values" => {
+          "0" => "rome",
           "1" => "some value for 1",
           "2" => "some value for 2",
         }

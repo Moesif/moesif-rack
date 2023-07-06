@@ -364,7 +364,7 @@ module MoesifRack
         # now we can do govern based on
         # override_response = govern(env, event_model)
         # return override_response if override_response
-        new_response, blocked_rule_id = @governance.govern_request(@config, env, event_model, status, headers, body)
+        new_response = @governance.govern_request(@config, env, event_model, status, headers, body)
 
         # update the event model
         if new_response

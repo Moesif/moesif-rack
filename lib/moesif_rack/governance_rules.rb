@@ -172,9 +172,9 @@ class GovernanceRules
         end
       end
     end
-    @moesif_helpers.log_debug('user_rules processed ' + @user_rules.to_s)
-    @moesif_helpers.log_debug('unidentified_user_rules' + @unidentified_user_rules.to_s);
-    @moesif_helpers.log_debug('regex_rules' + @regex_rules.to_s);
+    # @moesif_helpers.log_debug('user_rules processed ' + @user_rules.to_s)
+    # @moesif_helpers.log_debug('unidentified_user_rules' + @unidentified_user_rules.to_s);
+    # @moesif_helpers.log_debug('regex_rules' + @regex_rules.to_s);
   rescue StandardError => e
     @moesif_helpers.log_debug e.to_s
   end
@@ -389,6 +389,7 @@ class GovernanceRules
   def modify_response_for_applicable_rule(rule, response, mergetag_values)
     # For matched rule, we can now modify the response
     # response is a hash with :status, :headers and :body or nil
+    @moesif_helpers.log_debug('about to modify response ' + mergetag_values.to_s)
     new_headers = response[:headers].clone
     # headers are always merged togethe
     rule_headers = replace_merge_tag_values(rule.dig('response', 'headers'), mergetag_values)
@@ -398,11 +399,12 @@ class GovernanceRules
     response[:headers] = new_headers
 
     # only replace status and body if it is blocking.
-    if rule["blocking"]
+    if rule["block"]
+      @moesif_helpers.log_debug('rule is block' + rule[:response].to_s)
       response[:status] = rule.dig('response', 'status') || response[:status]
       new_body = replace_merge_tag_values(rule.dig('response', 'body'), mergetag_values)
       response[:body] = new_body
-      response[:block_rule_id] = rule[:_id]
+      response[:block_rule_id] = rule["_id"]
     end
 
     response
