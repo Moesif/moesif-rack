@@ -164,6 +164,11 @@ class GovernanceRules
     load_rules(api_controller)
   end
 
+  def has_rules
+    return false if @rules.nil?
+    @rules.length >= 1
+  end
+
   # TODO
   def convert_uri_to_route(uri)
     # TODO: for now just return uri

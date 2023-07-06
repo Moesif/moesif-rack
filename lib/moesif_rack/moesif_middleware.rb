@@ -42,7 +42,7 @@ module MoesifRack
       @batch_max_time = options['batch_max_time'] || 2
       @events_queue = Queue.new
       @event_response_config_etag = nil
-      @governance = GovernanceRules.new(@debug)
+      @governance_manager = GovernanceRules.new(@debug)
 
       # start the worker and Update the last worker run
       @last_worker_run = Time.now.utc
@@ -53,7 +53,7 @@ module MoesifRack
         unless new_config.nil?
           @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
         end
-        @governance.load_rules(@api_controller)
+        @governance_manager.load_rules(@api_controller)
       rescue StandardError => e
         @moesif_helpers.log_debug 'Error while parsing application configuration on initialization'
         @moesif_helpers.log_debug e.to_s
@@ -337,7 +337,7 @@ module MoesifRack
                 unless new_config.nil?
                   @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
                 end
-                @governance.reload_rules_if_needed(@api_controller)
+                @governance_manager.reload_rules_if_needed(@api_controller)
               rescue StandardError => e
                 @moesif_helpers.log_debug 'Error while updating the application configuration'
                 @moesif_helpers.log_debug e.to_s
@@ -356,7 +356,7 @@ module MoesifRack
 
       should_skip = true if @skip && @skip.call(env, headers, body)
 
-      should_govern = true
+      should_govern = @governance_manager.has_rules
 
       event_model = make_event_model.call if !should_skip || should_govern
 
@@ -364,7 +364,7 @@ module MoesifRack
         # now we can do govern based on
         # override_response = govern(env, event_model)
         # return override_response if override_response
-        new_response = @governance.govern_request(@config, env, event_model, status, headers, body)
+        new_response = @governance_manager.govern_request(@config, env, event_model, status, headers, body)
 
         # update the event model
         if new_response
