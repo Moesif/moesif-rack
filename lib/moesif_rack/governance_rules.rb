@@ -250,19 +250,12 @@ class GovernanceRules
 
   def get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
     @unidentified_user_rules.select do |rule|
-      # matching is an allow rule
-      # we only care about deny rules.
       @moesif_helpers.log_debug('check unidnetified user rule ' + rule.to_s)
       regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), request_fields, request_body)
       @moesif_helpers.log_debug('regexmatched')
       @moesif_helpers.log_debug(regex_matched)
 
-      # default is "matching" so if nil means "matching"
-      if rule["applied_to"] === 'not_matching'
-        !regex_matched
-      else
-        regex_matched
-      end
+      regex_matched
     end
   end
 
@@ -270,31 +263,40 @@ class GovernanceRules
     applicable_rules_list = []
 
     # handle uses where user_id is in the cohort of the rules.
-    if config_user_rules_values
+    if !config_user_rules_values.nil?
       config_user_rules_values.each do |entry|
         rule_id = entry["rules"]
         # this is user_id matched cohort set in the rule.
         mergetag_values = entry["values"]
 
         found_rule = @user_rules[rule_id]
-        next if found_rule.nil?
+        if found_rule.nil?
+          next
+        end
 
         regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), request_fields, request_body)
 
-        if found_rule["applied_to"] == 'not_matching' && !regex_matched
-          # if regex did not match, the user_id matched above, it is considered not matched, we still apply the rule..
-          applicable_rules_list.push(found_rule)
-        elsif regex_matched
+        if !regex_matched
+          next
+        end
+
+        if found_rule["applied_to"] != 'not_matching'
+          # means matching, i.e. we apply the rule since user is in cohort.
           applicable_rules_list.push(found_rule)
         end
       end
     end
 
-    # now user id is NOT associated with any cohort so we have to add user rules that is "Not matching"
+    # now user id is NOT associated with any cohort rule so we have to add user rules that is "Not matching"
     @user_rules.each do |_rule_id, rule|
       # we want to apply to any "not_matching" rules.
       # here regex does not matter since it is already NOT matched.
-      applicable_rules_list.push(rule) if rule["applied_to"] == 'not_matching'
+      if rule["applied_to"] == 'not_matching'
+        regex_matched = check_request_with_regex_match(rule.fetch('regex_config', nil), request_fields, request_body)
+        if regex_matched
+            applicable_rules_list.push(rule)
+        end
+      end
     end
 
     applicable_rules_list
@@ -444,4 +446,5 @@ class GovernanceRules
     end
     new_response
   end
+
 end

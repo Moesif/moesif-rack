@@ -30,11 +30,11 @@ class GovernanceRulesTest < Test::Unit::TestCase
     }
 
 
-    result = @goverance_rule_manager.get_applicable_regex_rules(request_fields, request_body)
-    print "\nFound applicable regex rule-------\n"
-    print result.to_s
+    applicable_rules = @goverance_rule_manager.get_applicable_regex_rules(request_fields, request_body)
+    print "\nFound #{applicable_rules.length} applicable rule for regex only rules-------\n"
+    print applicable_rules.to_s
     print "\n-------------\n"
-    assert(result.length === 1, "expect to get at least one regex rule")
+    assert(applicable_rules.length === 1, "expect to get at least one regex rule")
   end
 
 
@@ -45,11 +45,11 @@ class GovernanceRulesTest < Test::Unit::TestCase
     request_body = {
       "subject" => "should_block"
     }
-    result = @goverance_rule_manager.get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
-    print "\nFound applicable rule for anonymous user-------\n"
-    print result.to_s
+    applicable_rules = @goverance_rule_manager.get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
+    print "\nFound #{applicable_rules.length} applicable rule for anonymous user-------\n"
+    print applicable_rules.to_s
     print "\n-------------\n"
-    assert(result.length === 2, "expect to get 2 unidentified user rules")
+    assert(applicable_rules.length === 1, "expect to get 1 unidentified user rules")
   end
 
   def test_get_applicable_user_rules
@@ -75,12 +75,23 @@ class GovernanceRulesTest < Test::Unit::TestCase
       }
     ]
 
-    result = @goverance_rule_manager.get_applicable_user_rules(request_fields, request_body, config_user_rules_values)
-    print "\nFound applicable rule for identified user based on event and config user rule values-------\n"
-    print result.to_s
-    print result.length
+    applicable_rules = @goverance_rule_manager.get_applicable_user_rules(request_fields, request_body, config_user_rules_values)
+    print "\nFound #{applicable_rules.length} applicable rule for identified user based on event and config user rule values-------\n"
+    print applicable_rules.to_s
     print "\n-------------\n"
-    assert(result.length === 2, "expect 2 rules, because 1 is matching rule, one is not matching rule for canada")
+    assert(applicable_rules.length === 2, "expect 2 rules, because 1 is matching rule, one is not matching rule for canada")
+
+    fake_response = {
+      status: 200,
+      headers: {},
+      body: {
+        "foo_bar" => "if not blocked this would show"
+      }
+    }
+
+    new_response = {
+
+    }
   end
 
 end
