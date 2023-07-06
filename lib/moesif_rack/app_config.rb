@@ -33,7 +33,7 @@ class AppConfig
     # Parse configuration object and return Etag, sample rate and last updated time
 
     # Rails return gzipped compressed response body, so decompressing it and getting JSON response body
-    response_body = decompress_gzip_body(config_api_response)
+    response_body = @moesif_helpers.decompress_gzip_body(config_api_response)
     @moesif_helpers.log_debug(response_body.to_s)
 
     # Check if response body is not nil
@@ -95,30 +95,6 @@ class AppConfig
     @moesif_helpers.log_debug 'Error while geting sampling percentage, assuming default behavior'
     @moesif_helpers.log_debug e.to_s
     100
-  end
-
-  def decompress_gzip_body(config_api_response)
-    # Decompress gzip response body
-
-    # Check if the content-encoding header exist and is of type zip
-    if config_api_response.headers.key?(:content_encoding) && config_api_response.headers[:content_encoding].eql?('gzip')
-
-      # Create a GZipReader object to read data
-      gzip_reader = Zlib::GzipReader.new(StringIO.new(config_api_response.raw_body.to_s))
-
-      # Read the body
-      uncompressed_string = gzip_reader.read
-
-      # Return the parsed body
-      JSON.parse(uncompressed_string)
-    else
-      @moesif_helpers.log_debug 'Content Encoding is of type other than gzip, returning nil'
-      nil
-    end
-  rescue StandardError => e
-    @moesif_helpers.log_debug 'Error while decompressing the response body'
-    @moesif_helpers.log_debug e.to_s
-    nil
   end
 
   def calculate_weight(sample_rate)

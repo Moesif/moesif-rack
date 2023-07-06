@@ -109,10 +109,10 @@ class GovernanceRules
     # Get Application Config
     @moesif_helpers.log_debug('starting downlaoding rules')
     rules_response = api_controller.get_rules
-    rules = decompress_gzip_body(rules_response)
+    rules = @moesif_helpers.decompress_gzip_body(rules_response)
     @last_fetch = Time.now.utc
     @moesif_helpers.log_debug('new rules downloaded')
-    @moesif_helpers.log_debug(rules.to_s)
+    @moesif_helpers.log_debug(rules.to_json)
 
     generate_rules_caching(rules)
   rescue MoesifApi::APIException => e
@@ -123,29 +123,6 @@ class GovernanceRules
     @moesif_helpers.log_debug e.response_code
   rescue StandardError => e
     @moesif_helpers.log_debug e.to_s
-  end
-
-  def decompress_gzip_body(rules_response)
-    # Decompress gzip response body
-
-    # Check if the content-encoding header exist and is of type zip
-    if rules_response.headers.key?(:content_encoding) && rules_response.headers[:content_encoding].eql?('gzip')
-      # Create a GZipReader object to read data
-      gzip_reader = Zlib::GzipReader.new(StringIO.new(rules_response.raw_body.to_s))
-
-      # Read the body
-      uncompressed_string = gzip_reader.read
-
-      # Return the parsed body
-      JSON.parse(uncompressed_string)
-    else
-      @moesif_helpers.log_debug 'Content Encoding is of type other than gzip, returning nil'
-      nil
-    end
-  rescue StandardError => e
-    @moesif_helpers.log_debug 'Error while decompressing the response body'
-    @moesif_helpers.log_debug e.to_s
-    nil
   end
 
   def generate_rules_caching(rules)
@@ -265,6 +242,8 @@ class GovernanceRules
     rule_ids_hash_that_is_in_cohort = {}
 
     # handle uses where user_id is in the cohort of the rules.
+    # if user is in a cohorot of the rule, it will come from config user rule values array, which is
+    # config.user_rules.user_id.[]
     if !config_user_rules_values.nil?
       config_user_rules_values.each do |entry|
         rule_id = entry["rules"]
@@ -300,7 +279,7 @@ class GovernanceRules
     # now user id is NOT associated with any cohort rule so we have to add user rules that is "Not matching"
     @user_rules.each do |_rule_id, rule|
       # we want to apply to any "not_matching" rules.
-      # here regex does not matter since it is already NOT matched.
+      # we want to make sure user is not in the cohort of the rule.
       if rule["applied_to"] == 'not_matching' && !rule_ids_hash_that_is_in_cohort[_rule_id]
         regex_matched = check_request_with_regex_match(rule.fetch('regex_config', nil), request_fields, request_body)
         if regex_matched
@@ -337,7 +316,7 @@ class GovernanceRules
         found_rule = @company_rules[rule_id]
 
         if found_rule.nil?
-          @moesif_helpers.log_debug('company rule for not foun for ' + rule_id.to_s)
+          @moesif_helpers.log_debug('company rule for not found for ' + rule_id.to_s)
           next
         end
 
@@ -358,7 +337,6 @@ class GovernanceRules
     # handle is NOT in the cohort of rule so we have to apply rules that are "Not matching"
     @company_rules.each do |_rule_id, rule|
       # we want to apply to any "not_matching" rules.
-      # here regex does not matter since it is already NOT matched.
       if rule["applied_to"] == 'not_matching' && !rule_ids_hash_that_is_in_cohort[_rule_id]
         regex_matched = check_request_with_regex_match(rule.fetch('regex_config', nil), request_fields, request_body)
         if regex_matched
@@ -471,6 +449,8 @@ class GovernanceRules
       new_response = apply_rules_list(user_rules, new_response, config_rule_values)
     end
     new_response
+  rescue StandardError => e
+    @moesif_helpers.log_debug "error try to govern request:" + e.to_s + "for event" + event_model.to_s
   end
 
 end
