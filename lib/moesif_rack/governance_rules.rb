@@ -193,7 +193,7 @@ class GovernanceRules
   end
 
   def check_request_with_regex_match(regex_configs, request_fields, request_body)
-    # since there is no regex config, custom must only care about cohort criteria, we assume true.
+    # since there is no regex config, customer must only care about cohort criteria, we assume regex matched
     return true if regex_configs.nil? || regex_configs.empty?
 
     array_to_or = regex_configs.map do |or_group_of_regex_rule|
