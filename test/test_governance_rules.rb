@@ -171,7 +171,7 @@ class GovernanceRulesTest < Test::Unit::TestCase
       }
     }
 
-    new_response = @goverance_rule_manager.apply_rules_list(applicable_rules, fake_response, config_user_rules_values);
+    new_response = @goverance_rule_manager.apply_rules_list(applicable_rules, fake_response, config_user_rules_values)
     print "new resposne is: \n"
     print new_response.to_json
     print "\n------------------\n"
@@ -207,7 +207,7 @@ class GovernanceRulesTest < Test::Unit::TestCase
       }
     }
 
-    new_response = @goverance_rule_manager.apply_rules_list(applicable_rules, fake_response, config_user_rules_values);
+    new_response = @goverance_rule_manager.apply_rules_list(applicable_rules, fake_response, config_user_rules_values)
     print "new resposne is: \n"
     print new_response.to_json
     print "\n------------------\n"

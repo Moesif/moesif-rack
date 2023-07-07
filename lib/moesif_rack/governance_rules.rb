@@ -361,20 +361,24 @@ class GovernanceRules
   def replace_merge_tag_values(template_obj_or_val, mergetag_values, variables_from_rules)
     # take the template, either headers or body, and replace with mergetag_values
     # recursively
-    # return template_obj_or_val unless !mergetag_values.nil?
+    return template_obj_or_val if variables_from_rules.nil? || variables_from_rules.empty?
 
     if template_obj_or_val.nil?
       return template_obj_or_val
     elsif template_obj_or_val.is_a?(String)
       temp_val = template_obj_or_val
-      mergetag_values.each { |merge_key, merge_value| temp_val = temp_val.sub('{{' + merge_key + '}}', merge_value) }
+      variables_from_rules.each do |variable|
+        variable_name = variable["name"]
+        variable_value = mergetag_values.nil? ? 'UNKNOWN' : mergetag_values.fetch(variable_name, 'UNKNOWN')
+        temp_val = temp_val.sub('{{' + variable_name + '}}', variable_value)
+      end
       return temp_val
     elsif template_obj_or_val.is_a?(Array)
-      return tempplate_obj_or_val.map { |entry| replace_merge_tag_values(entry, mergetag_values) }
+      return tempplate_obj_or_val.map { |entry| replace_merge_tag_values(entry, mergetag_values, variables_from_rules) }
     elsif template_obj_or_val.is_a?(Hash)
       result_hash = {}
       template_obj_or_val.each do |key, entry|
-        result_hash[key] = replace_merge_tag_values(entry, mergetag_values)
+        result_hash[key] = replace_merge_tag_values(entry, mergetag_values, variables_from_rules)
       end
       return result_hash
     else
@@ -387,9 +391,9 @@ class GovernanceRules
     # response is a hash with :status, :headers and :body or nil
     @moesif_helpers.log_debug('about to modify response ' + mergetag_values.to_s)
     new_headers = response[:headers].clone
-    rule_variabes = rule["variables"]
+    rule_variables = rule["variables"]
     # headers are always merged togethe
-    rule_headers = replace_merge_tag_values(rule.dig('response', 'headers'), mergetag_values, rule_variabes)
+    rule_headers = replace_merge_tag_values(rule.dig('response', 'headers'), mergetag_values, rule_variables)
     # it is an insersion of rule headers not replacement.
     rule_headers.each { |key, entry| new_headers[key] = entry } unless rule_headers.nil?
 
