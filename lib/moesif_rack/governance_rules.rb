@@ -158,9 +158,9 @@ class GovernanceRules
 
   def reload_rules_if_needed(api_controller)
     # ten minutes to refech
-    print Time.now.utc
     return unless Time.now.utc > (@last_fetch + 60 * 10)
 
+    @moesif_helpers.log_debug 'more than 10 minutes passed reload rules again'
     load_rules(api_controller)
   end
 

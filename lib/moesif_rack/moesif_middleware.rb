@@ -167,6 +167,7 @@ module MoesifRack
             end
 
             @moesif_helpers.log_debug('No events to read from the queue') if @events_queue.empty?
+            @governance_manager.reload_rules_if_needed(@api_controller)
 
             sleep @batch_max_time
           rescue MoesifApi::APIException => e
@@ -305,6 +306,7 @@ module MoesifRack
       process_send = lambda do |_event_model|
         @moesif_helpers.log_debug 'sending data to moesif'
         @moesif_helpers.log_debug _event_model.to_json
+
         # Perform the API call through the SDK function
         begin
           random_percentage = Random.rand(0.00..100.00)
@@ -337,7 +339,6 @@ module MoesifRack
                 unless new_config.nil?
                   @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
                 end
-                @governance_manager.reload_rules_if_needed(@api_controller)
               rescue StandardError => e
                 @moesif_helpers.log_debug 'Error while updating the application configuration'
                 @moesif_helpers.log_debug e.to_s
