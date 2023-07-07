@@ -302,7 +302,7 @@ module MoesifRack
         @moesif_helpers.log_debug e.to_s
       end
 
-      process_send = lambda do |_event_mode|
+      process_send = lambda do |_event_model|
         @moesif_helpers.log_debug 'sending data to moesif'
         @moesif_helpers.log_debug _event_model.to_json
         # Perform the API call through the SDK function
