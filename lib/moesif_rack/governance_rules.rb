@@ -394,7 +394,7 @@ class GovernanceRules
     rule_variables = rule["variables"]
     # headers are always merged togethe
     rule_headers = replace_merge_tag_values(rule.dig('response', 'headers'), mergetag_values, rule_variables)
-    # it is an insersion of rule headers not replacement.
+    # insersion of rule headers, we do not replace all headers.
     rule_headers.each { |key, entry| new_headers[key] = entry } unless rule_headers.nil?
 
     response[:headers] = new_headers
