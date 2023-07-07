@@ -368,6 +368,14 @@ module MoesifRack
 
         # update the event model
         if new_response
+          @moesif_helpers.log_debug "new response back from govern" + new_response.to_json
+
+          # replace return value
+          status = new_response.fetch(:status, status)
+          headers = new_response.fetch(:headers, headers)
+          body = new_response.fetch(:body, body)
+
+          # replace in event_model
           event_model.response.status = new_response.fetch(:status, status)
           event_model.response.header = new_response.fetch(:headers, headers).dup
           replaced_body = new_response.fetch(:body, rsp_body)
