@@ -417,7 +417,7 @@ class GovernanceRules
     end
 
     applicable_rules.reduce(response) do |prev_response, rule|
-      if config_rule_values
+      if !config_rule_values.nil?
         found_rule_value_pair = config_rule_values.find { |rule_value_pair| rule_value_pair["rules"] == rule["_id"] }
         mergetag_values = found_rule_value_pair["values"] unless found_rule_value_pair.nil?
       end
