@@ -368,19 +368,22 @@ module MoesifRack
 
         # update the event model
         if new_response
-          @moesif_helpers.log_debug "new response back from govern" + new_response.to_json
+          @moesif_helpers.log_debug 'new response back from govern' + new_response.to_json
 
-          # replace return value
-          status = new_response.fetch(:status, status)
+          # replace headers since it might be non blocking rules that adds headers
           headers = new_response.fetch(:headers, headers)
-          body = new_response.fetch(:body, body)
 
           # replace in event_model
           event_model.response.status = new_response.fetch(:status, status)
           event_model.response.headers = new_response.fetch(:headers, headers).dup
           replaced_body = new_response.fetch(:body, event_model.response.body)
           blocked_by = new_response.fetch(:block_rule_id, nil)
-          if !blocked_by.nil?
+          event_model.blocked_by = blocked_by
+          unless blocked_by.nil?
+            # we only replace body and status if it is blocked.
+            body = new_response.fetch(:body, body)
+            status = new_response.fetch(:status, status)
+
             event_model.blocked_by = blocked_by
             event_model.response.body = replaced_body
             # replaced body is always json should not be transfer encoding needed.
