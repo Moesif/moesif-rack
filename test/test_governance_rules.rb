@@ -31,7 +31,6 @@ class GovernanceRulesTest < Test::Unit::TestCase
       "subject" => "should_block"
     }
 
-
     applicable_rules = @goverance_rule_manager.get_applicable_regex_rules(request_fields, request_body)
     print "\nFound #{applicable_rules.length} applicable rule for regex only rules-------\n"
     print applicable_rules.to_s

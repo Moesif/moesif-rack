@@ -221,7 +221,7 @@ class GovernanceRules
       @moesif_helpers.log_debug("checking regex_configs")
       @moesif_helpers.log_debug(regex_configs.to_s)
       if regex_configs.nil?
-        false
+        true
       else
         @moesif_helpers.log_debug("checking regex_configs")
         @moesif_helpers.log_debug(regex_configs.to_s)
@@ -246,7 +246,7 @@ class GovernanceRules
 
     rule_ids_hash_that_is_in_cohort = {}
 
-    # handle uses where user_id is in the cohort of the rules.
+    # handle uses where user_id is in ARLEADY in the cohort of the rules.
     # if user is in a cohorot of the rule, it will come from config user rule values array, which is
     # config.user_rules.user_id.[]
     if !config_user_rules_values.nil?
@@ -255,6 +255,7 @@ class GovernanceRules
         # this is user_id matched cohort set in the rule.
         mergetag_values = entry["values"]
         rule_ids_hash_that_is_in_cohort[rule_id] = true unless rule_id.nil?
+        # rule_ids_hash_that_I_am_in_cohot{629847be77e75b13635aa868: true}
 
         found_rule = @user_rules[rule_id]
         if found_rule.nil?
@@ -262,7 +263,7 @@ class GovernanceRules
           next
         end
 
-        @moesif_helpers.log_debug('found rule in saved entries ' + rule_id)
+        @moesif_helpers.log_debug('found rule in cached user rules' + rule_id)
 
         regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), request_fields, request_body)
 
@@ -272,9 +273,11 @@ class GovernanceRules
         end
 
         if found_rule["applied_to"] == 'not_matching'
-          # means matching, i.e. we apply the rule since user is in cohort.
+          # mean not matching, i.e. we do not apply the rule since current user is in cohort.
           @moesif_helpers.log_debug('applied to is not matching' + "so skipping add this rule")
+          next
         else
+          # since applied_to is matching, we are in the cohort, we apply the rule by adding it to the list.
           @moesif_helpers.log_debug('applied to is matching' + found_rule["applied_to"])
           applicable_rules_list.push(found_rule)
         end
@@ -352,10 +355,10 @@ class GovernanceRules
     applicable_rules_list
   end
 
-  def replace_merge_tag_values(template_obj_or_val, mergetag_values)
+  def replace_merge_tag_values(template_obj_or_val, mergetag_values, variables_from_rules)
     # take the template, either headers or body, and replace with mergetag_values
     # recursively
-    return template_obj_or_val unless mergetag_values
+    # return template_obj_or_val unless !mergetag_values.nil?
 
     if template_obj_or_val.nil?
       return template_obj_or_val
@@ -381,8 +384,9 @@ class GovernanceRules
     # response is a hash with :status, :headers and :body or nil
     @moesif_helpers.log_debug('about to modify response ' + mergetag_values.to_s)
     new_headers = response[:headers].clone
+    rule_variabes = rule["variables"]
     # headers are always merged togethe
-    rule_headers = replace_merge_tag_values(rule.dig('response', 'headers'), mergetag_values)
+    rule_headers = replace_merge_tag_values(rule.dig('response', 'headers'), mergetag_values, rule_variabes)
     # it is an insersion of rule headers not replacement.
     rule_headers.each { |key, entry| new_headers[key] = entry } unless rule_headers.nil?
 
@@ -392,7 +396,7 @@ class GovernanceRules
     if rule["block"]
       @moesif_helpers.log_debug('rule is block' + rule[:response].to_s)
       response[:status] = rule.dig('response', 'status') || response[:status]
-      new_body = replace_merge_tag_values(rule.dig('response', 'body'), mergetag_values)
+      new_body = replace_merge_tag_values(rule.dig('response', 'body'), mergetag_values, rule_variables)
       response[:body] = new_body
       response[:block_rule_id] = rule["_id"]
     end
