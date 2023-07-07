@@ -378,9 +378,10 @@ module MoesifRack
           # replace in event_model
           event_model.response.status = new_response.fetch(:status, status)
           event_model.response.headers = new_response.fetch(:headers, headers).dup
-          replaced_body = new_response.fetch(:body, rsp_body)
-          event_model.blocked_by = new_response.fetch(:block_rule_id, nil)
-          if !event_model.blocked_by.nil?
+          replaced_body = new_response.fetch(:body, event_model.response.body)
+          blocked_by = new_response.fetch(:block_rule_id, nil)
+          if !blocked_by.nil?
+            event_model.blocked_by = blocked_by
             event_model.response.body = replaced_body
             # replaced body is always json should not be transfer encoding needed.
             event_model.transfer_encoding = nil
