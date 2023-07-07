@@ -404,7 +404,7 @@ class GovernanceRules
 
     # only replace status and body if it is blocking.
     if rule['block']
-      @moesif_helpers.log_debug('rule is block' + rule[:response].to_s)
+      @moesif_helpers.log_debug('rule is block' + rule.to_s)
       response[:status] = rule.dig('response', 'status') || response[:status]
       new_body = replace_merge_tag_values(rule.dig('response', 'body'), mergetag_values, rule_variables)
       response[:body] = new_body

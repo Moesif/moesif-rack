@@ -374,20 +374,22 @@ module MoesifRack
           headers = new_response.fetch(:headers, headers)
 
           # replace in event_model
-          event_model.response.status = new_response.fetch(:status, status)
           event_model.response.headers = new_response.fetch(:headers, headers).dup
-          replaced_body = new_response.fetch(:body, event_model.response.body)
+
           blocked_by = new_response.fetch(:block_rule_id, nil)
           event_model.blocked_by = blocked_by
           unless blocked_by.nil?
             # we only replace body and status if it is blocked.
-            body = new_response.fetch(:body, body)
+            body = @moesif_helpers.format_replacement_body(new_response.fetch(:body, nil), body)
             status = new_response.fetch(:status, status)
 
+            # replace the event model.
             event_model.blocked_by = blocked_by
+            event_model.response.status = new_response.fetch(:status, status)
+            replaced_body = new_response.fetch(:body, event_model.response.body)
             event_model.response.body = replaced_body
             # replaced body is always json should not be transfer encoding needed.
-            event_model.transfer_encoding = nil
+            event_model.response.transfer_encoding = 'json'
           end
         end
       end
@@ -402,11 +404,6 @@ module MoesifRack
         end
       else
         @moesif_helpers.log_debug 'Skipped Event using should_skip configuration option.'
-      end
-
-      unless new_response.nil?
-        return [new_response.fetch(:status, status), new_response.fetch(:headers, headers),
-                new_response.fetch(:body, body)]
       end
 
       [status, headers, body]
