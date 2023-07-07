@@ -277,8 +277,7 @@ class GovernanceRules
 
         if found_rule["applied_to"] == 'not_matching'
           # mean not matching, i.e. we do not apply the rule since current user is in cohort.
-          @moesif_helpers.log_debug('applied to is not matching' + "so skipping add this rule")
-          next
+          @moesif_helpers.log_debug('applied to is not matching to users in this cohort, so skipping add this rule')
         else
           # since applied_to is matching, we are in the cohort, we apply the rule by adding it to the list.
           @moesif_helpers.log_debug('applied to is matching' + found_rule["applied_to"])
@@ -338,8 +337,12 @@ class GovernanceRules
           next
         end
 
-        if found_rule["applied_to"] != 'not_matching'
-          # means matching, i.e. we apply the rule since user is in cohort.
+        if found_rule["applied_to"] == 'not_matching'
+          # mean not matching, i.e. we do not apply the rule since current user is in cohort.
+          @moesif_helpers.log_debug('applied to is companies not in this cohort, so skipping add this rule')
+        else
+          # since applied_to is matching, we are in the cohort, we apply the rule by adding it to the list.
+          @moesif_helpers.log_debug('applied to is matching' + found_rule["applied_to"])
           applicable_rules_list.push(found_rule)
         end
       end
