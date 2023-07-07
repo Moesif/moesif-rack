@@ -194,7 +194,7 @@ class GovernanceRules
 
   def check_request_with_regex_match(regex_configs, request_fields, request_body)
     # since there is no regex config, custom must only care about cohort criteria, we assume true.
-    return true if regex_configs.empty?
+    return true if regex_configs.nil? || regex_configs.empty?
 
     array_to_or = regex_configs.map do |or_group_of_regex_rule|
       conditions = or_group_of_regex_rule.fetch('conditions', [])
@@ -236,7 +236,7 @@ class GovernanceRules
   def get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
     @unidentified_user_rules.select do |rule|
       @moesif_helpers.log_debug('check unidnetified user rule ' + rule.to_s)
-      regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), request_fields, request_body)
+      regex_matched = check_request_with_regex_match(rule.fetch('regex_config', nil), request_fields, request_body)
       @moesif_helpers.log_debug('regexmatched')
       @moesif_helpers.log_debug(regex_matched)
 
@@ -268,7 +268,7 @@ class GovernanceRules
 
         @moesif_helpers.log_debug('found rule in cached user rules' + rule_id)
 
-        regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), request_fields, request_body)
+        regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config', nil), request_fields, request_body)
 
         if !regex_matched
           @moesif_helpers.log_debug('regex not matched, skipping ' + rule_id.to_s)
@@ -304,7 +304,7 @@ class GovernanceRules
 
   def get_applicable_company_rules_for_unidentified_company(request_fields, request_body)
     @unidentified_company_rules.select do |rule|
-      regex_matched = check_request_with_regex_match(rule.fetch('regex_config'), request_fields, request_body)
+      regex_matched = check_request_with_regex_match(rule.fetch('regex_config', nil), request_fields, request_body)
 
       regex_matched
     end
@@ -331,7 +331,7 @@ class GovernanceRules
           next
         end
 
-        regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config'), request_fields, request_body)
+        regex_matched = check_request_with_regex_match(found_rule.fetch('regex_config', nil), request_fields, request_body)
 
         if !regex_matched
           @moesif_helpers.log_debug('regex not matched, skipping ' + rule_id.to_s)
