@@ -416,6 +416,19 @@ class GovernanceRules
       return response
     end
 
+    # config_rule_values if exists should be from config for a particular user for an list of rules.
+    # [
+    #   {
+    #     "rules": "629847be77e75b13635aa868",
+    #     "values": {
+    #       "1": "viewer-Float(online)-nd",
+    #       "2": "[\"62984b17715c450ba6ad46b2\"]",
+    #       "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+    #       "4": "viewer-Float(online)-nd"
+    #     }
+    #   }
+    # ]
+
     applicable_rules.reduce(response) do |prev_response, rule|
       if !config_rule_values.nil?
         found_rule_value_pair = config_rule_values.find { |rule_value_pair| rule_value_pair["rules"] == rule["_id"] }
