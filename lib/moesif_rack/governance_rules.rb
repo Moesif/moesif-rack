@@ -175,12 +175,13 @@ class GovernanceRules
     uri
   end
 
-  def prepare_request_fields_based_on_regex_config(_env, event_model)
+  def prepare_request_fields_based_on_regex_config(_env, event_model, request_body)
+    operation_name = request_body.fetch('operationName', nil) unless request_body.nil?
     {
-      'request.verb' => event_model.dig('request', 'verb'),
-      'request.ip_address' => event_model.dig('request', 'ip_address'),
-      'request.route' => convert_uri_to_route(event_model.dig('request', 'uri')),
-      'request.body.operationName' => event_model.dig('request', 'body', 'operationName')
+      'request.verb' => event_model.request.verb,
+      'request.ip_address' => event_model.request.ip_address,
+      'request.route' => convert_uri_to_route(event_model.request.uri),
+      'request.body.operationName' => operation_name
     }
   end
 
@@ -445,10 +446,13 @@ class GovernanceRules
     # we can skip if rules does not exist or config does not exist
     return if @rules.nil? || @rules.empty?
 
-    request_fields = prepare_request_fields_based_on_regex_config(env, event_model)
-    request_body = event_model.dig('request', 'body')
-    user_id = event_model.fetch('user_id', nil)
-    company_id = event_model.fetch('company_id', nil)
+    if event_model
+      request_body = event_model.request.body
+      request_fields = prepare_request_fields_based_on_regex_config(env, event_model, request_body)
+    end
+
+    user_id = event_model.user_id
+    company_id = event_model.company_id
 
     # apply in reverse order of priority.
     # Priority is user rule, company rule, and regex.

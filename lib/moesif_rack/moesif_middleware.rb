@@ -377,7 +377,7 @@ module MoesifRack
 
           # replace in event_model
           event_model.response.status = new_response.fetch(:status, status)
-          event_model.response.header = new_response.fetch(:headers, headers).dup
+          event_model.response.headers = new_response.fetch(:headers, headers).dup
           replaced_body = new_response.fetch(:body, rsp_body)
           event_model.blocked_by = new_response.fetch(:block_rule_id, nil)
           if !event_model.blocked_by.nil?
