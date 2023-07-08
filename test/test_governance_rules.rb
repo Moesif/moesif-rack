@@ -12,13 +12,9 @@ class GovernanceRulesTest < Test::Unit::TestCase
     return if @already_setup
     @goverance_rule_manager = GovernanceRules.new(true)
     @api_client = MoesifApi::MoesifAPIClient.new('Your Moesif Application Id')
-    @goverance_rule_manager.reload_rules_if_needed(@api_client.api)
+    @goverance_rule_manager.load_rules(@api_client.api)
     @already_setup = true
   end
-
-  # def test_load
-  #   @goverance_rule_manager.reload_rules_if_needed(@api_client.api)
-  # end
 
   def test_get_applicable_regex_rules
     request_fields = {

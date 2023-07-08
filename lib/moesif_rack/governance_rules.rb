@@ -156,14 +156,6 @@ class GovernanceRules
     @moesif_helpers.log_debug e.to_s
   end
 
-  def reload_rules_if_needed(api_controller)
-    # ten minutes to refech
-    return unless Time.now.utc > (@last_fetch + 60 * 10)
-
-    @moesif_helpers.log_debug 'more than 10 minutes passed reload rules again'
-    load_rules(api_controller)
-  end
-
   def has_rules
     return false if @rules.nil?
 

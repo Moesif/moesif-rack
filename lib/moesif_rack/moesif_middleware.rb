@@ -167,7 +167,21 @@ module MoesifRack
             end
 
             @moesif_helpers.log_debug('No events to read from the queue') if @events_queue.empty?
-            @governance_manager.reload_rules_if_needed(@api_controller)
+            if (!@event_response_config_etag.nil? && !@config_etag.nil? && @config_etag != @event_response_config_etag) || (Time.now.utc > (@last_config_download_time + 300))
+              begin
+                @moesif_helpers.log_debug('try to reload config and rules again')
+                new_config = @app_config.get_config(@api_controller)
+                unless new_config.nil?
+                  @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
+                end
+                # since logic to reload config is already here for every 5 minutes,
+                # reload rules here also.
+                @governance_manager.load_rules(@api_controller)
+              rescue StandardError => e
+                @moesif_helpers.log_debug 'Error while updating the application configuration'
+                @moesif_helpers.log_debug e.to_s
+              end
+            end
 
             sleep @batch_max_time
           rescue MoesifApi::APIException => e
@@ -332,18 +346,6 @@ module MoesifRack
             end
 
             start_worker if Time.now.utc > (@last_worker_run + 60)
-
-            if !@event_response_config_etag.nil? && !@config_etag.nil? && @config_etag != @event_response_config_etag && Time.now.utc > (@last_config_download_time + 300)
-              begin
-                new_config = @app_config.get_config(@api_controller)
-                unless new_config.nil?
-                  @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
-                end
-              rescue StandardError => e
-                @moesif_helpers.log_debug 'Error while updating the application configuration'
-                @moesif_helpers.log_debug e.to_s
-              end
-            end
           else
             @moesif_helpers.log_debug('Skipped Event due to sampling percentage: ' + sampling_percentage.to_s + ' and random percentage: ' + random_percentage.to_s)
           end
