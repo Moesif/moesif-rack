@@ -210,6 +210,9 @@ class GovernanceRules
     end
 
     array_to_or.reduce(false) { |anysofar, curr| anysofar || curr }
+  rescue StandardError
+    @moesif_helpers.log_debug('checking regex failed, possible malformed regex')
+    false
   end
 
   def get_applicable_regex_rules(request_fields, request_body)
