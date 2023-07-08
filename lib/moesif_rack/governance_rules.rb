@@ -107,10 +107,10 @@ class GovernanceRules
 
   def load_rules(api_controller)
     # Get Application Config
+    @last_fetch = Time.now.utc
     @moesif_helpers.log_debug('starting downlaoding rules')
     rules_response = api_controller.get_rules
     rules = @moesif_helpers.decompress_gzip_body(rules_response)
-    @last_fetch = Time.now.utc
     @moesif_helpers.log_debug('new rules downloaded')
     @moesif_helpers.log_debug(rules.to_json)
 
@@ -237,11 +237,9 @@ class GovernanceRules
 
   def get_applicable_user_rules_for_unidentified_user(request_fields, request_body)
     @unidentified_user_rules.select do |rule|
-      @moesif_helpers.log_debug('check unidnetified user rule ' + rule.to_s)
       regex_matched = check_request_with_regex_match(rule.fetch('regex_config', nil), request_fields, request_body)
-      @moesif_helpers.log_debug('regexmatched')
-      @moesif_helpers.log_debug(regex_matched)
 
+      @moesif_helpers.log_debug('regexmatched for unidetnfied_user rule ' + rule.to_json) if regex_matched
       regex_matched
     end
   end
@@ -258,7 +256,6 @@ class GovernanceRules
       config_user_rules_values.each do |entry|
         rule_id = entry['rules']
         # this is user_id matched cohort set in the rule.
-        mergetag_values = entry['values']
         rule_ids_hash_that_is_in_cohort[rule_id] = true unless rule_id.nil?
         # rule_ids_hash_that_I_am_in_cohot{629847be77e75b13635aa868: true}
 
@@ -313,15 +310,15 @@ class GovernanceRules
   def get_applicable_company_rules(request_fields, request_body, config_company_rules_values)
     applicable_rules_list = []
 
+    @moesif_helpers.log_debug('get applicable company rules for identifed company using these config values: ' + config_company_rules_values.to_s)
+
     rule_ids_hash_that_is_in_cohort = {}
 
     # handle where company_id is in the cohort of the rules.
     unless config_company_rules_values.nil?
       config_company_rules_values.each do |entry|
         rule_id = entry['rules']
-        # this is user_id matched cohort set in the rule.
-        mergetag_values = entry['values']
-
+        # this is company_id matched cohort set in the rule.
         rule_ids_hash_that_is_in_cohort[rule_id] = true unless rule_id.nil?
 
         found_rule = @company_rules[rule_id]
@@ -469,7 +466,7 @@ class GovernanceRules
       new_response = apply_rules_list(company_rules, new_response, nil)
     else
       config_rule_values = config.dig('company_rules', company_id) unless config.nil?
-      company_rules = get_applicable_user_rules(request_fields, request_body, config_rule_values)
+      company_rules = get_applicable_company_rules(request_fields, request_body, config_rule_values)
       new_response = apply_rules_list(company_rules, new_response, config_rule_values)
     end
 

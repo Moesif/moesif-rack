@@ -34,7 +34,7 @@ class AppConfig
 
     # Rails return gzipped compressed response body, so decompressing it and getting JSON response body
     response_body = @moesif_helpers.decompress_gzip_body(config_api_response)
-    @moesif_helpers.log_debug(response_body.to_s)
+    @moesif_helpers.log_debug(response_body.to_json)
 
     # Check if response body is not nil
     return response_body, config_api_response.headers[:x_moesif_config_etag], Time.now.utc unless response_body.nil?
