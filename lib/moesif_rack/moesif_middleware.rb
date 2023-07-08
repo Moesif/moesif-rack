@@ -31,7 +31,7 @@ module MoesifRack
       @debug = options['debug']
       @app_config = AppConfig.new(@debug)
       @moesif_helpers = MoesifHelpers.new(@debug)
-      # @config = @app_config.get_config(@api_controller)
+
       @config_etag = nil
       @last_config_download_time = Time.now.utc
       @config_dict = {}
@@ -380,7 +380,7 @@ module MoesifRack
           event_model.response.headers = new_response.fetch(:headers, headers).dup
 
           blocked_by = new_response.fetch(:block_rule_id, nil)
-          event_model.blocked_by = blocked_by
+
           unless blocked_by.nil?
             # we only replace body and status if it is blocked.
             body = @moesif_helpers.format_replacement_body(new_response.fetch(:body, nil), body)
