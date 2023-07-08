@@ -210,8 +210,8 @@ class GovernanceRules
     end
 
     array_to_or.reduce(false) { |anysofar, curr| anysofar || curr }
-  rescue StandardError
-    @moesif_helpers.log_debug('checking regex failed, possible malformed regex')
+  rescue StandardError => e
+    @moesif_helpers.log_debug('checking regex failed, possible malformed regex ' + e.to_s)
     false
   end
 
@@ -403,6 +403,9 @@ class GovernanceRules
       response[:block_rule_id] = rule['_id']
     end
 
+    response
+  rescue StandardError => e
+    @moesif_helpers.log_debug('failed to apply rule ' + rule.to_json + ' for  ' + response.to_s + ' error: ' + e.to_s)
     response
   end
 
