@@ -1,0 +1,20 @@
+{
+  "_id": "647e8bd1b80b4f10945463c9",
+  "type": "user",
+  "block": true,
+  "name": "test",
+  "appliedTo": "matching",
+  "appliedToUnidentified": false,
+  "regex_config": [],
+  "cohorts": [{ "id": "647e8bbbed26fe10468dfe55", "type": "user" }],
+  "state": 2,
+  "response": {
+    "status": 100,
+    "headers": { "test": "{{1}}" },
+    "body": { "test": "{{0}}" }
+  },
+  "variables": [
+    { "name": "0", "path": "cohort_names" },
+    { "name": "1", "path": "first_seen_time" }
+  ]
+}

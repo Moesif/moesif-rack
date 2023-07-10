@@ -1,0 +1,1477 @@
+{
+  "org_id": "262:549",
+  "app_id": "93:564",
+  "sample_rate": 100,
+  "block_bot_traffic": false,
+  "user_sample_rate": {
+    "ANOTHER SUPER SPICIAL USER": 100,
+    "be_test_user5": 100,
+    "ruby_perf_test_user": 100,
+    "table: 0x7fd673a70978": 100,
+    "noOpNameUser1": 100,
+    "ANOTHER SPECIAL USER": 100,
+    "test-company-2": 100,
+    "IntrospectionQuery_User": 100,
+    "sample_user_id-9-10": 100,
+    "alert_test_user_3": 100,
+    "alert_test_user_2": 100,
+    "be_test_user11": 100,
+    "SOMETHING SPECIAL USER": 100,
+    "be_test1": 100,
+    "user_test_sampling_rate1": 100,
+    "be_test_user2": 100,
+    "time_range_user1": 100,
+    "golangapiuser": 100,
+    "be_test_user17": 100,
+    "be_test_user14": 100,
+    "sample_user_id-9-9": 100,
+    "be_test_user6": 100,
+    "123": 100,
+    "u4": 100,
+    "table: 0x7f5cfd413bc0": 100,
+    "table: 0x7fc46685da20": 100,
+    "uuu1": 100,
+    "johndoe": 100,
+    "a6g3bvr46ag84e89": 100,
+    "Account eoh prod 2": 100,
+    "sample_user_id-9-4": 100,
+    "cSharpUser1": 100,
+    "be_test_user15": 100,
+    "uu2": 100,
+    "be_test_user1": 100,
+    "gov_user_1": 100,
+    "be_test_user16": 100,
+    "es7a1": 100,
+    "large_event_set_tag_u1": 100,
+    "c1": 100,
+    "urlencode_user1": 100,
+    "anyone else": 100,
+    "1": 100,
+    "test-user-3": 100,
+    "sample_user_id-9-3": 100,
+    "be_test_user7": 100,
+    "gina": 100,
+    "table: 0x7f5cfd55f090": 100,
+    "table: 0x7fc466d5d5e0": 100,
+    "SAMPLE_USER_ID": 100,
+    "recvreedfef": 100,
+    "monetization-ac4-prod": 100,
+    "table: 0x7fd67321ce28": 100,
+    "be_test_user4": 100,
+    "SUPER SPICIAL USER": 100,
+    "be_test_user12": 100,
+    "no_company_1": 100,
+    "12345": 100,
+    "test-company-1": 100,
+    "table: 0x7fd673546c50": 100,
+    "large_event_set_tag_u2": 100,
+    "00010": 100,
+    "be_test_user9": 100,
+    "table: 0x7fd673b089e8": 100,
+    "sample_user_id-9-11": 100,
+    "be_test_user8": 100,
+    "mndug437f43": 100,
+    "be_test_user3": 100,
+    "my_user_id": 100,
+    "mutFollowerCount": 100,
+    "3327f7f4daabefaa08c26845fb1f496d": 100,
+    "alert_test_user_1": 100,
+    "be_test_user10": 100,
+    "be_test_user13": 100,
+    "cus_LszNUhUG81oqds": 100
+  },
+  "company_sample_rate": {
+    "c37": 30,
+    "c22": 30,
+    "master": 30,
+    "c33": 30,
+    "c34": 30,
+    "c23": 30,
+    "c27": 30,
+    "c35": 30,
+    "c30": 30,
+    "c21": 30,
+    "c38": 30,
+    "c24": 30,
+    "c29": 30,
+    "c39": 30,
+    "c20": 30,
+    "c31": 30,
+    "c40": 30,
+    "c28": 30,
+    "cc2": 30,
+    "c32": 30,
+    "c10": 30,
+    "c36": 30
+  },
+  "user_rules": {
+    "fragment3": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "fragment3",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "fragment3"
+        }
+      }
+    ],
+    "Member_User": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "Member_User",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "Member_Company"
+        }
+      }
+    ],
+    "viewer-Float(online)-nd": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "viewer-Float(online)-nd",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "viewer-Float(online)-nd"
+        }
+      }
+    ],
+    "be_test_user5": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user5",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "be_test_company5"
+        }
+      }
+    ],
+    "ruby_perf_test_user": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "ruby_perf_test_user",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\"]",
+          "4": "ruby_perf_test_company"
+        }
+      }
+    ],
+    "NoOpName3_User": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "NoOpName3_User",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "NoOpName3_User"
+        }
+      }
+    ],
+    "noOpNameUser1": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "noOpNameUser1",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\"]",
+          "4": "noOpNameCompany1"
+        }
+      }
+    ],
+    "test-company-2": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "test-company-2",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "test-company-2"
+        }
+      }
+    ],
+    "IntrospectionQuery_User": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "IntrospectionQuery_User",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\"]",
+          "4": "IntrospectionQuery_Company"
+        }
+      }
+    ],
+    "sample_user_id-9-10": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "sample_user_id-9-10",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\"]",
+          "4": "sample_company_id-10"
+        }
+      }
+    ],
+    "alert_test_user_3": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "alert_test_user_3",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "alert_test_company_3"
+        }
+      }
+    ],
+    "no-fragment": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "no-fragment",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "no-fragment"
+        }
+      }
+    ],
+    "TeamAnswerQuestion": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "TeamAnswerQuestion",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "TeamAnswerQuestion"
+        }
+      }
+    ],
+    "alert_test_user_2": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "alert_test_user_2",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "alert_test_company_2"
+        }
+      }
+    ],
+    "be_test_user11": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user11",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "be_test_company11"
+        }
+      }
+    ],
+    "be_test_user2": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user2",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "be_test_company2"
+        }
+      }
+    ],
+    "time_range_user1": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "time_range_user1",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\",\"635231dfd0e4785ebbd58cf5\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\",\"FST exist cohorts\"]",
+          "4": "time_range_company1"
+        }
+      }
+    ],
+    "golangapiuser": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "golangapiuser",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\"]",
+          "4": "golangapicompany"
+        }
+      }
+    ],
+    "status-User": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "status-User",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "status-Company"
+        }
+      }
+    ],
+    "be_test_user17": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user17",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\",\"639b9487adb267778f64f055\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\",\"email includes es7\"]",
+          "4": "be_test_company17"
+        }
+      }
+    ],
+    "be_test_user14": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user14",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\",\"639b9487adb267778f64f055\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\",\"email includes es7\"]",
+          "4": "be_test_company14"
+        }
+      }
+    ],
+    "sample_user_id-9-9": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "sample_user_id-9-9",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\",\"639b9487adb267778f64f055\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\",\"email includes es7\"]",
+          "4": "sample_company_id-9"
+        }
+      }
+    ],
+    "be_test_user6": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user6",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "be_test_company6"
+        }
+      }
+    ],
+    "getPortal_User": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "getPortal_User",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "getPortal_Company"
+        }
+      }
+    ],
+    "fragment2": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "fragment2",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "fragment2"
+        }
+      }
+    ],
+    "status-GET-User": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "status-GET-User",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "status-GET-Company"
+        }
+      }
+    ],
+    "MemberUser": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "MemberUser",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "MemberCompany"
+        }
+      }
+    ],
+    "a6g3bvr46ag84e89": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "a6g3bvr46ag84e89",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "sub_1L0s39EQc06VM4aWMIDG4G5i"
+        }
+      }
+    ],
+    "Account eoh prod 2": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "Account eoh prod 2",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\"]",
+          "4": "62ae2a6b84057a79ced81543acaff06f"
+        }
+      }
+    ],
+    "sample_user_id-9-4": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "sample_user_id-9-4",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\",\"639b9487adb267778f64f055\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\",\"email includes es7\"]",
+          "4": "sample_company_id-8"
+        }
+      }
+    ],
+    "cSharpUser1": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "cSharpUser1",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\"]",
+          "4": "cSharpCompany1"
+        }
+      }
+    ],
+    "be_test_user15": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user15",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\",\"639b9487adb267778f64f055\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\",\"email includes es7\"]",
+          "4": "be_test_company15"
+        }
+      }
+    ],
+    "be_test_user1": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user1",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "be_test_company1"
+        }
+      }
+    ],
+    "gov_user_1": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "gov_user_1",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\"]",
+          "4": "gov_company_1"
+        }
+      }
+    ],
+    "be_test_user16": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user16",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\",\"639b9487adb267778f64f055\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\",\"email includes es7\"]",
+          "4": "be_test_company16"
+        }
+      }
+    ],
+    "es7a1": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "es7a1",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "66fc64ec4ff66c423f404e4a9aba6c86"
+        }
+      }
+    ],
+    "large_event_set_tag_u1": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "large_event_set_tag_u1",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\"]",
+          "4": "large_event_set_tag_c1"
+        }
+      }
+    ],
+    "fragment4": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "fragment4",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "fragment4"
+        }
+      }
+    ],
+    "urlencode_user1": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "urlencode_user1",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\"]",
+          "4": "urlencode_company1"
+        }
+      }
+    ],
+    "test-user-3": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "test-user-3",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "test-company-3"
+        }
+      }
+    ],
+    "sample_user_id-9-3": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "sample_user_id-9-3",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\",\"639b9487adb267778f64f055\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\",\"email includes es7\"]",
+          "4": "sample_company_id-5"
+        }
+      }
+    ],
+    "be_test_user7": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user7",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "be_test_company7"
+        }
+      }
+    ],
+    "null3_User": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "null3_User",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "null3_Company"
+        }
+      }
+    ],
+    "monetization-ac4-prod": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "monetization-ac4-prod",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\"]",
+          "4": "646855e5ad3e1a99653129449a842e1e"
+        }
+      }
+    ],
+    "GetPortal-nd": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "GetPortal-nd",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "GetPortal-nd"
+        }
+      }
+    ],
+    "status": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "status",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "status"
+        }
+      }
+    ],
+    "be_test_user4": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user4",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "be_test_company4"
+        }
+      }
+    ],
+    "fragment1": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "fragment1",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "fragment1"
+        }
+      }
+    ],
+    "TeamAnswerQuestion_User": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "TeamAnswerQuestion_User",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "TeamAnswerQuestion_Company"
+        }
+      }
+    ],
+    "GraphQLUser": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "GraphQLUser",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "GraphQLCompany"
+        }
+      }
+    ],
+    "be_test_user12": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user12",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "be_test_company12"
+        }
+      }
+    ],
+    "GetPortal": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "GetPortal",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "GetPortal"
+        }
+      }
+    ],
+    "test-company-1": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "test-company-1",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "test-company-1"
+        }
+      }
+    ],
+    "CreateReviewForEpisode": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "CreateReviewForEpisode",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "CreateReviewForEpisode"
+        }
+      }
+    ],
+    "noOpNameUser2": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "noOpNameUser2",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "noOpNameCompany2"
+        }
+      }
+    ],
+    "large_event_set_tag_u2": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "large_event_set_tag_u2",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\"]",
+          "4": "large_event_set_tag_c2"
+        }
+      }
+    ],
+    "viewer-Float(online)": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "viewer-Float(online)",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "viewer-Float(online)"
+        }
+      }
+    ],
+    "be_test_user9": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user9",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "be_test_company9"
+        }
+      }
+    ],
+    "sample_user_id-9-11": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "4": "sample_company_id-11",
+          "1": "sample_user_id-9-11",
+          "0": "sample_name911",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6352371ed0e4785ebbd58db8\",\"6356cadd18931e52a9defd80\",\"639b9487adb267778f64f055\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"SF Cohort\",\"Ceo IP\",\"email includes es7\"]"
+        }
+      }
+    ],
+    "be_test_user8": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user8",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "be_test_company8"
+        }
+      }
+    ],
+    "my_user_id": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "my_user_id",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "my_company_id"
+        }
+      }
+    ],
+    "noOperationName1": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "noOperationName1",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "noOperationName1"
+        }
+      }
+    ],
+    "alert_test_user_1": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "alert_test_user_1",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "alert_test_company_1"
+        }
+      }
+    ],
+    "customer2_User": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "customer2_User",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "customer2_Company"
+        }
+      }
+    ],
+    "be_test_user10": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user10",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\"]",
+          "4": "be_test_company10"
+        }
+      }
+    ],
+    "be_test_user13": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "be_test_user13",
+          "2": "[\"62984b17715c450ba6ad46b2\",\"6356cadd18931e52a9defd80\",\"639b9487adb267778f64f055\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\",\"Ceo IP\",\"email includes es7\"]",
+          "4": "be_test_company13"
+        }
+      }
+    ],
+    "nullUser1": [
+      {
+        "rules": "629847be77e75b13635aa868",
+        "values": {
+          "1": "nullUser1",
+          "2": "[\"62984b17715c450ba6ad46b2\"]",
+          "3": "[\"user cohort created at 6/1, 10:31 PM\"]",
+          "4": "nullCompany1"
+        }
+      }
+    ]
+  },
+  "company_rules": {
+    "67890": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "67890" } }
+    ],
+    "fragment3": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "fragment3" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "fragment3" } }
+    ],
+    "be_test_company15": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company15" }
+      }
+    ],
+    "be_test_company3": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company3" }
+      },
+      {
+        "rules": "649a1fe24991bd5c289bf39e",
+        "values": { "0": "be_test_company3" }
+      }
+    ],
+    "viewer-Float(online)-nd": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "viewer-Float(online)-nd" }
+      }
+    ],
+    "viewer-Int(online)": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "viewer-Int(online)" }
+      }
+    ],
+    "NoOpName3_User": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "NoOpName3_User" }
+      },
+      {
+        "rules": "649a1fe24991bd5c289bf39e",
+        "values": { "0": "NoOpName3_User" }
+      }
+    ],
+    "Member_Company": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "Member_Company" }
+      }
+    ],
+    "MemberCompany": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "MemberCompany" }
+      }
+    ],
+    "test-company-2": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "test-company-2" }
+      }
+    ],
+    "ccc1": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "ccc1" } }
+    ],
+    "c3": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "c3" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "c3" } }
+    ],
+    "sample_company_id-10": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "sample_company_id-10" }
+      }
+    ],
+    "c4": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c4" } }],
+    "nullCompany1": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "nullCompany1" } }
+    ],
+    "no-fragment": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "no-fragment" } }
+    ],
+    "TeamAnswerQuestion": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "TeamAnswerQuestion" }
+      }
+    ],
+    "ANOTHER SPECIAL COMPANY": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "ANOTHER SPECIAL COMPANY" }
+      }
+    ],
+    "viewer-Int(online)-nd": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "viewer-Int(online)-nd" }
+      }
+    ],
+    "c11": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c11" } }],
+    "be_test_company10": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company10" }
+      }
+    ],
+    "c8": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c8" } }],
+    "be_test1": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "be_test1" } }
+    ],
+    "alert_test_company_1": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "alert_test_company_1" }
+      }
+    ],
+    "GraphQLCompany": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "GraphQLCompany" }
+      }
+    ],
+    "sample_company_id-8": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "sample_company_id-8" }
+      }
+    ],
+    "c37": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "c37" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "c37" } }
+    ],
+    "c22": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c22" } }],
+    "master": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "master" } }
+    ],
+    "be_test_company8": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company8" }
+      }
+    ],
+    "getPortal_Company": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "getPortal_Company" }
+      }
+    ],
+    "567": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "567" } }],
+    "TeamAnswerQuestion_Company": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "TeamAnswerQuestion_Company" }
+      }
+    ],
+    "c33": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "c33" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "c33" } }
+    ],
+    "sub_1LBDQlIDRpUzdfHJ7fuvxkj8": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "sub_1LBDQlIDRpUzdfHJ7fuvxkj8" }
+      }
+    ],
+    "66fc64ec4ff66c423f404e4a9aba6c86": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "66fc64ec4ff66c423f404e4a9aba6c86" }
+      },
+      {
+        "rules": "649a1fe24991bd5c289bf39e",
+        "values": { "0": "66fc64ec4ff66c423f404e4a9aba6c86" }
+      }
+    ],
+    "ruby_perf_test_company": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "ruby_perf_test_company" }
+      }
+    ],
+    "sub_1L0s39EQc06VM4aWMIDG4G5i": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "sub_1L0s39EQc06VM4aWMIDG4G5i" }
+      },
+      {
+        "rules": "649a1fe24991bd5c289bf39e",
+        "values": { "0": "sub_1L0s39EQc06VM4aWMIDG4G5i" }
+      }
+    ],
+    "sample_company_id-7": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "sample_company_id-7" }
+      }
+    ],
+    "62ae2a6b84057a79ced81543acaff06f": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "62ae2a6b84057a79ced81543acaff06f" }
+      },
+      {
+        "rules": "649a1fe24991bd5c289bf39e",
+        "values": { "0": "62ae2a6b84057a79ced81543acaff06f" }
+      }
+    ],
+    "be_test_company11": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company11" }
+      }
+    ],
+    "c5": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c5" } }],
+    "GreetingQuery-String(online)-nd": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "GreetingQuery-String(online)-nd" }
+      }
+    ],
+    "c2": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c2" } }],
+    "fragment2": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "fragment2" } }
+    ],
+    "c34": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "c34" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "c34" } }
+    ],
+    "status-GET-Company": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "status-GET-Company" }
+      }
+    ],
+    "be_test_company2": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company2" }
+      }
+    ],
+    "c9": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c9" } }],
+    "be_test_company5": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company5" }
+      }
+    ],
+    "c12": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c12" } }],
+    "my_company_id": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "my_company_id" }
+      }
+    ],
+    "company_test_sampling_rate1": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "company_test_sampling_rate1" }
+      }
+    ],
+    "c23": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "c23" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "c23" } }
+    ],
+    "golangapicompany": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "golangapicompany" }
+      }
+    ],
+    "SOMETHING SPECIAL COMPANY": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "SOMETHING SPECIAL COMPANY" }
+      }
+    ],
+    "67890        ": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "67890        " }
+      }
+    ],
+    "time_range_company1": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "time_range_company1" }
+      }
+    ],
+    "c16": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c16" } }],
+    "c27": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c27" } }],
+    "sample_company_id-6": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "sample_company_id-6" }
+      }
+    ],
+    "large_event_set_tag_c1": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "large_event_set_tag_c1" }
+      }
+    ],
+    "c35": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "c35" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "c35" } }
+    ],
+    "fragment4": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "fragment4" } }
+    ],
+    "c30": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "c30" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "c30" } }
+    ],
+    "c21": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c21" } }],
+    "c1": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c1" } }],
+    "be_test_company13": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company13" }
+      },
+      {
+        "rules": "649a1fe24991bd5c289bf39e",
+        "values": { "0": "be_test_company13" }
+      }
+    ],
+    "c6": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c6" } }],
+    "IntrospectionQuery_Company": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "IntrospectionQuery_Company" }
+      }
+    ],
+    "SUPER SPICIAL COMPANY": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "SUPER SPICIAL COMPANY" }
+      }
+    ],
+    "c18": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c18" } }],
+    "be_test_company12": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company12" }
+      }
+    ],
+    "c38": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "c38" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "c38" } }
+    ],
+    "noOpNameCompany2": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "noOpNameCompany2" }
+      }
+    ],
+    "be_test_company1": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company1" }
+      }
+    ],
+    "be_test_company17": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company17" }
+      }
+    ],
+    "SAMPLE_USER_ID": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "SAMPLE_USER_ID" }
+      }
+    ],
+    "GetPortal-nd": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "GetPortal-nd" } }
+    ],
+    "c24": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c24" } }],
+    "c29": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c29" } }],
+    "status": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "status" } }
+    ],
+    "ANOTHER SUPER SPICIAL COMPANY": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "ANOTHER SUPER SPICIAL COMPANY" }
+      }
+    ],
+    "c13": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "c13" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "c13" } }
+    ],
+    "customer": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "customer" } }
+    ],
+    "fragment1": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "fragment1" } }
+    ],
+    "c39": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "c39" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "c39" } }
+    ],
+    "alert_test_company_3": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "alert_test_company_3" }
+      },
+      {
+        "rules": "649a1fe24991bd5c289bf39e",
+        "values": { "0": "alert_test_company_3" }
+      }
+    ],
+    "large_event_set_tag_c2": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "large_event_set_tag_c2" }
+      }
+    ],
+    "c20": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c20" } }],
+    "c31": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "c31" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "c31" } }
+    ],
+    "noOpNameCompany1": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "noOpNameCompany1" }
+      }
+    ],
+    "null3_Company": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "null3_Company" }
+      },
+      {
+        "rules": "649a1fe24991bd5c289bf39e",
+        "values": { "0": "null3_Company" }
+      }
+    ],
+    "GetPortal": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "GetPortal" } }
+    ],
+    "be_test_company6": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company6" }
+      }
+    ],
+    "be_test_company16": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company16" }
+      }
+    ],
+    "be_test_company9": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company9" }
+      }
+    ],
+    "be_test_company4": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company4" }
+      }
+    ],
+    "c40": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c40" } }],
+    "customer2_Company": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "customer2_Company" }
+      }
+    ],
+    "12345": [
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "12345" } }
+    ],
+    "c7": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c7" } }],
+    "test-company-1": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "test-company-1" }
+      }
+    ],
+    "CreateReviewForEpisode": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "CreateReviewForEpisode" }
+      }
+    ],
+    "cc": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "cc" } }],
+    "viewer-Float(online)": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "viewer-Float(online)" }
+      }
+    ],
+    "GreetingQuery(online)": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "GreetingQuery(online)" }
+      }
+    ],
+    "test-company-3": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "test-company-3" }
+      },
+      {
+        "rules": "649a1fe24991bd5c289bf39e",
+        "values": { "0": "test-company-3" }
+      }
+    ],
+    "c28": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c28" } }],
+    "sample_company_id-11": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "sample_company_id-11" }
+      }
+    ],
+    "sample_company_id-5": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "sample_company_id-5" }
+      }
+    ],
+    "null1-identity": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "null1-identity" }
+      }
+    ],
+    "gov_company_1": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "gov_company_1" }
+      }
+    ],
+    "be_test_company14": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company14" }
+      }
+    ],
+    "urlencode_company1": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "urlencode_company1" }
+      }
+    ],
+    "status-Company": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "status-Company" }
+      }
+    ],
+    "sample_company_id-9": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "sample_company_id-9" }
+      }
+    ],
+    "c14": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c14" } }],
+    "IntrospectionQuery": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "IntrospectionQuery" }
+      }
+    ],
+    "noOperationName1": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "noOperationName1" }
+      }
+    ],
+    "cc2": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "cc2" } }],
+    "c32": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "c32" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "c32" } }
+    ],
+    "alert_test_company_2": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "alert_test_company_2" }
+      }
+    ],
+    "mutFollowerCount": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "mutFollowerCount" }
+      }
+    ],
+    "customer2": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "customer2" } }
+    ],
+    "646855e5ad3e1a99653129449a842e1e": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "646855e5ad3e1a99653129449a842e1e" }
+      },
+      {
+        "rules": "649a1fe24991bd5c289bf39e",
+        "values": { "0": "646855e5ad3e1a99653129449a842e1e" }
+      }
+    ],
+    "be_test_company7": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "be_test_company7" }
+      }
+    ],
+    "c10": [{ "rules": "6455928ab9b8551112508232", "values": { "0": "c10" } }],
+    "cSharpCompany1": [
+      {
+        "rules": "6455928ab9b8551112508232",
+        "values": { "0": "cSharpCompany1" }
+      }
+    ],
+    "c36": [
+      { "rules": "6455928ab9b8551112508232", "values": { "0": "c36" } },
+      { "rules": "649a1fe24991bd5c289bf39e", "values": { "0": "c36" } }
+    ]
+  },
+  "ip_addresses_blocked_by_name": {},
+  "regex_config": [],
+  "billing_config_jsons": {
+    "stripe": "{\"user_id_field\":\"id\",\"company_id_field\":\"metadata.uuid\"}",
+    "recurly": "{\"user_id_field\":\"account_code\",\"company_id_field\":\"uuid\"}"
+  }
+}
