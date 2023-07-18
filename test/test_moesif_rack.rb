@@ -4,8 +4,6 @@ require 'net/http'
 require_relative '../lib/moesif_rack/app_config.rb'
 require_relative '../lib/moesif_rack'
 
-print "hellow world"
-
 class MoesifRackTest < Test::Unit::TestCase
   def setup
     @app = ->(env) { [200, { "Content-Type" => "application/json" }, ["{ \"key\": \"value\"}"]]}
@@ -48,7 +46,6 @@ class MoesifRackTest < Test::Unit::TestCase
     }
   }
 
-    print "hellow world"
     @moesif_rack_app = MoesifRack::MoesifMiddleware.new(@app, @options)
     @app_config = AppConfig.new(true)
   end
