@@ -176,26 +176,9 @@ module MoesifCaptureOutgoing
               # we put in the queue and format abot it.
               unless @events_queue.nil?
                 @events_queue << event_model
+                puts('Outgoing Event successfully added to event queue') if @debug
                 return
               end
-
-              # event_api_response = @api_controller.create_event(event_model)
-              # event_response_config_etag = event_api_response[:x_moesif_config_etag]
-
-              # if !event_response_config_etag.nil? && !@config_etag.nil? && @config_etag != event_response_config_etag && Time.now.utc > @last_updated_time + 300
-              #   begin
-              #     new_config = @app_config.get_config(@api_controller)
-              #     unless new_config.nil?
-              #       @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
-              #     end
-              #   rescue StandardError => e
-              #     if @debug
-              #       puts 'Error while updating the application configuration'
-              #       puts e
-              #     end
-              #   end
-              # end
-              puts('Event successfully sent to Moesif') if @debug
             elsif @debug
               puts('Skipped outgoing Event due to sampling percentage: ' + @sampling_percentage.to_s + ' and random percentage: ' + @random_percentage.to_s)
             end
