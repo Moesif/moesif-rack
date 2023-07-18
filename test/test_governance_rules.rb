@@ -1,6 +1,6 @@
 require 'moesif_api'
 require 'test/unit'
-require 'rack'
+
 require 'net/http'
 require_relative '../lib/moesif_rack/app_config'
 require_relative '../lib/moesif_rack'
@@ -61,10 +61,10 @@ class GovernanceRulesTest < Test::Unit::TestCase
     #for user id matched rules it depends on getting from config_rules_values
     #for that particular user id.
     # for this test case I will use this rule as fake input
-    #https://www.moesif.com/wrap/app/88:210-1051:5/governance-rule/64a5b8f9aca3042266d36ebc
+    #https://www.moesif.com/wrap/app/88:210-660:387/governance-rule/64a783a3e7d62b036d16006e
     config_user_rules_values = [
       {
-        "rules" => "64a5b8f9aca3042266d36ebc",
+        "rules" => "64a783a3e7d62b036d16006e",
         "values" => {
           "0" => "rome",
           "1" => "some value for 1",
@@ -105,9 +105,10 @@ class GovernanceRulesTest < Test::Unit::TestCase
     }
     user_id = 'vancouver1'
 
+    # https://www.moesif.com/wrap/app/88:210-660:387/governance-rule/64a783a43660b60f7c766a06
     config_user_rules_values = [
       {
-        "rules" => "64a5b8fa3660b60f7c7662fc",
+        "rules" => "64a783a43660b60f7c766a06",
         "values" => {
           "0" => "city",
           "1" => "some value for 1",

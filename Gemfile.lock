@@ -3,6 +3,7 @@ PATH
   specs:
     moesif_rack (2.0.1)
       moesif_api (~> 2.0.1)
+      rack (~> 3.0.8, >= 2.0.0)
 
 GEM
   remote: https://rubygems.org/
@@ -46,6 +47,7 @@ GEM
     netrc (0.11.0)
     power_assert (2.0.3)
     public_suffix (5.0.1)
+    rack (3.0.8)
     rake (13.0.6)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)

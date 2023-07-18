@@ -175,7 +175,7 @@ module MoesifCaptureOutgoing
 
               # we put in the queue and format abot it.
               unless @events_queue.nil?
-                events_queue << event_model
+                @events_queue << event_model
                 return
               end
 

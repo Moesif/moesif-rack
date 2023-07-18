@@ -4,6 +4,8 @@ require 'net/http'
 require_relative '../lib/moesif_rack/app_config.rb'
 require_relative '../lib/moesif_rack'
 
+print "hellow world"
+
 class MoesifRackTest < Test::Unit::TestCase
   def setup
     @app = ->(env) { [200, { "Content-Type" => "application/json" }, ["{ \"key\": \"value\"}"]]}
@@ -45,6 +47,8 @@ class MoesifRackTest < Test::Unit::TestCase
       event_model
     }
   }
+
+    print "hellow world"
     @moesif_rack_app = MoesifRack::MoesifMiddleware.new(@app, @options)
     @app_config = AppConfig.new(true)
   end
@@ -118,7 +122,7 @@ class MoesifRackTest < Test::Unit::TestCase
     @api_controller = @api_client.api
     @app_config.get_config(@api_controller)
     @sampling_percentage = @app_config.get_sampling_percentage(nil, nil, nil)
-    assert_instance_of @app_config.config, Hash
+    assert_instance_of Hash, @app_config.config
     print "app config from test " + @app_config.config.to_s
     assert_operator 100, :>=, @sampling_percentage
   end

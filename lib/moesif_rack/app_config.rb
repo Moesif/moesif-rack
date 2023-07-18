@@ -18,7 +18,7 @@ class AppConfig
   def should_reload(etag_from_create_event)
     if @last_download_time.nil?
       return true
-    elsif Time.now.utc > (@last_config_download_time + 300)
+    elsif Time.now.utc > (@last_download_time + 300)
       return true
     elsif !etag_from_create_event.nil? && !@recent_etag.nil?
       @moesif_helpers.log_debug('comparing if etag from event and recent etag match ' + etag_from_create_event + ' ' + @recent_etag)
@@ -49,12 +49,11 @@ class AppConfig
   end
 
   def get_sampling_percentage(event_model, user_id, company_id)
+    # if we do not have config for some reason we return 100
+    if !@config.nil?
     # Get sampling percentage
       @moesif_helpers.log_debug("Getting sample rate for user #{user_id} company #{company_id}")
       @moesif_helpers.log_debug(@config.to_s)
-
-      # if we do not have config for some reason we return 100
-      return 100 if @config.nil?
 
       # Get Regex Sampling rate
       regex_config = @config.fetch('regex_config', nil)
