@@ -72,9 +72,9 @@ class MoesifRackTest < Test::Unit::TestCase
     campaign_model = {"utm_source" => "Newsletter",
                       "utm_medium" => "Email"}
 
-    user_model = { "user_id" => "12345", 
+    user_model = { "user_id" => "12345",
                    "company_id" => "67890",
-                   "modified_time" => Time.now.utc.iso8601, 
+                   "modified_time" => Time.now.utc.iso8601,
                    "metadata" => metadata,
                    "campaign" => campaign_model}
 
@@ -91,14 +91,14 @@ class MoesifRackTest < Test::Unit::TestCase
 
     user_models = []
 
-    user_model_A = { "user_id" => "12345", 
+    user_model_A = { "user_id" => "12345",
                    "company_id" => "67890",
-                   "modified_time" => Time.now.utc.iso8601, 
+                   "modified_time" => Time.now.utc.iso8601,
                    "metadata" => metadata }
-    
+
     user_model_B = { "user_id" => "1234",
-                    "company_id" => "6789", 
-                    "modified_time" => Time.now.utc.iso8601, 
+                    "company_id" => "6789",
+                    "modified_time" => Time.now.utc.iso8601,
                     "metadata" => metadata }
 
     user_models << user_model_A << user_model_B
@@ -116,9 +116,10 @@ class MoesifRackTest < Test::Unit::TestCase
   def test_get_config
     @api_client = MoesifApi::MoesifAPIClient.new(@options['application_id'])
     @api_controller = @api_client.api
-    @config = @app_config.get_config(@api_controller)
-    @config_body, @config_etag, @last_updated_time = @app_config.parse_configuration(@config)
-    @sampling_percentage = @app_config.get_sampling_percentage(nil, @config_body, nil, nil)
+    @app_config.get_config(@api_controller)
+    @sampling_percentage = @app_config.get_sampling_percentage(nil, nil, nil)
+    assert_instance_of @app_config.config, Hash
+    print "app config from test " + @app_config.config.to_s
     assert_operator 100, :>=, @sampling_percentage
   end
 
@@ -132,8 +133,8 @@ class MoesifRackTest < Test::Unit::TestCase
     campaign_model = {"utm_source" => "Adwords",
                       "utm_medium" => "Twitter"}
 
-    company_model = { "company_id" => "12345", 
-                      "company_domain" => "acmeinc.com", 
+    company_model = { "company_id" => "12345",
+                      "company_domain" => "acmeinc.com",
                       "metadata" => metadata,
                       "campaign" => campaign_model }
 
@@ -151,11 +152,11 @@ class MoesifRackTest < Test::Unit::TestCase
     company_models = []
 
     company_model_A = { "company_id" => "12345",
-                        "company_domain" => "nowhere.com", 
+                        "company_domain" => "nowhere.com",
                    "metadata" => metadata }
-    
+
     company_model_B = { "company_id" => "1234",
-                        "company_domain" => "acmeinc.com", 
+                        "company_domain" => "acmeinc.com",
                     "metadata" => metadata }
 
     company_models << company_model_A << company_model_B
