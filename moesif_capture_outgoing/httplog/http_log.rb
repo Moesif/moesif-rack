@@ -28,19 +28,6 @@ module MoesifCaptureOutgoing
       @events_queue = events_queue
       @sampling_percentage = 100
       @last_updated_time = Time.now.utc
-
-      # most likeky won't need to reloaded again here.
-      # begin
-      #   new_config = @app_config.get_config(@api_controller)
-      #   unless new_config.nil?
-      #     @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
-      #   end
-      # rescue StandardError => e
-      #   if @debug
-      #     puts 'Error while parsing application configuration on initialization'
-      #     puts e
-      #   end
-      # end
     end
 
     def call(url, request, request_time, response, response_time)
