@@ -1469,9 +1469,5 @@
     ]
   },
   "ip_addresses_blocked_by_name": {},
-  "regex_config": [],
-  "billing_config_jsons": {
-    "stripe": "{\"user_id_field\":\"id\",\"company_id_field\":\"metadata.uuid\"}",
-    "recurly": "{\"user_id_field\":\"account_code\",\"company_id_field\":\"uuid\"}"
-  }
+  "regex_config": []
 }

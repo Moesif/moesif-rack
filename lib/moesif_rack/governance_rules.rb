@@ -109,10 +109,7 @@ class GovernanceRules
     # Get Application Config
     @last_fetch = Time.now.utc
     @moesif_helpers.log_debug('starting downlaoding rules')
-    rules_response = api_controller.get_rules
-    rules = @moesif_helpers.decompress_gzip_body(rules_response)
-    @moesif_helpers.log_debug('new rules downloaded')
-    @moesif_helpers.log_debug(rules.to_json)
+    rules, _context = api_controller.get_rules
 
     generate_rules_caching(rules)
   rescue MoesifApi::APIException => e

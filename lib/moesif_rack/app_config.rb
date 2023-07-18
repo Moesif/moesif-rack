@@ -15,10 +15,10 @@ class AppConfig
 
   def get_config(api_controller)
     # Get Application Config
-    config_api_response = api_controller.get_app_config
+    config_json, _context = api_controller.get_app_config
     @moesif_helpers.log_debug('new config downloaded')
     @moesif_helpers.log_debug(config_api_response.to_s)
-    config_api_response
+    parse_configuration(config_json, _context)
   rescue MoesifApi::APIException => e
     if e.response_code.between?(401, 403)
       @moesif_helpers.log_debug 'Unauthorized access getting application configuration. Please check your Appplication Id.'
@@ -29,15 +29,11 @@ class AppConfig
     @moesif_helpers.log_debug e.to_s
   end
 
-  def parse_configuration(config_api_response)
+  def parse_configuration(config_json, _context)
     # Parse configuration object and return Etag, sample rate and last updated time
-
     # Rails return gzipped compressed response body, so decompressing it and getting JSON response body
-    response_body = @moesif_helpers.decompress_gzip_body(config_api_response)
-    @moesif_helpers.log_debug(response_body.to_json)
-
     # Check if response body is not nil
-    return response_body, config_api_response.headers[:x_moesif_config_etag], Time.now.utc unless response_body.nil?
+    return config_json, _context.response.headers[:x_moesif_config_etag], Time.now.utc unless config_json.nil?
 
     # Return Etag, sample rate and last updated time
 
