@@ -7,18 +7,37 @@ require_relative './moesif_helpers'
 require_relative './regex_config_helper'
 
 class AppConfig
+  attr_accessor :config, :recent_etag, :last_download_time
+
   def initialize(debug)
     @debug = debug
     @moesif_helpers = MoesifHelpers.new(debug)
     @regex_config_helper = RegexConfigHelper.new(debug)
   end
 
+  def should_reload(etag_from_create_event)
+    if @last_download_time.nil?
+      return true
+    elsif Time.now.utc > (@last_download_time + 300)
+      return true
+    elsif !etag_from_create_event.nil? && !@recent_etag.nil?
+      @moesif_helpers.log_debug('comparing if etag from event and recent etag match ' + etag_from_create_event + ' ' + @recent_etag)
+
+      return etag_from_create_event != @recent_etag
+    end
+    @moesif_helpers.log_debug('should skip reload config')
+    return false;
+  end
+
   def get_config(api_controller)
     # Get Application Config
-    config_api_response = api_controller.get_app_config
+    @moesif_helpers.log_debug('try to loading etag')
+    config_json, _context = api_controller.get_app_config
+    @config = config_json
+    @recent_etag = _context.response.headers[:x_moesif_config_etag]
+    @last_download_time = Time.now.utc
     @moesif_helpers.log_debug('new config downloaded')
-    @moesif_helpers.log_debug(config_api_response.to_s)
-    config_api_response
+    @moesif_helpers.log_debug(config_json.to_s)
   rescue MoesifApi::APIException => e
     if e.response_code.between?(401, 403)
       @moesif_helpers.log_debug 'Unauthorized access getting application configuration. Please check your Appplication Id.'
@@ -29,38 +48,15 @@ class AppConfig
     @moesif_helpers.log_debug e.to_s
   end
 
-  def parse_configuration(config_api_response)
-    # Parse configuration object and return Etag, sample rate and last updated time
-
-    # Rails return gzipped compressed response body, so decompressing it and getting JSON response body
-    response_body = @moesif_helpers.decompress_gzip_body(config_api_response)
-    @moesif_helpers.log_debug(response_body.to_json)
-
-    # Check if response body is not nil
-    return response_body, config_api_response.headers[:x_moesif_config_etag], Time.now.utc unless response_body.nil?
-
-    # Return Etag, sample rate and last updated time
-
-    @moesif_helpers.log_debug 'Response body is nil, assuming default behavior'
-    # Response body is nil, so assuming default behavior
-    [nil, nil, Time.now.utc]
-  rescue StandardError => e
-    @moesif_helpers.log_debug 'Error while parsing the configuration object, assuming default behavior'
-    @moesif_helpers.log_debug e.to_s
-    # Assuming default behavior
-    [nil, nil, Time.now.utc]
-  end
-
-  def get_sampling_percentage(event_model, config_api_response, user_id, company_id)
+  def get_sampling_percentage(event_model, user_id, company_id)
+    # if we do not have config for some reason we return 100
+    if !@config.nil?
     # Get sampling percentage
-
-    # Check if response body is not nil
-    if !config_api_response.nil?
       @moesif_helpers.log_debug("Getting sample rate for user #{user_id} company #{company_id}")
-      @moesif_helpers.log_debug(config_api_response.to_s)
+      @moesif_helpers.log_debug(@config.to_s)
 
       # Get Regex Sampling rate
-      regex_config = config_api_response.fetch('regex_config', nil)
+      regex_config = @config.fetch('regex_config', nil)
 
       if !regex_config.nil? and !event_model.nil?
         config_mapping = @regex_config_helper.prepare_config_mapping(event_model)
@@ -70,10 +66,10 @@ class AppConfig
       end
 
       # Get user sample rate object
-      user_sample_rate = config_api_response.fetch('user_sample_rate', nil)
+      user_sample_rate = @config.fetch('user_sample_rate', nil)
 
       # Get company sample rate object
-      company_sample_rate = config_api_response.fetch('company_sample_rate', nil)
+      company_sample_rate = @config.fetch('company_sample_rate', nil)
 
       # Get sample rate for the user if exist
       if !user_id.nil? && !user_sample_rate.nil? && user_sample_rate.key?(user_id)
@@ -85,8 +81,8 @@ class AppConfig
         return company_sample_rate.fetch(company_id)
       end
 
-      # Return sample rate
-      config_api_response.fetch('sample_rate', 100)
+      # Return overall sample rate
+      @config.fetch('sample_rate', 100)
     else
       @moesif_helpers.log_debug 'Assuming default behavior as response body is nil - '
       100

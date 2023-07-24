@@ -18,7 +18,7 @@ module MoesifRack
       @app = app
       raise 'application_id required for Moesif Middleware' unless options['application_id']
 
-      @api_client = MoesifApi::MoesifAPIClient.new(options['application_id'])
+      @api_client = MoesifApi::MoesifAPIClient.new(options['application_id'], 'moesif-rack/2.0.1')
       @api_controller = @api_client.api
 
       @api_version = options['api_version']
@@ -32,9 +32,6 @@ module MoesifRack
       @app_config = AppConfig.new(@debug)
       @moesif_helpers = MoesifHelpers.new(@debug)
 
-      @config_etag = nil
-      @last_config_download_time = Time.now.utc
-      @config_dict = {}
       @disable_transaction_id = options['disable_transaction_id'] || false
       @log_body = options.fetch('log_body', true)
       @batch_size = options['batch_size'] || 200
@@ -49,22 +46,20 @@ module MoesifRack
       start_worker
 
       begin
-        new_config = @app_config.get_config(@api_controller)
-        unless new_config.nil?
-          @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
-        end
+        @app_config.get_config(@api_controller)
         @governance_manager.load_rules(@api_controller)
       rescue StandardError => e
         @moesif_helpers.log_debug 'Error while parsing application configuration on initialization'
         @moesif_helpers.log_debug e.to_s
       end
+      # backwards compatibility for a typo in docs
       @capture_outoing_requests = options['capture_outoing_requests']
       @capture_outgoing_requests = options['capture_outgoing_requests']
       return unless @capture_outoing_requests || @capture_outgoing_requests
 
       @moesif_helpers.log_debug 'Start Capturing outgoing requests'
       require_relative '../../moesif_capture_outgoing/httplog'
-      MoesifCaptureOutgoing.start_capture_outgoing(options)
+      MoesifCaptureOutgoing.start_capture_outgoing(options, @app_config, @events_queue)
     end
 
     def update_user(user_profile)
@@ -167,20 +162,10 @@ module MoesifRack
             end
 
             @moesif_helpers.log_debug('No events to read from the queue') if @events_queue.empty?
-            if (!@event_response_config_etag.nil? && !@config_etag.nil? && @config_etag != @event_response_config_etag) || (Time.now.utc > (@last_config_download_time + 300))
-              begin
-                @moesif_helpers.log_debug('try to reload config and rules again')
-                new_config = @app_config.get_config(@api_controller)
-                unless new_config.nil?
-                  @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
-                end
-                # since logic to reload config is already here for every 5 minutes,
-                # reload rules here also.
-                @governance_manager.load_rules(@api_controller)
-              rescue StandardError => e
-                @moesif_helpers.log_debug 'Error while updating the application configuration'
-                @moesif_helpers.log_debug e.to_s
-              end
+
+            if @app_config.should_reload(@event_response_config_etag)
+              @app_config.get_config(@api_controller)
+              @governance_manager.load_rules(@api_controller)
             end
 
             sleep @batch_max_time
@@ -326,7 +311,7 @@ module MoesifRack
           random_percentage = Random.rand(0.00..100.00)
 
           begin
-            sampling_percentage = @app_config.get_sampling_percentage(_event_model, @config, _event_model.user_id,
+            sampling_percentage = @app_config.get_sampling_percentage(_event_model, _event_model.user_id,
                                                                       _event_model.company_id)
             @moesif_helpers.log_debug "Using sample rate #{sampling_percentage}"
           rescue StandardError => e
@@ -367,7 +352,7 @@ module MoesifRack
         # now we can do govern based on
         # override_response = govern(env, event_model)
         # return override_response if override_response
-        new_response = @governance_manager.govern_request(@config, env, event_model, status, headers, body)
+        new_response = @governance_manager.govern_request(@app_config.config, env, event_model, status, headers, body)
 
         # update the event model
         if new_response

@@ -7,7 +7,7 @@ require_relative '../../lib/moesif_rack/app_config'
 
 module MoesifCaptureOutgoing
   class << self
-    def start_capture_outgoing(options)
+    def start_capture_outgoing(options, app_config_manager, events_queue)
       @moesif_options = options
       raise 'application_id required for Moesif Middleware' unless @moesif_options['application_id']
 
@@ -21,22 +21,13 @@ module MoesifCaptureOutgoing
       @skip_outgoing = options['skip_outgoing']
       @mask_data_outgoing = options['mask_data_outgoing']
       @log_body_outgoing = options.fetch('log_body_outgoing', true)
-      @app_config = AppConfig.new(@debug)
-      @config_etag = nil
+
+      @app_config = app_config_manager
+      # @app_config and @events_queue should be shared instance from the middleware
+      # so that we can use the same queue and same loaded @app_config
+      @events_queue = events_queue
       @sampling_percentage = 100
       @last_updated_time = Time.now.utc
-      @config_dict = {}
-      begin
-        new_config = @app_config.get_config(@api_controller)
-        unless new_config.nil?
-          @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
-        end
-      rescue StandardError => e
-        if @debug
-          puts 'Error while parsing application configuration on initialization'
-          puts e
-        end
-      end
     end
 
     def call(url, request, request_time, response, response_time)
@@ -152,7 +143,7 @@ module MoesifCaptureOutgoing
           begin
             @random_percentage = Random.rand(0.00..100.00)
             begin
-              @sampling_percentage = @app_config.get_sampling_percentage(event_model, @config, event_model.user_id,
+              @sampling_percentage = @app_config.get_sampling_percentage(event_model, event_model.user_id,
                                                                          event_model.company_id)
             rescue StandardError => e
               if @debug
@@ -168,23 +159,13 @@ module MoesifCaptureOutgoing
                 puts 'Sending Outgoing Request Data to Moesif'
                 puts event_model.to_json
               end
-              event_api_response = @api_controller.create_event(event_model)
-              event_response_config_etag = event_api_response[:x_moesif_config_etag]
 
-              if !event_response_config_etag.nil? && !@config_etag.nil? && @config_etag != event_response_config_etag && Time.now.utc > @last_updated_time + 300
-                begin
-                  new_config = @app_config.get_config(@api_controller)
-                  unless new_config.nil?
-                    @config, @config_etag, @last_config_download_time = @app_config.parse_configuration(new_config)
-                  end
-                rescue StandardError => e
-                  if @debug
-                    puts 'Error while updating the application configuration'
-                    puts e
-                  end
-                end
+              # we put in the queue and format abot it.
+              unless @events_queue.nil?
+                @events_queue << event_model
+                puts('Outgoing Event successfully added to event queue') if @debug
+                return
               end
-              puts('Event successfully sent to Moesif') if @debug
             elsif @debug
               puts('Skipped outgoing Event due to sampling percentage: ' + @sampling_percentage.to_s + ' and random percentage: ' + @random_percentage.to_s)
             end
