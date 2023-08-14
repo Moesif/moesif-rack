@@ -2,13 +2,13 @@ PATH
   remote: .
   specs:
     moesif_rack (2.0.2)
-      moesif_api (~> 2.0.1)
+      moesif_api (~> 2.0.2)
 
 GEM
   remote: https://rubygems.org/
   specs:
     connection_pool (2.4.1)
-    faraday (2.7.4)
+    faraday (2.7.10)
       faraday-net_http (>= 2.0, < 3.1)
       ruby2_keywords (>= 0.0.4)
     faraday-net_http (3.0.2)
@@ -20,12 +20,12 @@ GEM
     json (2.6.3)
     json_mapper (0.2.1)
       json (>= 1.4.3)
-    moesif_api (2.0.1)
-      faraday (~> 2.7, >= 2.6)
-      faraday-net_http_persistent (~> 2.0, >= 2.0.1)
-      faraday-retry (~> 2.2.0, >= 2.0.0)
-      json_mapper (~> 0.2, >= 0.2.1)
-      net-http-persistent (~> 4.0, >= 4.0.1)
+    moesif_api (2.0.2)
+      faraday (~> 2)
+      faraday-net_http_persistent (~> 2)
+      faraday-retry (~> 2)
+      json_mapper (~> 0)
+      net-http-persistent (~> 4)
     net-http-persistent (4.0.2)
       connection_pool (~> 2.2)
     power_assert (2.0.3)
@@ -36,8 +36,6 @@ GEM
 
 PLATFORMS
   arm64-darwin-21
-  ruby
-  x86_64-linux
 
 DEPENDENCIES
   moesif_api
