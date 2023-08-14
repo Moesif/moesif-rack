@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     moesif_rack (2.0.2)
-      moesif_api (~> 2.0.2)
+      moesif_api (~> 2, >= 2.0.2)
 
 GEM
   remote: https://rubygems.org/
