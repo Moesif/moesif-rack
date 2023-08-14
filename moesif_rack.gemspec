@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'moesif_rack'
-  s.version = '2.0.1'
+  s.version = '2.0.2'
   s.summary = 'moesif_rack'
   s.description = 'Rack/Rails middleware to log API calls to Moesif API analytics and monitoring'
   s.authors = ['Moesif, Inc', 'Xing Wang']
@@ -9,7 +9,6 @@ Gem::Specification.new do |s|
   s.license = 'Apache-2.0'
   s.add_development_dependency('test-unit', '~> 3.5', '>= 3.5.0')
   s.add_dependency('moesif_api', '~> 2.0.1')
-  s.add_dependency('rack', '~> 3.0.8', '>= 2.0.0')
   s.required_ruby_version = '>= 2.6'
   s.files = Dir['{bin,lib,moesif_capture_outgoing,man,test,spec}/**/*', 'README*', 'LICENSE*']
   s.require_paths = ['lib']
