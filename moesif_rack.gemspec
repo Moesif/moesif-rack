@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'moesif_rack'
-  s.version = '2.0.2'
+  s.version = '2.0.3'
   s.summary = 'moesif_rack'
   s.description = 'Rack/Rails middleware to log API calls to Moesif API analytics and monitoring'
   s.authors = ['Moesif, Inc', 'Xing Wang']
