@@ -18,7 +18,7 @@ module MoesifRack
       @app = app
       raise 'application_id required for Moesif Middleware' unless options['application_id']
 
-      @api_client = MoesifApi::MoesifAPIClient.new(options['application_id'], 'moesif-rack/2.0.3')
+      @api_client = MoesifApi::MoesifAPIClient.new(options['application_id'], 'moesif-rack/2.1.0')
       @api_controller = @api_client.api
 
       @api_version = options['api_version']
