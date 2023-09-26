@@ -18,7 +18,7 @@ module MoesifRack
       @app = app
       raise 'application_id required for Moesif Middleware' unless options['application_id']
 
-      @api_client = MoesifApi::MoesifAPIClient.new(options['application_id'], 'moesif-rack/2.1.0')
+      @api_client = MoesifApi::MoesifAPIClient.new(options['application_id'], 'moesif-rack/2.1.1')
       @api_controller = @api_client.api
 
       @api_version = options['api_version']
@@ -35,7 +35,7 @@ module MoesifRack
       @disable_transaction_id = options['disable_transaction_id'] || false
       @log_body = options.fetch('log_body', true)
       @batch_size = options['batch_size'] || 200
-      @event_queue_size = options['event_queue_size'] || 1000
+      @event_queue_size = options['event_queue_size'] || 1000000
       @batch_max_time = options['batch_max_time'] || 2
       @events_queue = Queue.new
       @event_response_config_etag = nil
