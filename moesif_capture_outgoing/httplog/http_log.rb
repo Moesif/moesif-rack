@@ -52,9 +52,12 @@ module MoesifCaptureOutgoing
         response.code = transform_response_code(response.code) if response.code.is_a?(Symbol)
 
         # Request Body
-        req_body_string = request.body.nil? || request.body.empty? ? nil : request.body
+        req_body_string = request.body.nil? || request.body.empty? ? body_from_request_call : request.body
         req_body_transfer_encoding = nil
         req_body = nil
+
+        @moesif_helpers.log_debug 'ougoing body_from_request_call: ' + body_from_request_call.to_s
+        @moesif_helpers.log_debug 'outgoing request.body: ' + request.body.to_s
 
         if @log_body_outgoing && (req_body_string && req_body_string.length != 0)
           begin
@@ -69,9 +72,6 @@ module MoesifCaptureOutgoing
         rsp_body_string = get_response_body(response.body)
         rsp_body_transfer_encoding = nil
         rsp_body = nil
-
-        @moesif_helpers.log_debug 'body_from_request_call: ' + body_from_request_call
-        @moesif_helpers.log_debug 'request.body: ' + request.body
 
         if @log_body_outgoing && (rsp_body_string && rsp_body_string.length != 0)
           begin
