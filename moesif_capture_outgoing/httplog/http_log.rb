@@ -68,8 +68,8 @@ module MoesifCaptureOutgoing
           @moesif_helpers.log_debug 'outgoing request is multipart, parsing req_body_from_stream'
           begin
             req_body = @moesif_helpers.parse_multipart(req_body_from_stream, req_content_type)
-          rescue StandardError
-            @moesif_helpers.log_debug 'outgoing request is multipart, but failed to process req_body_from_stream: ' + req_body_from_stream.to_s
+          rescue StandardError => e
+            @moesif_helpers.log_debug 'outgoing request is multipart, but failed to process req_body_from_stream: ' + req_body_from_stream.to_s + e.to_s
             req_body = nil
           end
         elsif @log_body_outgoing && (req_body_string && req_body_string.length != 0)
