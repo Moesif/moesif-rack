@@ -100,25 +100,6 @@ module MoesifRack
       puts("#{Time.now} [Moesif Middleware] PID #{Process.pid} TID #{Thread.current.object_id} #{message}")
     end
 
-    # def parse_multipart(multipart_form_data, content_type)
-    #   @moesif_helpers.log_debug("try to parse multiple part #{content_type}")
-
-    #   sanitized_multipart_form_data = multipart_form_data.gsub(/\r?\n/, "\r\n")
-
-    #   io = StringIO.new(sanitized_multipart_form_data)
-    #   tempfile = Rack::Multipart::Parser::TEMPFILE_FACTORY
-    #   bufsize = Rack::Multipart::Parser::BUFSIZE
-    #   query_parser = Rack::Utils.default_query_parser
-    #   result = Rack::Multipart::Parser.parse(io, sanitized_multipart_form_data.length, content_type, tempfile, bufsize,
-    #                                          query_parser)
-
-    #   @moesif_helpers.log_debug('multipart parse result')
-    #   @moesif_helpers.log_debug(result.inspect)
-
-    #   # this is a hash shold be treated as JSON down the road.
-    #   result.params
-    # end
-
     def parse_body(body, headers)
       begin
         if body.instance_of?(Hash) || body.instance_of?(Array)
