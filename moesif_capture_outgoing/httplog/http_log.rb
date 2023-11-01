@@ -31,8 +31,8 @@ module MoesifCaptureOutgoing
       @moesif_helpers = moesif_helpers
     end
 
-    def call(url, request, request_time, response, response_time, body_from_request_call)
-      send_moesif_event(url, request, request_time, response, response_time, body_from_request_call)
+    def call(url, request, request_time, response, response_time, body_from_req_call, req_body_from_stream)
+      send_moesif_event(url, request, request_time, response, response_time, body_from_req_call, req_body_from_stream)
     end
 
     def get_response_body(response)
@@ -45,21 +45,30 @@ module MoesifCaptureOutgoing
       Rack::Utils::HTTP_STATUS_CODES.detect { |_k, v| v.to_s.casecmp(response_code_name.to_s).zero? }.first
     end
 
-    def send_moesif_event(url, request, request_time, response, response_time, body_from_request_call)
+    def send_moesif_event(url, request, request_time, response, response_time, body_from_req_call, req_body_from_stream)
       if url.downcase.include? 'moesif'
         puts 'Skip sending as it is moesif Event' if @debug
       else
         response.code = transform_response_code(response.code) if response.code.is_a?(Symbol)
 
+        # Request headers
+        req_headers = request.each_header.collect.to_h
+        req_content_type = req_headers['content-type'].nil? ? req_headers['Content-Type'] : req_headers['content-type']
+
         # Request Body
-        req_body_string = request.body.nil? || request.body.empty? ? body_from_request_call : request.body
+        req_body_string = request.body.nil? || request.body.empty? ? body_from_req_call : request.body
         req_body_transfer_encoding = nil
         req_body = nil
 
-        @moesif_helpers.log_debug 'ougoing body_from_request_call: ' + body_from_request_call.to_s
-        @moesif_helpers.log_debug 'outgoing request.body: ' + request.body.to_s
-
-        if @log_body_outgoing && (req_body_string && req_body_string.length != 0)
+        if @log_body_outgoing && (not req_content_type.nil?) && (req_content_type.downcase.include? 'multipart/form-data')
+          @moesif_helpers.log_debug 'outgoing request is multipart, parsing req_body_from_stream'
+          begin
+            req_body = @moesif_helpers.parse_multipart(req_body_from_stream, req_content_type)
+          rescue Error
+            @moesif_helpers.log_debug 'outgoing request is multiple, but failed to process req_body_from_stream: ' + req_body_from_stream.to_s
+            req_body = nil
+          end
+        elsif @log_body_outgoing && (req_body_string && req_body_string.length != 0)
           begin
             req_body = JSON.parse(req_body_string)
           rescue StandardError
@@ -87,8 +96,9 @@ module MoesifCaptureOutgoing
         event_req.time = request_time
         event_req.uri = url
         event_req.verb = request.method.to_s.upcase
-        event_req.headers = request.each_header.collect.to_h
+        event_req.headers = req_headers
         event_req.api_version = nil
+
         event_req.body = req_body
         event_req.transfer_encoding = req_body_transfer_encoding
 
