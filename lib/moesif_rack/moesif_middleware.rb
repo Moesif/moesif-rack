@@ -18,7 +18,7 @@ module MoesifRack
       @app = app
       raise 'application_id required for Moesif Middleware' unless options['application_id']
 
-      @api_client = MoesifApi::MoesifAPIClient.new(options['application_id'], 'moesif-rack/2.1.1')
+      @api_client = MoesifApi::MoesifAPIClient.new(options['application_id'], 'moesif-rack/2.2.1')
       @api_controller = @api_client.api
 
       @api_version = options['api_version']
@@ -59,7 +59,7 @@ module MoesifRack
 
       @moesif_helpers.log_debug 'Start Capturing outgoing requests'
       require_relative '../../moesif_capture_outgoing/httplog'
-      MoesifCaptureOutgoing.start_capture_outgoing(options, @app_config, @events_queue)
+      MoesifCaptureOutgoing.start_capture_outgoing(options, @app_config, @events_queue, @moesif_helpers)
     end
 
     def update_user(user_profile)
@@ -100,25 +100,6 @@ module MoesifRack
       puts("#{Time.now} [Moesif Middleware] PID #{Process.pid} TID #{Thread.current.object_id} #{message}")
     end
 
-    def parse_multipart(multipart_form_data, content_type)
-      @moesif_helpers.log_debug("try to parse multiple part #{content_type}")
-
-      sanitized_multipart_form_data = multipart_form_data.gsub(/\r?\n/, "\r\n")
-
-      io = StringIO.new(sanitized_multipart_form_data)
-      tempfile = Rack::Multipart::Parser::TEMPFILE_FACTORY
-      bufsize = Rack::Multipart::Parser::BUFSIZE
-      query_parser = Rack::Utils.default_query_parser
-      result = Rack::Multipart::Parser.parse(io, sanitized_multipart_form_data.length, content_type, tempfile, bufsize,
-                                             query_parser)
-
-      @moesif_helpers.log_debug('multipart parse result')
-      @moesif_helpers.log_debug(result.inspect)
-
-      # this is a hash shold be treated as JSON down the road.
-      result.params
-    end
-
     def parse_body(body, headers)
       begin
         if body.instance_of?(Hash) || body.instance_of?(Array)
@@ -128,7 +109,7 @@ module MoesifRack
           parsed_body = JSON.parse(body)
           transfer_encoding = 'json'
         elsif headers.key?('content-type') && (headers['content-type'].downcase.include? 'multipart/form-data')
-          parsed_body = parse_multipart(body, headers['content-type'])
+          parsed_body = @moesif_helpers.parse_multipart(body, headers['content-type'])
           transfer_encoding = 'json'
         elsif headers.key?('content-encoding') && (headers['content-encoding'].downcase.include? 'gzip')
           uncompressed_string = decompress_body(body)

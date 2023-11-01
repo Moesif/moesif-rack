@@ -38,4 +38,23 @@ class MoesifHelpers
     log_debug 'failed to convert replacement body ' + e.to_s
     [replacement_body.to_json.to_s]
   end
+
+  def parse_multipart(multipart_form_data, content_type)
+    log_debug("try to parse multiple part #{content_type}")
+
+    sanitized_multipart_form_data = multipart_form_data.gsub(/\r?\n/, "\r\n")
+
+    io = StringIO.new(sanitized_multipart_form_data)
+    tempfile = Rack::Multipart::Parser::TEMPFILE_FACTORY
+    bufsize = Rack::Multipart::Parser::BUFSIZE
+    query_parser = Rack::Utils.default_query_parser
+    result = Rack::Multipart::Parser.parse(io, sanitized_multipart_form_data.length, content_type, tempfile, bufsize,
+                                           query_parser)
+
+    log_debug('multipart parse result')
+    log_debug(result.inspect)
+
+    # this is a hash should be treated as JSON down the road.
+    result.params
+  end
 end

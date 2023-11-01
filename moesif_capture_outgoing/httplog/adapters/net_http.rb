@@ -7,9 +7,13 @@ module Net
     def request(request, body = nil, &block)
       # Request Start Time
       request_time = Time.now.utc.iso8601(3)
-
       # URL
       url = "https://#{@address}#{request.path}"
+
+      if (not request.body_stream.nil?) && MoesifCaptureOutgoing.should_capture_body
+        req_body_from_stream = request.body_stream.read
+        request.body_stream.rewind
+      end
 
       # Response
       @response = orig_request(request, body, &block)
@@ -18,7 +22,8 @@ module Net
       response_time = Time.now.utc.iso8601(3)
 
       # Log Event to Moesif
-      MoesifCaptureOutgoing.call(url, request, request_time, @response, response_time) if started?
+      body_from_req_call = body
+      MoesifCaptureOutgoing.call(url, request, request_time, @response, response_time, body_from_req_call, req_body_from_stream) if started?
 
       @response
     end
