@@ -54,7 +54,7 @@ class MoesifHelpers
     log_debug('multipart parse result')
     log_debug(result.inspect)
 
-    # this is a hash shold be treated as JSON down the road.
+    # this is a hash should be treated as JSON down the road.
     result.params
   end
 end
