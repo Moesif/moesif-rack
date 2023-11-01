@@ -59,7 +59,7 @@ module MoesifRack
 
       @moesif_helpers.log_debug 'Start Capturing outgoing requests'
       require_relative '../../moesif_capture_outgoing/httplog'
-      MoesifCaptureOutgoing.start_capture_outgoing(options, @app_config, @events_queue)
+      MoesifCaptureOutgoing.start_capture_outgoing(options, @app_config, @events_queue, @moesif_helpers)
     end
 
     def update_user(user_profile)

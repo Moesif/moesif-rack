@@ -7,7 +7,7 @@ require_relative '../../lib/moesif_rack/app_config'
 
 module MoesifCaptureOutgoing
   class << self
-    def start_capture_outgoing(options, app_config_manager, events_queue)
+    def start_capture_outgoing(options, app_config_manager, events_queue, moesif_helpers)
       @moesif_options = options
       raise 'application_id required for Moesif Middleware' unless @moesif_options['application_id']
 
@@ -28,10 +28,11 @@ module MoesifCaptureOutgoing
       @events_queue = events_queue
       @sampling_percentage = 100
       @last_updated_time = Time.now.utc
+      @moesif_helpers = moesif_helpers
     end
 
-    def call(url, request, request_time, response, response_time)
-      send_moesif_event(url, request, request_time, response, response_time)
+    def call(url, request, request_time, response, response_time, body_from_request_call)
+      send_moesif_event(url, request, request_time, response, response_time, body_from_request_call)
     end
 
     def get_response_body(response)
@@ -44,7 +45,7 @@ module MoesifCaptureOutgoing
       Rack::Utils::HTTP_STATUS_CODES.detect { |_k, v| v.to_s.casecmp(response_code_name.to_s).zero? }.first
     end
 
-    def send_moesif_event(url, request, request_time, response, response_time)
+    def send_moesif_event(url, request, request_time, response, response_time, body_from_request_call)
       if url.downcase.include? 'moesif'
         puts 'Skip sending as it is moesif Event' if @debug
       else
@@ -68,6 +69,9 @@ module MoesifCaptureOutgoing
         rsp_body_string = get_response_body(response.body)
         rsp_body_transfer_encoding = nil
         rsp_body = nil
+
+        @moesif_helpers.log_debug 'body_from_request_call: ' + body_from_request_call
+        @moesif_helpers.log_debug 'request.body: ' + request.body
 
         if @log_body_outgoing && (rsp_body_string && rsp_body_string.length != 0)
           begin

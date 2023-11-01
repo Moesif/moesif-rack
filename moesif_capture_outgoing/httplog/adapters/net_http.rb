@@ -18,7 +18,8 @@ module Net
       response_time = Time.now.utc.iso8601(3)
 
       # Log Event to Moesif
-      MoesifCaptureOutgoing.call(url, request, request_time, @response, response_time) if started?
+      body_from_request_call = body
+      MoesifCaptureOutgoing.call(url, request, request_time, @response, response_time, body_from_request_call) if started?
 
       @response
     end
