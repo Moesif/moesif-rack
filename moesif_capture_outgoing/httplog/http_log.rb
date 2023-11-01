@@ -31,6 +31,10 @@ module MoesifCaptureOutgoing
       @moesif_helpers = moesif_helpers
     end
 
+    def should_capture
+      @moesif_options.nil? ? false : @moesif_options['capture_outgoing_requests']
+    end
+
     def call(url, request, request_time, response, response_time, body_from_req_call, req_body_from_stream)
       send_moesif_event(url, request, request_time, response, response_time, body_from_req_call, req_body_from_stream)
     end
