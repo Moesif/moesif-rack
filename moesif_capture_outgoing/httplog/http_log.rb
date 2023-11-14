@@ -51,7 +51,7 @@ module MoesifCaptureOutgoing
 
     def send_moesif_event(url, request, request_time, response, response_time, body_from_req_call, req_body_from_stream)
       if url.downcase.include? 'moesif'
-        puts 'Skip sending as it is moesif Event' if @debug
+        @moesif_helpers.log_debug 'Skip adding to queue as it is moesif Event'
       else
         response.code = transform_response_code(response.code) if response.code.is_a?(Symbol)
 
@@ -173,19 +173,17 @@ module MoesifCaptureOutgoing
 
             if @sampling_percentage > @random_percentage
               event_model.weight = @app_config.calculate_weight(@sampling_percentage)
-              if @debug
-                puts 'Sending Outgoing Request Data to Moesif'
-                puts event_model.to_json
-              end
+              @moesif_helpers.log_debug 'Adding Outgoing Request Data to Queue'
+              @moesif_helpers.log_debug event_model.to_json
 
               # we put in the queue and format abot it.
               unless @events_queue.nil?
                 @events_queue << event_model
-                puts('Outgoing Event successfully added to event queue') if @debug
+                @moesif_helpers.log_debug 'Outgoing Event successfully added to event queue'
                 return
               end
-            elsif @debug
-              puts('Skipped outgoing Event due to sampling percentage: ' + @sampling_percentage.to_s + ' and random percentage: ' + @random_percentage.to_s)
+            else
+              @moesif_helpers.log_debug('Skipped outgoing Event due to sampling percentage: ' + @sampling_percentage.to_s + ' and random percentage: ' + @random_percentage.to_s)
             end
           rescue MoesifApi::APIException => e
             if e.response_code.between?(401, 403)
