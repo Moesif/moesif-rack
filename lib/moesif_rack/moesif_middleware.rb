@@ -94,12 +94,6 @@ module MoesifRack
       [Base64.encode64(body), 'base64']
     end
 
-    # def @moesif_helpers.log_debug(message)
-    #   return unless @debug
-
-    #   puts("#{Time.now} [Moesif Middleware] PID #{Process.pid} TID #{Thread.current.object_id} #{message}")
-    # end
-
     def parse_body(body, headers)
       begin
         if body.instance_of?(Hash) || body.instance_of?(Array)
