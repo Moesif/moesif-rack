@@ -7,7 +7,7 @@ require_relative '../../lib/moesif_rack/app_config'
 
 module MoesifCaptureOutgoing
   class << self
-    def start_capture_outgoing(options, app_config_manager, events_queue, moesif_helpers)
+    def start_capture_outgoing(options, app_config_manager, add_to_queue, moesif_helpers)
       @moesif_options = options
       raise 'application_id required for Moesif Middleware' unless @moesif_options['application_id']
 
@@ -23,9 +23,10 @@ module MoesifCaptureOutgoing
       @log_body_outgoing = options.fetch('log_body_outgoing', true)
 
       @app_config = app_config_manager
-      # @app_config and @events_queue should be shared instance from the middleware
-      # so that we can use the same queue and same loaded @app_config
-      @events_queue = events_queue
+      # @app_config is shared instance from the middleware
+      # so same loaded @app_config
+      # add_to_queue is method from the middleware so that we can add to the same queue
+      @add_to_queue = add_to_queue
       @sampling_percentage = 100
       @last_updated_time = Time.now.utc
       @moesif_helpers = moesif_helpers
@@ -51,7 +52,7 @@ module MoesifCaptureOutgoing
 
     def send_moesif_event(url, request, request_time, response, response_time, body_from_req_call, req_body_from_stream)
       if url.downcase.include? 'moesif'
-        puts 'Skip sending as it is moesif Event' if @debug
+        @moesif_helpers.log_debug 'Skip adding to queue as it is moesif Event'
       else
         response.code = transform_response_code(response.code) if response.code.is_a?(Symbol)
 
@@ -173,19 +174,14 @@ module MoesifCaptureOutgoing
 
             if @sampling_percentage > @random_percentage
               event_model.weight = @app_config.calculate_weight(@sampling_percentage)
-              if @debug
-                puts 'Sending Outgoing Request Data to Moesif'
-                puts event_model.to_json
-              end
+              @moesif_helpers.log_debug 'Adding Outgoing Request Data to Queue'
+              @moesif_helpers.log_debug event_model.to_json
+              # we put in the queue and forget it.
+              @add_to_queue.call(event_model)
+              @moesif_helpers.log_debug 'Finished adding outgoing request data to Queue'
 
-              # we put in the queue and format abot it.
-              unless @events_queue.nil?
-                @events_queue << event_model
-                puts('Outgoing Event successfully added to event queue') if @debug
-                return
-              end
-            elsif @debug
-              puts('Skipped outgoing Event due to sampling percentage: ' + @sampling_percentage.to_s + ' and random percentage: ' + @random_percentage.to_s)
+            else
+              @moesif_helpers.log_debug('Skipped outgoing Event due to sampling percentage: ' + @sampling_percentage.to_s + ' and random percentage: ' + @random_percentage.to_s)
             end
           rescue MoesifApi::APIException => e
             if e.response_code.between?(401, 403)

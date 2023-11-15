@@ -18,7 +18,7 @@ module MoesifRack
       @app = app
       raise 'application_id required for Moesif Middleware' unless options['application_id']
 
-      @api_client = MoesifApi::MoesifAPIClient.new(options['application_id'], 'moesif-rack/2.2.1')
+      @api_client = MoesifApi::MoesifAPIClient.new(options['application_id'], 'moesif-rack/2.2.2')
       @api_controller = @api_client.api
 
       @api_version = options['api_version']
@@ -59,7 +59,7 @@ module MoesifRack
 
       @moesif_helpers.log_debug 'Start Capturing outgoing requests'
       require_relative '../../moesif_capture_outgoing/httplog'
-      MoesifCaptureOutgoing.start_capture_outgoing(options, @app_config, @events_queue, @moesif_helpers)
+      MoesifCaptureOutgoing.start_capture_outgoing(options, @app_config, method(:add_to_queue), @moesif_helpers)
     end
 
     def update_user(user_profile)
@@ -94,12 +94,6 @@ module MoesifRack
       [Base64.encode64(body), 'base64']
     end
 
-    def @moesif_helpers.log_debug(message)
-      return unless @debug
-
-      puts("#{Time.now} [Moesif Middleware] PID #{Process.pid} TID #{Thread.current.object_id} #{message}")
-    end
-
     def parse_body(body, headers)
       begin
         if body.instance_of?(Hash) || body.instance_of?(Array)
@@ -124,6 +118,7 @@ module MoesifRack
     end
 
     def start_worker
+      @moesif_helpers.log_debug('start worker');
       Thread.new do
         loop do
           # Update the last worker run, in case the events_queue is empty
@@ -161,6 +156,18 @@ module MoesifRack
           end
         end
       end
+    end
+
+    def add_to_queue(_event_model)
+      # Add Event to the queue
+      if @events_queue.size >= @event_queue_size
+        @moesif_helpers.log_debug("Skipped Event due to events_queue size [#{@events_queue.size}] is over max #{@event_queue_size} ")
+      else
+        @events_queue << _event_model
+        @moesif_helpers.log_debug('Event added to the queue ')
+      end
+
+      start_worker if Time.now.utc > (@last_worker_run + 60)
     end
 
     def call(env)
@@ -284,10 +291,9 @@ module MoesifRack
       end
 
       process_send = lambda do |_event_model|
-        @moesif_helpers.log_debug 'sending data to moesif'
+        @moesif_helpers.log_debug 'incoming event to add to queue for sending to moesif'
         @moesif_helpers.log_debug _event_model.to_json
 
-        # Perform the API call through the SDK function
         begin
           random_percentage = Random.rand(0.00..100.00)
 
@@ -303,15 +309,7 @@ module MoesifRack
 
           if sampling_percentage > random_percentage
             _event_model.weight = @app_config.calculate_weight(sampling_percentage)
-            # Add Event to the queue
-            if @events_queue.size >= @event_queue_size
-              @moesif_helpers.log_debug("Skipped Event due to events_queue size [#{@events_queue.size}] is over max #{@event_queue_size} ")
-            else
-              @events_queue << _event_model
-              @moesif_helpers.log_debug('Event added to the queue ')
-            end
-
-            start_worker if Time.now.utc > (@last_worker_run + 60)
+            add_to_queue(_event_model)
           else
             @moesif_helpers.log_debug('Skipped Event due to sampling percentage: ' + sampling_percentage.to_s + ' and random percentage: ' + random_percentage.to_s)
           end
