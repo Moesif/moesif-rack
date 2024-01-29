@@ -61,7 +61,15 @@ module MoesifCaptureOutgoing
         req_content_type = req_headers['content-type'].nil? ? req_headers['Content-Type'] : req_headers['content-type']
 
         # Request Body
-        req_body_string = request.body.nil? || request.body.empty? ? body_from_req_call : request.body
+        req_body_string = nil
+        if not (request.body.nil? || request.body.empty?)
+          req_body_string = request.body;
+        elsif not body_from_req_call.nil?
+          req_body_string = body_from_req_call
+        elsif req_body_from_stream.is_a? String
+          req_body_string = req_body_from_stream
+        end
+
         req_body_transfer_encoding = nil
         req_body = nil
 
