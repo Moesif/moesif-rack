@@ -19,7 +19,6 @@ module Net
         end
         result
       rescue StandardError => e
-        # do nothig for now
         return nil
       end
     end
