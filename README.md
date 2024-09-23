@@ -845,9 +845,9 @@ If `false`, doesn't log request and response body to Moesif.
 
 ## Examples
 
-- [Moesif Rails 5 Example](https://github.com/Moesif/moesif-rails5-example) is an example of Moesif with a Ruby on Rails 5 application.
-- [Moesif Rails 4 Example](https://github.com/Moesif/moesif-rails4-example) is an example of Moesif with a Ruby on Rails 4 application.
-- [Moesif Rack Example](https://github.com/Moesif/moesif-rack-example) is an example of Moesif applied to a Rack application.
+- __[Moesif Rails 5 Example](https://github.com/Moesif/moesif-rails5-example)__: an example of Moesif with a Ruby on Rails 5 application
+- __[Moesif Rails 4 Example](https://github.com/Moesif/moesif-rails4-example)__: an example of Moesif with a Ruby on Rails 4 application
+- __[Moesif Rack Example](https://github.com/Moesif/moesif-rack-example)__: an example of Moesif in a Rack application
 
 The following examples demonstrate how to add and update customer information.
 
