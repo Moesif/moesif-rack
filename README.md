@@ -1,4 +1,5 @@
 # Moesif Middleware for Ruby on Rails and Rack
+by [Moesif](https://moesif.com), the [API analytics](https://www.moesif.com/features/api-analytics) and [API monetization](https://www.moesif.com/solutions/metered-api-billing) platform.
 
 [![Built For rack][ico-built-for]][link-built-for]
 [![Latest Version][ico-version]][link-package]
@@ -6,70 +7,78 @@
 [![Software License][ico-license]][link-license]
 [![Source Code][ico-source]][link-source]
 
-Rack Middleware that logs API calls and sends 
-to [Moesif](https://www.moesif.com) for API analytics and monitoring.
+Moesif Rack Middleware automatically logs incoming and outgoing API calls 
+and sends them to [Moesif](https://www.moesif.com) for API analytics and monitoring.
+This middleware allows you to integrate Moesif's API analytics and 
+API monetization features into your Ruby applications with minimal configuration. The middleware 
+supports Ruby on Rails, Grape, and other Ruby frameworks built on Rack.
 
-Supports Ruby on Rails, Grape, and other Ruby frameworks built on Rack.
+> If you're new to Moesif, see [our Getting Started](https://www.moesif.com/docs/) resources to quickly get up and running.
 
-[Source Code on GitHub](https://github.com/moesif/moesif-rack)
+## Prerequisites
+Before using this middleware, make sure you have the following:
 
-## How to install
+- [An active Moesif account](https://moesif.com/wrap)
+- [A Moesif Application ID](#get-your-moesif-application-id)
 
-Install the Moesif gem. 
+### Get Your Moesif Application ID
+After you log into [Moesif Portal](https://www.moesif.com/wrap), you can get your Moesif Application ID during the onboarding steps. You can always access the Application ID any time by following these steps from Moesif Portal after logging in:
+
+1. Select the account icon to bring up the settings menu.
+2. Select **Installation** or **API Keys**.
+3. Copy your Moesif Application ID from the **Collector Application ID** field.
+<img class="lazyload blur-up" src="images/app_id.png" width="700" alt="Accessing the settings menu in Moesif Portal">
+
+## Install the Middleware
+Install the Moesif gem:
 
 ```bash
 gem install moesif_rack
 ```
 
-If you're using Bundler, add the gem to your `Gemfile`.
+If you're using Bundler, add the gem to your `Gemfile`:
 
 ```ruby
 gem 'moesif_rack'
 ```
 
-Then, run `bundle install`
+Then run `bundle install`.
+
+## Configure the Middleware
+See the available [configuration options](#configuration-options) to learn how to configure the middleware for your use case.
 
 ## How to use
 
-### 1. Enter Moesif Application Id
+### 1. Enter Moesif Application ID
 
-Create an options hash containing application_id and any other options.
+Create a hash containing `application_id` and specify your [Moesif Application ID](#get-your-moesif-application-id) as its value. This hash also contains other [options](#configuration-options) you may want to specify.
 
 ```ruby
 moesif_options = {
-  'application_id' => 'Your Moesif Application Id'
+  'application_id' => 'YOUR_MOESIF_APPLICATION_ID'
 }
 ```
 
-Your Moesif Application Id can be found in the [_Moesif Portal_](https://www.moesif.com/).
-After signing up for a Moesif account, your Moesif Application Id will be displayed during the onboarding steps. 
+### 2. Add the Middleware
 
-You can always find your Moesif Application Id at any time by logging 
-into the [_Moesif Portal_](https://www.moesif.com/), click on the top right menu,
-and then clicking _Installation_.
+#### For Rails 5.0 or Newer
 
-### 2. Add the middleware
-
-#### For Rails 5.0 or newer:
-
-Using strings or symbols for middleware class names is deprecated for newer frameworks like Ruby 5.0, 
-so you should pass the class directly.
+Using strings or symbols for middleware class names is deprecated for newer frameworks like Ruby 5.0. So we recommend 
+that you pass the class directly:
 
 ```ruby
   class Application < Rails::Application
     moesif_options = {
-      'application_id' => 'Your Moesif Application Id'
+      'application_id' => 'YOUR_MOESIF_APPLICATION_ID'
     }
 
     config.middleware.use MoesifRack::MoesifMiddleware, moesif_options
   end
 ```
 
-#### For Rails 4.0 and other frameworks:
+#### For Rails 4.0 and Other Frameworks
 
-For most rack-based frameworks including Rails 4.x or older, add the middleware `MoesifRack::MoesifMiddleware`.
-
-within `config/application.rb`
+For most Rack-based frameworks including Rails 4.x or older, add the middleware `MoesifRack::MoesifMiddleware` within `config/application.rb`:
 
 ```ruby
   class Application < Rails::Application
@@ -81,9 +90,9 @@ within `config/application.rb`
   end
 ```
 
-#### For Grape API:
+#### For Grape API
 
-For [Grape APIs](https://github.com/ruby-grape/grape), we can add the middleware after any custom parsers or formatters.
+For [Grape APIs](https://github.com/ruby-grape/grape), you can add the middleware after any custom parsers or formatters.
 
 ```ruby
 module Acme
@@ -103,17 +112,18 @@ module Acme
 end
 ```
 
-#### Order of Middleware Matters
+#### Order of Middleware
 
 Since Moesif Rack is a logging middleware, the ordering of middleware matters.
-The best place for "MoesifRack::MoesifMidleware" is near the top (so it captures the data closest to the wire), but after 
-any body parsers or authentication  middleware.
 
-Typically, right above the default logger of Rails apps, "Rails::Rack::Logger" is a good spot.
-Or if you want to be as close as wire as possible, put it before "ActionDispatch::Static"
+The best place for `MoesifRack::MoesifMidleware` is near the top so it captures the data closest to the wire. 
+But remember to put it after any body parsers or authentication  middleware.
 
-To insert the Moesif middleware before "Rails::Rack::Logger", you can use the `insert_before` method instead of 
-`use`
+Typically, right above the default logger of Rails app `Rails::Rack::Logger` is a good spot.
+If you want to be as close as wire as possible, put it before `ActionDispatch::Static`.
+
+To insert the Moesif middleware before `Rails::Rack::Logger`, you can use the `insert_before` method instead of 
+`use`:
 
 ```ruby
   class Application < Rails::Application
@@ -124,34 +134,110 @@ To insert the Moesif middleware before "Rails::Rack::Logger", you can use the `i
     # snip
   end
 ```
-If you are using "Rack::Deflater" or other compression middleware, make sure Moesif is after
-it, so it can capture the uncompressed data.
 
-To see your current list of middleware:
+If you are using `Rack::Deflater` or other compression middleware, make sure to put the Moesif middleware after
+it so it can capture the uncompressed data.
+
+To see your current list of middleware, execute this command:
 
 ```bash
   bin/rails middleware
 ```
+### Optional: Capturing Outgoing API Calls
+In addition to your own APIs, you can also start capturing calls out to third party services through by setting the [`capture_outgoing_requests`](#capture_outgoing_requests) option.
 
-## Configuration options
+For configuration options specific to capturing outgoing API calls, see [Options For Outgoing API Calls](#options-for-outgoing-api-calls).
 
-Options is a hash with these possible key/value pairs.
+## Troubleshoot
+For a general troubleshooting guide that can help you solve common problems, see [Server Troubleshooting Guide](https://www.moesif.com/docs/troubleshooting/server-troubleshooting-guide/).
 
-#### __`application_id`__
+Other troubleshooting supports:
 
-Required. String. This is the Moesif application_id under settings
-from your [Moesif account.](https://www.moesif.com)
+- [FAQ](https://www.moesif.com/docs/faq/)
+- [Moesif support email](mailto:support@moesif.com)
 
+## Repository Structure
 
-#### __`api_version`__
+```
+.
+├── BUILDING.md
+├── Gemfile
+├── images/
+├── lib/
+├── LICENSE
+├── moesif_capture_outgoing/
+├── moesif_rack.gemspec
+├── Rakefile
+├── README.md
+└── test/
+```
 
-Optional. String. Tag requests with the version of your API.
+## Configuration Options
+The following sections describe the available configuration options for this middleware. You have to set these options in a Ruby hash as key-value pairs. See the [examples](#examples) for better understanding.
 
+#### `application_id` (Required)
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    String
+   </td>
+  </tr>
+</table>
 
-#### __`identify_user`__
+A string that [identifies your application in Moesif](#get-your-moesif-application-id).
+
+#### `api_version`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    String
+   </td>
+  </tr>
+</table>
 
 Optional.
-identify_user is a Proc that takes env, headers, and body as arguments and returns a user_id string. This helps us attribute requests to unique users. Even though Moesif can automatically retrieve the user_id without this, this is highly recommended to ensure accurate attribution.
+
+Use to tag requests with the version of your API.
+
+
+#### `identify_user`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Return type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>Proc</code>
+   </td>
+   <td>
+    String
+   </td>
+  </tr>
+</table>
+
+Optional, but highly recommended.
+
+A `Proc` that takes `env`, `headers`, and `body` as arguments.
+
+Returns a string that represents the user ID used by your system. 
+
+Moesif identifies users automatically. However, due to the differences arising from different frameworks and implementations, set this option to ensure user identification properly.
+
 
 ```ruby
 moesif_options['identify_user'] = Proc.new { |env, headers, body|
@@ -159,13 +245,33 @@ moesif_options['identify_user'] = Proc.new { |env, headers, body|
   # Add your custom code that returns a string for user id
   '12345'
 }
-
 ```
 
-#### __`identify_company`__
+#### `identify_company`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Return type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>Proc</code>
+   </td>
+   <td>
+    String
+   </td>
+  </tr>
+</table>
 
 Optional.
-identify_company is a Proc that takes env, headers, and body as arguments and returns a company_id string. This helps us attribute requests to unique company.
+
+A `Proc` that takes `env`, `headers`, and `body` as arguments.
+
+Returns a string that represents the company ID for this event. This helps Moesif attribute requests to unique company.
 
 ```ruby
 
@@ -177,9 +283,33 @@ moesif_options['identify_company'] = Proc.new { |env, headers, body|
 
 ```
 
-#### __`identify_session`__
+#### `identify_session`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Return type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>Proc</code>
+   </td>
+   <td>
+    String
+   </td>
+  </tr>
+</table>
 
-Optional. A Proc that takes env, headers, body and returns a string.
+Optional.
+
+A `Proc` that takes `env`, `headers`, and `body` as arguments.
+
+Returns a string that represents the session token for this event. 
+
+Similar to users and companies, Moesif tries to retrieve session tokens automatically. But if it doesn't work for your service, use this option to help identify sessions.
 
 ```ruby
 
@@ -189,11 +319,31 @@ moesif_options['identify_session'] = Proc.new { |env, headers, body|
 }
 ```
 
-#### __`get_metadata`__
+#### `get_metadata`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Return type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>Proc</code>
+   </td>
+   <td>
+    <code>Hash</code>
+   </td>
+  </tr>
+</table>
 
 Optional.
-get_metadata is a Proc that takes env, headers, and body as arguments and returns a Hash that is
-representation of a JSON object. This allows you to attach any
+
+A `Proc` that takes `env`, `headers`, and `body` as arguments.
+
+Returns a `Hash` that represents a JSON object. This allows you to attach any
 metadata to this event.
 
 ```ruby
@@ -208,11 +358,31 @@ moesif_options['get_metadata'] = Proc.new { |env, headers, body|
 }
 ```
 
+#### `mask_data`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Return type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>Proc</code>
+   </td>
+   <td>
+    <code>EventModel</code>
+   </td>
+  </tr>
+</table>
 
-#### __`mask_data`__
+Optional. 
 
-Optional. A Proc that takes event_model as an argument and returns event_model.
-With mask_data, you can make modifications to headers or body of the event before it is sent to Moesif.
+A Proc that takes an `EventModel` as an argument and returns an `EventModel`.
+
+This option allows you to modify headers or body of an event before sending the event to Moesif.
 
 ```ruby
 
@@ -224,11 +394,33 @@ moesif_options['mask_data'] = Proc.new { |event_model|
 
 ```
 
-For details for the spec of event model, please see the [moesifapi-ruby](https://github.com/Moesif/moesifapi-ruby)
+For more information and the spec of Moesif's event model, see the source code of [Moesif API library for Ruby](https://github.com/Moesif/moesifapi-ruby).
 
-#### __`skip`__
+#### `skip`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Return type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>Proc</code>
+   </td>
+   <td>
+    Boolean
+   </td>
+  </tr>
+</table>
 
-Optional. A Proc that takes env, headers, body and returns a boolean.
+Optional.
+
+A `Proc` that takes `env`, `headers`, and `body` as arguments.
+
+Returns a boolean. Return `true` if you want to skip a particular event.
 
 ```ruby
 
@@ -244,34 +436,183 @@ moesif_options['skip'] = Proc.new { |env, headers, body|
 
 ```
 
-For details for the spec of event model, please see the [Moesif Ruby API Documentation](https://www.moesif.com/docs/api?ruby)
-
-
-#### __`debug`__
-
-Optional. Boolean. Default false. If true, it will print out debug messages. In debug mode, the processing is not done in backend thread.
-
-#### __`log_body`__
-
-Optional. Boolean. Default true. If false, will not log request and response body to Moesif.
-
-#### __`batch_size`__
-Optional. int, default 200, Maximum batch size when sending to Moesif.
-
-#### __`batch_max_time`__
-Optional. int in seconds Default 2.	This is the maximum wait time (approximately) before triggering flushing of the queue and sending to Moesif.
-
-#### __`event_queue_size`__
-Optional. int, Default 1000000, Maximum number of events to hold in queue before sending to Moesif. In case of network issues when not able to connect/send event to Moesif, skips adding new to event to queue to prevent memory overflow.
-
-#### __`capture_outgoing_requests`__
-Optional. Boolean, Default `false`. Set to `true` to capture all outgoing API calls from your app to third parties like Stripe, Github or to your own dependencies while using [Net::HTTP](https://ruby-doc.org/stdlib-2.6.3/libdoc/net/http/rdoc/Net/HTTP.html) package. The options below is applied to outgoing API calls. When the request is outgoing, for options functions that take request and response as input arguments, the request and response objects passed in are [Request](https://www.rubydoc.info/stdlib/net/Net/HTTPRequest) request and [Response](https://www.rubydoc.info/stdlib/net/Net/HTTPResponse) response objects.
-
-
-##### __`identify_user_outgoing`__
+#### `debug`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Default
+   </th>
+  </tr>
+  <tr>
+   <td>
+    Boolean
+   </td>
+   <td>
+    <code>false</code>
+   </td>
+  </tr>
+</table>
 
 Optional.
-identify_user_outgoing is a Proc that takes request and response as arguments and returns a user_id string. This helps us attribute requests to unique users. Even though Moesif can automatically retrieve the user_id without this, this is highly recommended to ensure accurate attribution.
+
+If `true`, the middleware prints out debug messages. In debug mode, the processing is not done in backend thread.
+
+#### `log_body`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Default
+   </th>
+  </tr>
+  <tr>
+   <td>
+    Boolean
+   </td>
+   <td>
+    <code>true</code>
+   </td>
+  </tr>
+</table>
+
+Optional.
+
+If `false`, doesn't log request and response body to Moesif.
+
+#### `batch_size`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Default
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>int</code>
+   </td>
+   <td>
+    <code>200</code>
+   </td>
+  </tr>
+</table>
+
+Optional.
+
+The maximum batch size when sending to Moesif.
+
+#### `batch_max_time`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Default
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>int</code>
+   </td>
+   <td>
+    <code>2</code>
+   </td>
+  </tr>
+</table>
+
+Optional. 
+
+The maximum time in seconds to wait (approximately) before triggering flushing of the queue and sending to Moesif.
+
+#### `event_queue_size`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Default
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>int</code>
+   </td>
+   <td>
+    <code>1000000</code>
+   </td>
+  </tr>
+</table>
+
+Optional.
+
+The maximum number of events to hold in queue before sending to Moesif. 
+
+In case of network issues, the middleware may fail to connect or send event to Moesif. In those cases, the middleware skips adding new to event to queue to prevent memory overflow.
+
+### Options For Outgoing API Calls 
+The following options apply to outgoing API calls. These are calls you initiate using [`Net::HTTP`](https://ruby-doc.org/stdlib-2.6.3/libdoc/net/http/rdoc/Net/HTTP.html) package to third parties like Stripe or to your own services.
+
+Several options use request and response as input arguments. The request and response objects passed in are [`HTTPRequest`](https://www.rubydoc.info/stdlib/net/Net/HTTPRequest) request and [`HTTPResponse`](https://www.rubydoc.info/stdlib/net/Net/HTTPResponse) response objects.
+
+#### `capture_outgoing_requests`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Default
+   </th>
+  </tr>
+  <tr>
+   <td>
+    Boolean
+   </td>
+   <td>
+    <code>false</code>
+   </td>
+  </tr>
+</table>
+
+Set to `true` to capture all outgoing API calls from your app.
+
+#### `identify_user_outgoing`
+
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Return type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>Proc</code>
+   </td>
+   <td>
+    String
+   </td>
+  </tr>
+</table>
+
+Optional, but highly recommended.
+
+A `Proc` that takes `env`, `headers`, and `body` as arguments.
+
+Returns a string that represents the user ID used by your system. 
+
+Moesif identifies users automatically. However, due to the differences arising from different frameworks and implementations, set this option to ensure user identification properly.
 
 ```ruby
 
@@ -283,10 +624,33 @@ moesif_options['identify_user_outgoing'] = Proc.new { |request, response|
 
 ```
 
-##### __`identify_company_outgoing`__
+#### `identify_company_outgoing`
+
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Return type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>Proc</code>
+   </td>
+   <td>
+    String
+   </td>
+  </tr>
+</table>
 
 Optional.
-identify_company_outgoing is a Proc that takes request and response as arguments and returns a company_id string. This helps us attribute requests to unique company.
+
+A `Proc` that takes `env`, `headers`, and `body` as arguments.
+
+Returns a string that represents the company ID for this event. This helps Moesif attribute requests to unique company.
+
 
 ```ruby
 
@@ -298,12 +662,34 @@ moesif_options['identify_company_outgoing'] = Proc.new { |request, response|
 
 ```
 
-##### __`get_metadata_outgoing`__
+#### `get_metadata_outgoing`
+
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Return type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>Proc</code>
+   </td>
+   <td>
+    <code>Hash</code>
+   </td>
+  </tr>
+</table>
 
 Optional.
-get_metadata_outgoing is a Proc that takes request and response as arguments and returns a Hash that is
-representation of a JSON object. This allows you to attach any
+
+A `Proc` that takes `env`, `headers`, and `body` as arguments.
+
+Returns a `Hash` that represents a JSON object. This allows you to attach any
 metadata to this event.
+
 
 ```ruby
 
@@ -318,9 +704,34 @@ moesif_options['get_metadata_outgoing'] = Proc.new { |request, response|
 }
 ```
 
-##### __`identify_session_outgoing`__
+#### `identify_session_outgoing`
 
-Optional. A Proc that takes request, response and returns a string.
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Return type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>Proc</code>
+   </td>
+   <td>
+    String
+   </td>
+  </tr>
+</table>
+
+Optional.
+
+A `Proc` that takes `env`, `headers`, and `body` as arguments.
+
+Returns a string that represents the session token for this event. 
+
+Similar to users and companies, Moesif tries to retrieve session tokens automatically. But if it doesn't work for your service, use this option to help identify sessions.
 
 ```ruby
 
@@ -332,9 +743,32 @@ moesif_options['identify_session_outgoing'] = Proc.new { |request, response|
 
 ```
 
-##### __`skip_outgoing`__
+#### `skip_outgoing`
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Return type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>Proc</code>
+   </td>
+   <td>
+    Boolean
+   </td>
+  </tr>
+</table>
 
-Optional. A Proc that takes request, response and returns a boolean. If `true` would skip sending the particular event.
+Optional.
+
+A `Proc` that takes `env`, `headers`, and `body` as arguments.
+
+Returns a boolean. Return `true` if you want to skip a particular event.
+
 
 ```ruby
 
@@ -346,10 +780,32 @@ moesif_options['skip_outgoing'] = Proc.new{ |request, response|
 
 ```
 
-##### __`mask_data_outgoing`__
+#### `mask_data_outgoing`
 
-Optional. A Proc that takes event_model as an argument and returns event_model.
-With mask_data_outgoing, you can make modifications to headers or body of the event before it is sent to Moesif.
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Return type
+   </th>
+  </tr>
+  <tr>
+   <td>
+    <code>Proc</code>
+   </td>
+   <td>
+    <code>EventModel</code>
+   </td>
+  </tr>
+</table>
+
+Optional. 
+
+A Proc that takes an `EventModel` as an argument and returns an `EventModel`.
+
+This option allows you to modify headers or body of an event before sending the event to Moesif.
 
 ```ruby
 
@@ -362,18 +818,41 @@ moesif_options['mask_data_outgoing'] = Proc.new { |event_model|
 
 ```
 
-#### __`log_body_outgoing`__
+### `log_body_outgoing`
 
-Optional. Boolean. Default true. If false, will not log request and response body to Moesif.
+<table>
+  <tr>
+   <th scope="col">
+    Data type
+   </th>
+   <th scope="col">
+    Default
+   </th>
+  </tr>
+  <tr>
+   <td>
+    Boolean
+   </td>
+   <td>
+    <code>true</code>
+   </td>
+  </tr>
+</table>
 
-## Update User
+Optional.
+
+If `false`, doesn't log request and response body to Moesif.
+
+## Examples
+
+- [Moesif Rails 5 Example](https://github.com/Moesif/moesif-rails5-example) is an example of Moesif with a Ruby on Rails 5 application.
+- [Moesif Rails 4 Example](https://github.com/Moesif/moesif-rails4-example) is an example of Moesif with a Ruby on Rails 4 application.
+- [Moesif Rack Example](https://github.com/Moesif/moesif-rack-example) is an example of Moesif applied to a Rack application.
+
+The following examples demonstrate how to add and update customer information.
 
 ### Update a Single User
-Create or update a user profile in Moesif.
-The metadata field can be any customer demographic or other info you want to store.
-Only the `user_id` field is required.
-This method is a convenient helper that calls the Moesif API lib.
-For details, visit the [Ruby API Reference](https://www.moesif.com/docs/api?ruby#update-a-user).
+To create or update a [user](https://www.moesif.com/docs/getting-started/users/) profile in Moesif, use the `update_user()` method.
 
 ```ruby
 metadata = {
@@ -407,12 +886,12 @@ user.metadata = metadata
 
 update_user = MoesifRack::MoesifMiddleware.new(@app, @options).update_user(user_model)
 ```
+The `metadata` field can contain any customer demographic or other info you want to store. Moesif only requires the `user_id` field.
+
+For more information, see the function documentation in [Moesif Ruby API reference](https://www.moesif.com/docs/api?ruby#update-a-user).
 
 ### Update Users in Batch
-Similar to update_user, but used to update a list of users in one batch. 
-Only the `user_id` field is required.
-This method is a convenient helper that calls the Moesif API lib.
-For details, visit the [Ruby API Reference](https://www.moesif.com/docs/api?ruby#update-users-in-batch).
+To update a list of [users](https://www.moesif.com/docs/getting-started/users/) in one batch, use the `update_users_batch()` method.
 
 ```ruby
 users = []
@@ -451,14 +930,12 @@ users << user
 response = MoesifRack::MoesifMiddleware.new(@app, @options).update_users_batch(users)
 ```
 
-## Update Company
+The `metadata` field can contain any customer demographic or other info you want to store. Moesif only requires the `user_id` field. This method is a convenient helper that calls the Moesif API lib.
+
+For more information, see the function documentation in [Moesif Ruby API reference](https://www.moesif.com/docs/api?ruby#update-users-in-batch).
 
 ### Update a Single Company
-Create or update a company profile in Moesif.
-The metadata field can be any company demographic or other info you want to store.
-Only the `company_id` field is required.
-This method is a convenient helper that calls the Moesif API lib.
-For details, visit the [Ruby API Reference](https://www.moesif.com/docs/api?ruby#update-a-company).
+To update a single [company](https://www.moesif.com/docs/getting-started/companies/), use the `update_company()` method.
 
 ```ruby
 metadata = {
@@ -492,11 +969,12 @@ company.metadata = metadata
 update_company = MoesifRack::MoesifMiddleware.new(@app, @options).update_company(company_model)
 ```
 
+The `metadata` field can contain any customer demographic or other info you want to store. Moesif only requires the `company_id` field. This method is a convenient helper that calls the Moesif API lib.
+
+For more information, see the function documentation in [Moesif Ruby API reference](https://www.moesif.com/docs/api?ruby#update-a-company).
+
 ### Update Companies in Batch
-Similar to update_company, but used to update a list of companies in one batch. 
-Only the `company_id` field is required.
-This method is a convenient helper that calls the Moesif API lib.
-For details, visit the [Ruby API Reference](https://www.moesif.com/docs/api?ruby#update-companies-in-batch).
+To update a list of [companies](https://www.moesif.com/docs/getting-started/companies/) in one batch, use the `update_companies_batch()` method.
 
 ```ruby
 companies = []
@@ -533,24 +1011,25 @@ companies << company
 response = MoesifRack::MoesifMiddleware.new(@app, @options).update_companies_batch(companies)
 ```
 
-## How to test
+The `metadata` field can contain any customer demographic or other info you want to store. Moesif only requires the `company_id` field. This method is a convenient helper that calls the Moesif API lib.
 
-1. Manually clone the git repo
-2. From terminal/cmd navigate to the root directory of the middleware.
-3. Invoke 'gem install moesif_rack'
-4. Add your own application id to 'test/moesif_rack_test.rb'. You can find your Application Id from [_Moesif Dashboard_](https://www.moesif.com/) -> _Bottom Left Menu_ -> _Installation_
-5. Invoke 'ruby test/moesif_rack_test.rb'
-6. Invoke 'ruby -I test test/moesif_rack_test.rb -n test_capture_outgoing' to test capturing outgoing API calls from your app to third parties like Stripe, Github or to your own dependencies.
+For more information, see the function documentation in [Moesif Ruby API reference](https://www.moesif.com/docs/api?ruby#update-companies-in-batch).
 
-## Example Projects
+## How to Test
 
-- [Moesif Rails 5 Example](https://github.com/Moesif/moesif-rails5-example) is an example of Moesif with a Ruby on Rails 5 application.
-- [Moesif Rails 4 Example](https://github.com/Moesif/moesif-rails4-example) is an example of Moesif with a Ruby on Rails 4 application.
-- [Moesif Rack Example](https://github.com/Moesif/moesif-rack-example) is an example of Moesif applied to a Rack application.
+1. Manually clone this repository.
+2. From your terminal, navigate to the root directory of the middleware.
+3. Run `gem install moesif_rack`.
+4. Add your [Moesif Application ID](#get-your-moesif-application-id) to `test/moesif_rack_test.rb`.
+5. Run `ruby test/moesif_rack_test.rb`.
+6. Then run `ruby -I test test/moesif_rack_test.rb -n test_capture_outgoing` to test capturing outgoing API calls from your app to third parties like Stripe, Github or to your own dependencies.
 
-## Other integrations
+## Explore Other Integrations
 
-To view more documentation on integration options, please visit [the Integration Options Documentation](https://www.moesif.com/docs/getting-started/integration-options/).
+Explore other integration options from Moesif:
+
+- [Server integration options documentation](https://www.moesif.com/docs/server-integration//)
+- [Client integration options documentation](https://www.moesif.com/docs/client-integration/)
 
 [ico-built-for]: https://img.shields.io/badge/built%20for-rack-blue.svg
 [ico-version]: https://img.shields.io/gem/v/moesif_rack.svg
